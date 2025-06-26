@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Personnes vulnérables | LanfiaSave{% endblock %}
+
+{% block content %}
+<h2>Personnes vulnérables disponibles pour un don</h2>
+<ul>
+    {% for personne in personnes %}
+        <li>
+            {{ personne.user.username }} - Montant reçu : {{ personne.montant_recu }} €
+            {% if personne.est_vulnerable %}
+                <a href="{% url 'make_donation' personne.id %}">Faire un don</a>
+            {% else %}
+                (Non vulnérable)
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Aucune personne vulnérable disponible pour le moment.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

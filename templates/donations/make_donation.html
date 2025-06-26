@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Faire un Don - LanfiaSave{% endblock %}
+
+{% block content %}
+    <h1>Faire un don à {{ personne.user.username }}</h1>
+    <p>Montant reçu jusqu'à présent : {{ personne.montant_recu }} €</p>
+    <form method="post">
+        {% csrf_token %}
+        <label for="montant">Montant du don :</label><br>
+        <input type="number" name="montant" id="montant" step="0.01" min="0" required><br><br>
+        <button type="submit">Envoyer le don</button>
+    </form>
+    <p><a href="{% url 'donation_list' %}">Retour à la liste</a></p>
+{% endblock %}

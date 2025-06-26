@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Faire un Don - LanfiaSave{% endblock %}
+
+{% block content %}
+<h1>Faire un Don</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    
+    {{ form.as_p }}  <!-- Formulaire de base rendu ici -->
+    
+    <div>
+        <label for="personne_vulnerable">Personnes vulnérables</label>
+        <select name="personne_vulnerable" id="personne_vulnerable" multiple>
+            <!-- Options dynamiques ajoutées par JavaScript -->
+        </select>
+    </div>
+    
+    <button type="submit">Faire un Don</button>
+</form>
+
+{% endblock %}
+
+<script>
+// Sélectionner les éléments du formulaire
+const entiteField = document.getElementById('id_entite_vulnerable');
+const personneField = document.getElementById('personne_vulnerable');
+
+// Fonction pour charger les personnes vulnérables en fonction de l'entité sélectionnée
+function loadPersonnesVulnerables(entite) {
+    console.log(`Requête pour l'entité : ${entite}`); // Log pour vérifier l'entité
+    fetch(`/get_personnes_vulnerables/${entite}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);  // Affiche les données récupérées
+            personneField.innerHTML = '';  // Vider le champ avant d'ajouter les nouvelles options
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Sélectionner une personne';
+            personneField.appendChild(defaultOption);
+
+            // Ajoute chaque personne vulnérable en tant qu'option dans le sélecteur
+            data.personnes.forEach(personne => {
+                const option = document.createElement('option');
+                option.value = personne.id;
+                option.textContent = `${personne.first_name} ${personne.last_name}`;
+                personneField.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Erreur lors du chargement des personnes vulnérables:", error));
+}
+
+// Écouter les changements dans le champ 'entite_vulnerable'
+entiteField.addEventListener('change', function () {
+    loadPersonnesVulnerables(this.value);
+});
+
+// Charger les personnes vulnérables dès le chargement de la page si une entité est déjà sélectionnée
+loadPersonnesVulnerables(entiteField.value);
+</script>

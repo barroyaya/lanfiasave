@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Dons en attente de répartition{% endblock %}
+
+{% block content %}
+<h1>Dons en attente de répartition</h1>
+
+{% if dons %}
+    <ul>
+    {% for don in dons %}
+        <li>
+            Don de {{ don.donateur.username }} à {{ don.personne.user.username }} :
+            {{ don.montant }} € - Date : {{ don.date_don }}
+            <!-- Lien pour marquer ce don comme réparti -->
+            <a href="{% url 'repartir_don' don.id %}">Répartir ce don</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucun don en attente pour le moment.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,351 @@
+/* Palette de couleurs */
+:root {
+    --primary-color: #3498db; /* Bleu apaisant */
+    --secondary-color: #2ecc71; /* Vert positif */
+    --accent-color: #e74c3c; /* Rouge pour les accents */
+    --background-color: #f9f9f9;
+    --header-bg-color: #2c3e50;
+    --footer-bg-color: #1a252f;
+    --text-color: #333;
+    --link-color: #ffffff;
+    --link-hover-color: #f1c40f;
+    --button-color: #e67e22;
+    --button-hover-color: #d35400;
+}
+
+/* Styles de base */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+}
+
+/* En-tête */
+header {
+    background-color: var(--header-bg-color);
+    color: var(--link-color);
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+header nav {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--link-color);
+    transition: transform 0.3s;
+}
+
+.logo a:hover {
+    transform: scale(1.05);
+}
+
+.nav-links, .auth-links {
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a, .auth-links a {
+    margin-left: 20px;
+    font-weight: bold;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.nav-links a::after, .auth-links a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: var(--link-hover-color);
+    transition: width 0.3s;
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+}
+
+.nav-links a:hover::after, .auth-links a:hover::after {
+    width: 100%;
+}
+
+/* Container principal */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto;
+    background-color: #ffffff;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Footer */
+footer {
+    background-color: var(--footer-bg-color);
+    color: var(--link-color);
+    text-align: center;
+    padding: 15px 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    margin-top: 40px;
+    transition: background-color 0.3s;
+}
+
+/* Notifications */
+#notification-container .notification {
+    background-color: var(--secondary-color);
+    border: 1px solid var(--primary-color);
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: fadeInSlide 0.5s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Messages */
+.messages {
+    margin-bottom: 20px;
+}
+
+.messages .message {
+    padding: 12px 20px;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+/* Carousel des donateurs */
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+    margin: 30px auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.carousel-images img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    opacity: 0;
+    transition: all 1s ease-in-out;
+}
+
+.carousel-images img.active {
+    left: 0;
+    opacity: 1;
+}
+
+/* Section Donation */
+.donation-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.donation-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.donation-form {
+    width: 100%;
+    max-width: 500px;
+    background-color: #fefefe;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 40px;
+}
+
+.donation-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.donation-form input,
+.donation-form select,
+.donation-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+.donation-form input:focus,
+.donation-form select:focus,
+.donation-form textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.donate-button {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--button-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.donate-button:hover {
+    background-color: var(--button-hover-color);
+    transform: scale(1.05);
+}
+
+/* Section Motivationale */
+.motivational-section {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.motivational-section h3 {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+}
+
+.testimonials-carousel {
+    position: relative;
+    overflow: hidden;
+    height: 300px;
+}
+
+.testimonial {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 100%;
+    opacity: 0;
+    transition: all 1s ease-in-out;
+    text-align: center;
+}
+
+.testimonial.active {
+    left: 0;
+    opacity: 1;
+}
+
+.testimonial img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+.testimonial p {
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.testimonial span {
+    display: block;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Animations supplémentaires */
+.animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+}
+
+/* Responsivité */
+@media (max-width: 768px) {
+    header nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-links, .auth-links {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .nav-links a, .auth-links a {
+        margin: 10px 0;
+    }
+
+    .carousel {
+        height: 250px;
+    }
+
+    .donation-form {
+        padding: 15px;
+    }
+
+    .motivational-section {
+        margin-bottom: 30px;
+    }
+}

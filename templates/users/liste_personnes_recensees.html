@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des Personnes Recensées{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Liste des Personnes Recensées</h1>
+    <p>Cette page affiche toutes les personnes recensées en attente de validation par l'administration.</p>
+
+    {% if personnes %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Âge</th>
+                    <th>Revenu</th>
+                    <th>Entité</th>
+                    <th>Validation</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for personne in personnes %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ personne.first_name }}</td>
+                        <td>{{ personne.last_name }}</td>
+                        <td>{{ personne.age }}</td>
+                        <td>{{ personne.revenu }} €</td>
+                        <td>{{ personne.get_entite_display }}</td>
+
+                        <!-- Affichage de l'état de la validation par l'admin -->
+                        <td>
+                            {% if personne.validated_by_admin %}
+                                <span class="badge bg-success">Validé par l'Admin</span>
+                            {% else %}
+                                <span class="badge bg-warning">En attente de validation</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <!-- Voir Button : seulement désactivé pour les personnes validées -->
+                            {% if personne.validated_by_admin %}
+                                <button class="btn btn-secondary btn-sm" disabled>Voir</button>
+                            {% else %}
+                                <a href="{% url 'voir_personne'  personne.id %}" class="btn btn-info btn-sm">Voir</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucune personne recensée n'est en attente de validation.</p>
+    {% endif %}
+</div>
+
+<style>
+.container {
+    margin: 20px auto;
+    max-width: 900px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.badge.bg-success {
+    background-color: #28a745;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107;
+}
+</style>
+{% endblock %}
+
+
+
+{##}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Liste des Personnes Recensées{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container">#}
+{#    <h1 class="page-title">Liste des Personnes Recensées</h1>#}
+{#    <p>Cette page affiche toutes les personnes recensées en attente de validation par l'administration.</p>#}
+{##}
+{#    {% if personnes %}#}
+{#        <table class="table table-striped">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th>#</th>#}
+{#                    <th>Âge</th>#}
+{#                    <th>Revenu</th>#}
+{#                    <th>Entité</th>#}
+{#                    <th>Actions</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                {% for personne in personnes %}#}
+{#                    <tr>#}
+{#                        <td>{{ forloop.counter }}</td>#}
+{#                        <td>{{ personne.age }}</td>#}
+{#                        <td>{{ personne.revenu }} €</td>#}
+{#                        <td>{{ personne.get_entite_display }}</td>#}
+{#                        <td>#}
+{#                            {% if personne.est_vulnerable %}#}
+{#                                <span class="badge bg-success">Vulnérable</span>#}
+{#                            {% else %}#}
+{#                                <span class="badge bg-warning">Non vulnérable</span>#}
+{#                            {% endif %}#}
+{#                        </td>#}
+{#                        <td>#}
+{#                            <a href="{% url 'valider_personne' personne.id %}" class="btn btn-primary btn-sm">#}
+{#                                Valider#}
+{#                            </a>#}
+{#                        </td>#}
+{#                    </tr>#}
+{#                {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    {% else %}#}
+{#        <p>Aucune personne recensée n'est en attente de validation.</p>#}
+{#    {% endif %}#}
+{#</div>#}
+{##}
+{#<style>#}
+{#.container {#}
+{#    margin: 20px auto;#}
+{#    max-width: 900px;#}
+{#    padding: 20px;#}
+{#    background: #fff;#}
+{#    border-radius: 8px;#}
+{#    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);#}
+{#}#}
+{##}
+{#.page-title {#}
+{#    font-size: 1.8rem;#}
+{#    margin-bottom: 20px;#}
+{#}#}
+{##}
+{#.table {#}
+{#    width: 100%;#}
+{#    border-collapse: collapse;#}
+{#}#}
+{##}
+{#.table th, .table td {#}
+{#    padding: 12px 15px;#}
+{#    text-align: left;#}
+{#    border-bottom: 1px solid #ddd;#}
+{#}#}
+{##}
+{#.badge {#}
+{#    padding: 5px 10px;#}
+{#    border-radius: 5px;#}
+{#    color: #fff;#}
+{#    font-size: 0.9rem;#}
+{#}#}
+{##}
+{#.badge.bg-success {#}
+{#    background-color: #28a745;#}
+{#}#}
+{##}
+{#.badge.bg-warning {#}
+{#    background-color: #ffc107;#}
+{#}#}
+{#</style>#}
+{#{% endblock %}#}

@@ -1,0 +1,43 @@
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Modifier Personne{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container">#}
+{#    <h1 class="page-title">Modifier les informations de la personne recensée</h1>#}
+{#    #}
+{#    <form method="post">#}
+{#        {% csrf_token %}#}
+{#        {{ form.as_p }}  <!-- Affiche les champs du formulaire -->#}
+{##}
+{#        <button type="submit" class="btn btn-primary">Sauvegarder les modifications</button>#}
+{#    </form>#}
+{##}
+{#    <br>#}
+{#    <a href="{% url 'liste_personnes_recensees' %}" class="btn btn-secondary">Retour à la liste</a>#}
+{#</div>#}
+{#{% endblock %}#}
+
+{% extends 'base.html' %}
+
+{% block title %}Voir Personne{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Voir / Modifier Personne Recensée</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Affiche les champs du formulaire -->
+
+        {% if personne.validated_by_admin %}
+            <button class="btn btn-secondary" disabled>Formulaire validé par l'Admin</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">Sauvegarder les modifications</button>
+        {% endif %}
+    </form>
+
+    <br>
+    <a href="{% url 'liste_personnes_recensees' %}" class="btn btn-secondary">Retour à la liste</a>
+</div>
+{% endblock %}

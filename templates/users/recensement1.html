@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Recensement - LanfiaSave{% endblock %}
+
+{% block content %}
+    <h1>Formulaire de Recensement</h1>
+    
+    <!-- Affichage des messages (facultatif) -->
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <!-- Formulaire de Recensement -->
+    <form method="POST" class="form-container">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <!-- Style personnalisé pour rendre les boutons plus beaux -->
+{#        <a href="{% url 'recensement' %}">Recensement</a>#}
+
+        <button type="submit" class="btn-submit">Soumettre</button>
+    </form>
+
+    <style>
+        .form-container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        .messages .message {
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}

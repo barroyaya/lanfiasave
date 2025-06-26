@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - LanfiaSave{% endblock %}
+
+{% block content %}
+<!-- Section "Hero" avec carrousel d'images de fond -->
+<div class="hero" id="hero">
+    <div class="hero-content">
+        <h1>Bienvenue sur LanfiaSave&nbsp;!</h1>
+        <p>
+            Ceci est la page d'accueil. Découvrez nos actions et comment vous pouvez aider.
+        </p>
+        <!-- Exemple de bouton d'appel à l'action -->
+        <a href="{% url 'register' %}" class="btn">Faire un don</a>
+        <a href="{% url 'dashboard_donateur' %}" class="btn btn-green">voir les statistiques</a>
+        
+    </div>
+    
+
+</div>
+
+<!-- Petite section de présentation ou de "services" -->
+<div class="section">
+    <h2>Nos Missions</h2>
+    <p>
+        Nous nous engageons à venir en aide aux personnes vulnérables à travers l’Afrique, 
+        grâce à des dons et à des initiatives de soutien local. 
+        Découvrez nos projets, nos partenariats et comment vous pouvez contribuer.
+    </p>
+</div>
+
+<!-- Présentation de quelques points clés / fonctionnalités -->
+<div class="features">
+    <div class="feature">
+        <img src="{% static 'images/heart_icon.png' %}" alt="Icône coeur" />
+        <h3>Santé</h3>
+        <p>
+            Aider à la construction et l’amélioration de centres de santé dans les zones reculées.
+        </p>
+    </div>
+    <div class="feature">
+        <img src="{% static 'images/book_icon.png' %}" alt="Icône livre" />
+        <h3>Éducation</h3>
+        <p>
+            Permettre l’accès à l’éducation en équipant des écoles et en formant des enseignants.
+        </p>
+    </div>
+    <div class="feature">
+        <img src="{% static 'images/hands_icon.png' %}" alt="Icône mains" />
+        <h3>Solidarité</h3>
+        <p>
+            Soutenir les communautés, partager les ressources et encourager l’autonomie locale.
+        </p>
+    </div>
+</div>
+
+<!-- Une zone d'appel à l'action secondaire -->
+<div class="call-to-action">
+    <h2>Rejoignez notre mouvement</h2>
+    <p>
+        Ensemble, nous pouvons faire une différence significative dans la vie de milliers de familles.
+    </p>
+    <a href="#" class="btn-secondary">En savoir plus</a>
+</div>
+
+<!-- Script JavaScript pour le carrousel de fond -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hero = document.getElementById('hero');
+        const images = [
+            "{% static 'images/p2.jpg' %}",
+            "{% static 'images/p3.jpg' %}",
+            "{% static 'images/p4.jpg' %}",
+            "{% static 'images/don.jpeg' %}" // Ajoutez autant d'images que vous le souhaitez
+        ];
+        let current = 0;
+
+        // Initialisation de la première image
+        hero.style.backgroundImage = `url('${images[current]}')`;
+
+        // Fonction pour changer l'image
+        function changeBackground() {
+            current = (current + 1) % images.length;
+            hero.style.backgroundImage = `url('${images[current]}')`;
+        }
+
+        // Changement d'image toutes les 5 secondes
+        setInterval(changeBackground, 5000);
+    });
+</script>
+
+<!-- Styles CSS -->
+<style>
+    /* --- STYLES GLOBAUX / RÉINITIALISATION --- */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        color: #333;
+        background-color: #f7f7f7;
+    }
+
+    h1, h2, h3 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    p {
+        line-height: 1.6;
+        margin: 1rem 0;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    /* --- SECTION HERO --- */
+    .hero {
+        position: relative;
+        width: 100%;
+        min-height: 70vh; /* Hauteur minimum de la bannière */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+        transition: background-image 1s ease-in-out; /* Transition fluide */
+    }
+
+    /* Superposition foncée pour améliorer la lisibilité du texte */
+    .hero::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Voile sombre */
+        z-index: 0;
+    }
+
+    .hero-content {
+        position: relative; /* Permet de placer le texte au-dessus du voile sombre */
+        z-index: 1;
+        max-width: 700px;
+        padding: 2rem;
+    }
+
+    /* --- BOUTON PRINCIPAL --- */
+    .btn {
+        display: inline-block;
+        background-color: #e74c3c;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+        background-color: #c0392b;
+    }
+
+    /* --- CONTENU SECONDAIRE --- */
+    .section {
+        background-color: #fff;
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    .section h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .section p {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* --- FEATURES (POINTS CLÉS) --- */
+    .features {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 2rem 0;
+        padding: 0 1rem;
+    }
+    .feature {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        flex: 0 1 calc(33.333% - 2rem);
+        margin: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    .feature:hover {
+        transform: translateY(-5px);
+    }
+    .feature img {
+        width: 60px;
+        margin-bottom: 1rem;
+    }
+    .feature h3 {
+        margin-bottom: 0.5rem;
+        color: #e74c3c;
+    }
+
+    /* --- CALL TO ACTION SECONDAIRE --- */
+    .call-to-action {
+        background-color: #fff;
+        text-align: center;
+        padding: 2rem 1rem;
+        margin: 2rem auto;
+    }
+    .call-to-action h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+    .call-to-action p {
+        max-width: 600px;
+        margin: 0 auto 1.5rem auto;
+    }
+    .btn-secondary {
+        background-color: #3498db;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background-color: #2980b9;
+    }
+    .btn-green {
+    background-color: #28a745; /* Vert Bootstrap */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-green:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+    /* --- ADAPTATION RESPONSIVE --- */
+    @media (max-width: 768px) {
+        .features {
+            flex-direction: column;
+            align-items: center;
+        }
+        .feature {
+            flex: 0 1 auto;
+            width: 80%;
+            margin: 1rem 0;
+        }
+    }
+</style>
+{% endblock %}
+
+
+
+
+
+
+{##}
+{##}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Accueil - LanfiaSave{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    <h1>Bienvenue sur LanfiaSave !</h1>#}
+{#    <p>Ceci est la page d'accueil. Utilisez la navigation pour explorer le site.</p>#}
+{#{% endblock %}#}

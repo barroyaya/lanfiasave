@@ -1,0 +1,1402 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil - LanfiaSave{% endblock %}
+
+{% block content %}
+<!-- Hero Section avec effet parallaxe -->
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="profile-avatar-container">
+            <div class="profile-avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="avatar-status-indicator"></div>
+        </div>
+        <h1 class="profile-name">{{ user.username }}</h1>
+        <p class="profile-email">{{ user.email }}</p>
+        <div class="profile-badges">
+            <span class="badge-modern {% if user.is_donator %}badge-gold{% elif user.is_vulnerable %}badge-purple{% elif user.is_recenseur %}badge-blue{% else %}badge-silver{% endif %}">
+                <i class="fas {% if user.is_donator %}fa-heart{% elif user.is_vulnerable %}fa-hands-helping{% elif user.is_recenseur %}fa-clipboard-check{% else %}fa-user{% endif %}"></i>
+                {% if user.is_donator %}
+                    Donateur Actif
+                {% elif user.is_vulnerable %}
+                    Bénéficiaire
+                {% elif user.is_recenseur %}
+                    Agent Recenseur
+                {% else %}
+                    Membre
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="hero-pattern"></div>
+</div>
+
+<!-- Stats Overview -->
+<div class="stats-overview">
+    <div class="container">
+        <div class="stats-grid">
+            {% if user.is_donator %}
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-donate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ total_donations|default:"0" }}</span>
+                        <span class="stat-label">Dons effectués</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ total_amount|default:"0" }} F</span>
+                        <span class="stat-label">Total donné</span>
+                    </div>
+                </div>
+            {% elif user.is_vulnerable and personne %}
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-hands-holding-heart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ montant_total }}€</span>
+                        <span class="stat-label">Total reçu</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ progression|default:"0" }}%</span>
+                        <span class="stat-label">Objectif atteint</span>
+                    </div>
+                </div>
+            {% elif user.is_recenseur %}
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ user.personnes_recensees.count }}</span>
+                        <span class="stat-label">Personnes recensées</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ recensements_mois|default:"0" }}</span>
+                        <span class="stat-label">Ce mois-ci</span>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ days_active|default:"0" }}</span>
+                    <span class="stat-label">Jours actif</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="profile-main-content">
+    <div class="container">
+        {% if user.is_recenseur %}
+        <!-- Section Recenseur -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-list"></i> Espace Recenseur</h2>
+                <div class="section-actions">
+                    <a href="{% url 'recenser_personne' %}" class="btn-primary">
+                        <i class="fas fa-plus-circle"></i> Nouveau recensement
+                    </a>
+                </div>
+            </div>
+
+            <div class="action-cards">
+                <a href="{% url 'recenser_personne' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>Recenser</h3>
+                    <p>Ajouter une nouvelle personne vulnérable</p>
+                </a>
+                <a href="{% url 'liste_personnes_recensees' %}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    <h3>Consulter</h3>
+                    <p>Voir toutes les personnes recensées</p>
+                </a>
+                <div class="action-card stats-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Statistiques</h3>
+                    <p>Analysez vos performances</p>
+                </div>
+            </div>
+
+            <!-- Derniers recensements -->
+            <div class="recent-activities">
+                <h3><i class="fas fa-history"></i> Activité récente</h3>
+                {% if user.personnes_recensees.exists %}
+                    <div class="timeline">
+                        {% for personne in user.personnes_recensees.all|slice:":5" %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>{{ personne.get_full_name }}</h4>
+                                    <span class="timeline-date">{{ personne.created_at|date:"d M Y" }}</span>
+                                </div>
+                                <div class="timeline-body">
+                                    <span class="tag">{{ personne.get_entite_display }}</span>
+                                    <span class="tag">{{ personne.age }} ans</span>
+                                    <span class="tag">{{ personne.region_geographique }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Aucun recensement effectué</p>
+                        <a href="{% url 'recenser_personne' %}" class="btn-primary">Commencer</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if personne %}
+        <!-- Section Personne Vulnérable -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-hand-holding-heart"></i> Mon Espace Bénéficiaire</h2>
+                <div class="vulnerability-status {% if personne.est_vulnerable %}status-active{% else %}status-inactive{% endif %}">
+                    <i class="fas fa-shield-alt"></i>
+                    {% if personne.est_vulnerable %}
+                        Statut actif
+                    {% else %}
+                        Objectif atteint
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Progress Overview -->
+<div class="progress-overview">
+    <div class="progress-card p-4 shadow-sm rounded" style="background-color: #f5f6fa;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-2">Progression vers l'objectif</h5>
+            <span class="text-primary font-weight-bold">{{ progression|floatformat:2 }}%</span>
+        </div>
+        <div class="progress-bar-container mt-2">
+            <div class="progress-bar"
+                 style="
+                    background: linear-gradient(90deg, #7b61ff, #a871ff);
+                    width: {% if progression > 0 and progression < 1 %}1%{% else %}{{ progression }}%{% endif %};
+                 ">
+                {{ montant_total|floatformat:2 }} / 200000
+            </div>
+        </div>
+        <div class="d-flex justify-content-between text-muted mt-2">
+            <small>Montant reçu</small>
+            <small>Objectif: 200 000</small>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Donations History -->
+            <div class="donations-history">
+                <h3><i class="fas fa-history"></i> Historique des dons reçus</h3>
+                {% if dons_recus %}
+                    <div class="donations-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Donateur</th>
+                                    <th>Montant</th>
+                                    <th>Message</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for don_recu in dons_recus %}
+                                <tr>
+                                    <td>{{ don_recu.don.date_don|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <div class="donor-info">
+                                            <div class="donor-avatar">{{ don_recu.don.donateur.username|first|upper }}</div>
+                                            <span>{{ don_recu.don.donateur.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="amount">{{ don_recu.montant_recu|floatformat:2 }}€</td>
+                                    <td class="message">{{ don_recu.don.description|default:"Aucun message" }}</td>
+                                    <td>
+                                        <span class="status-badge status-success">
+                                            <i class="fas fa-check-circle"></i> Validé
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Summary Card -->
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4>Résumé</h4>
+                            <p>Total des dons reçus: <strong>{{ montant_total|floatformat:2 }}€</strong></p>
+                            <p>Nombre de donateurs: <strong>{{ dons_recus|length }}</strong></p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-gift"></i>
+                        <p>Aucun don reçu pour le moment</p>
+                        <p class="text-muted">Les dons validés apparaîtront ici</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif user.is_vulnerable %}
+        <div class="content-section">
+            <div class="alert-info">
+                <i class="fas fa-info-circle"></i>
+                <p>Votre profil de personne vulnérable n'est pas encore configuré. Veuillez contacter un recenseur.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Account Settings Section -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Paramètres du compte</h2>
+            </div>
+            
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <div class="settings-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <h3>Informations personnelles</h3>
+                    <p>Modifier vos informations de profil</p>
+                    <a href="#" class="btn-secondary">Modifier</a>
+                </div>
+                
+                <div class="settings-card">
+                    <div class="settings-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Sécurité</h3>
+                    <p>Changer votre mot de passe</p>
+                    <a href="{% url 'password_change' %}" class="btn-secondary">Changer</a>
+                </div>
+                
+                <div class="settings-card">
+                    <div class="settings-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Notifications</h3>
+                    <p>Gérer vos préférences</p>
+                    <a href="#" class="btn-secondary">Configurer</a>
+                </div>
+                
+                <div class="settings-card danger">
+                    <div class="settings-icon">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <h3>Déconnexion</h3>
+                    <p>Se déconnecter en toute sécurité</p>
+                    <a href="{% url 'logout' %}" class="btn-danger">Déconnexion</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fab-container">
+    <button class="fab" id="fabToggle">
+        <i class="fas fa-plus"></i>
+    </button>
+    <div class="fab-menu">
+        {% if user.is_donator %}
+        <a href="{% url 'donation_view' %}" class="fab-item" data-tooltip="Faire un don">
+            <i class="fas fa-donate"></i>
+        </a>
+        {% endif %}
+        {% if user.is_recenseur %}
+        <a href="{% url 'recenser_personne' %}" class="fab-item" data-tooltip="Nouveau recensement">
+            <i class="fas fa-user-plus"></i>
+        </a>
+        {% endif %}
+        <a href="#" class="fab-item" data-tooltip="Aide">
+            <i class="fas fa-question"></i>
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Variables CSS */
+    :root {
+        --primary-color: #6366f1;
+        --secondary-color: #8b5cf6;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+        --dark-color: #1f2937;
+        --light-color: #f9fafb;
+        --border-radius: 16px;
+        --transition: all 0.3s ease;
+    }
+
+    /* Reset & Base */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f3f4f6;
+        color: var(--dark-color);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 80px 0 120px;
+        overflow: hidden;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,213.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+    }
+
+    .hero-pattern {
+        position: absolute;
+        inset: 0;
+        opacity: 0.1;
+        background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .hero-content {
+        position: relative;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .profile-avatar-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 700;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 4px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .avatar-status-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background: var(--success-color);
+        border-radius: 50%;
+        border: 3px solid white;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .profile-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-email {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .profile-badges {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .badge-modern {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        backdrop-filter: blur(10px);
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-gold {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+        box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+    }
+
+    .badge-purple {
+        background: linear-gradient(135deg, #a855f7, #9333ea);
+        color: white;
+        box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+    }
+
+    .badge-blue {
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        color: white;
+        box-shadow: 0 4px 16px rgba(96, 165, 250, 0.3);
+    }
+
+    .badge-silver {
+        background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+        color: var(--dark-color);
+        box-shadow: 0 4px 16px rgba(229, 231, 235, 0.3);
+    }
+
+    /* Stats Overview */
+    .stats-overview {
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+        padding: 0 20px 40px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 32px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    /* Main Content */
+    .profile-main-content {
+        padding: 40px 0 80px;
+    }
+
+    .content-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .section-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-header h2 i {
+        color: var(--primary-color);
+    }
+
+    /* Action Cards */
+    .action-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .action-card {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: var(--border-radius);
+        padding: 32px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark-color);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .action-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.1);
+    }
+
+    .action-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: white;
+    }
+
+    .action-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .action-card p {
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 12px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e5e7eb;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 32px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -28px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .timeline-content {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .timeline-header h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .timeline-date {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .timeline-body {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 4px 12px;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+
+    /* Progress Card */
+    .progress-card {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        border-radius: var(--border-radius);
+        padding: 32px;
+        margin-bottom: 32px;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .progress-header h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .progress-percentage {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .progress-bar-container {
+        background: white;
+        border-radius: 50px;
+        height: 32px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        transition: width 0.5s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .progress-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    /* Donations Table */
+    .donations-table {
+        overflow-x: auto;
+        margin: 24px 0;
+    }
+
+    .donations-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .donations-table th {
+        background: #f9fafb;
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #4b5563;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .donations-table td {
+        padding: 16px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .donations-table tr:hover {
+        background: #f9fafb;
+    }
+
+    .donor-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .donor-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .amount {
+        font-weight: 700;
+        color: var(--success-color);
+        font-size: 1.1rem;
+    }
+
+    .message {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    /* Vulnerability Status */
+    .vulnerability-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 2px solid var(--success-color);
+    }
+
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 2px solid var(--danger-color);
+    }
+
+    /* Summary Card */
+    .summary-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: var(--border-radius);
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-top: 24px;
+    }
+
+    .summary-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .summary-content h4 {
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+    }
+
+    .summary-content p {
+        margin: 4px 0;
+        opacity: 0.9;
+    }
+
+    /* Settings Grid */
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .settings-card {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: var(--border-radius);
+        padding: 24px;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .settings-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .settings-card.danger:hover {
+        border-color: var(--danger-color);
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .settings-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 16px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .settings-card.danger .settings-icon {
+        color: var(--danger-color);
+    }
+
+    .settings-card h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .settings-card p {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-bottom: 16px;
+    }
+
+    /* Buttons */
+    .btn-primary, .btn-secondary, .btn-danger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .empty-state .text-muted {
+        font-size: 0.95rem;
+        color: #d1d5db;
+    }
+
+    .empty-state .btn-primary {
+        margin-top: 20px;
+    }
+
+    /* Alert */
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        border: 2px solid var(--info-color);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: var(--info-color);
+    }
+
+    .alert-info i {
+        font-size: 24px;
+    }
+
+    /* Floating Action Button */
+    .fab-container {
+        position: fixed;
+        bottom: 32px;
+        right: 32px;
+        z-index: 100;
+    }
+
+    .fab {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+    }
+
+    .fab:active {
+        transform: scale(0.95);
+    }
+
+    .fab i {
+        transition: transform 0.3s ease;
+    }
+
+    .fab.active i {
+        transform: rotate(45deg);
+    }
+
+    .fab-menu {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+    }
+
+    .fab-menu.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .fab-item {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: white;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+        transform: scale(0);
+        position: relative;
+    }
+
+    .fab-menu.active .fab-item {
+        transform: scale(1);
+    }
+
+    .fab-menu.active .fab-item:nth-child(1) {
+        transition-delay: 0.1s;
+    }
+
+    .fab-menu.active .fab-item:nth-child(2) {
+        transition-delay: 0.2s;
+    }
+
+    .fab-menu.active .fab-item:nth-child(3) {
+        transition-delay: 0.3s;
+    }
+
+    .fab-item:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .fab-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--dark-color);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .fab-item:hover::after {
+        opacity: 1;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .content-section {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .content-section:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .content-section:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 60px 0 80px;
+        }
+
+        .profile-name {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-card {
+            padding: 24px;
+        }
+
+        .content-section {
+            padding: 24px;
+        }
+
+        .section-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .action-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .donations-table {
+            font-size: 0.875rem;
+        }
+
+        .donations-table th,
+        .donations-table td {
+            padding: 12px 8px;
+        }
+
+        .message {
+            max-width: 150px;
+        }
+
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .fab-container {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+
+        .badge-modern {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+
+        .timeline {
+            padding-left: 30px;
+        }
+
+        .timeline-marker {
+            left: -25px;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .hero-section {
+            background: white;
+            color: var(--dark-color);
+        }
+
+        .fab-container,
+        .section-actions,
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger {
+            display: none;
+        }
+
+        .content-section {
+            box-shadow: none;
+            border: 1px solid #e5e7eb;
+            break-inside: avoid;
+        }}
+    .progress-bar-container {
+        background-color: #e9ecef;
+        height: 20px;
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        border-radius: 50px;
+        transition: width 0.8s ease-in-out;
+    }
+    
+</style>
+
+<script>
+    // Floating Action Button Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const fabToggle = document.getElementById('fabToggle');
+        const fabMenu = document.querySelector('.fab-menu');
+        
+        fabToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            fabMenu.classList.toggle('active');
+        });
+        
+        // Close FAB menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!fabToggle.contains(e.target) && !fabMenu.contains(e.target)) {
+                fabToggle.classList.remove('active');
+                fabMenu.classList.remove('active');
+            }
+        });
+        
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease-out';
+            observer.observe(card);
+        });
+        
+        // Progress bar animation
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            setTimeout(() => {
+                progressBar.style.width = progressBar.getAttribute('style').match(/width:\s*(\d+%)/)[1];
+            }, 500);
+        }
+    });
+</script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+{% endblock %}

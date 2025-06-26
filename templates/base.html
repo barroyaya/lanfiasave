@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}LanfiaSave{% endblock %}</title>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --dark-gradient: linear-gradient(135deg, #232526 0%, #414345 100%);
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            --border-radius-sm: 6px;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-xl: 16px;
+            --border-radius-2xl: 20px;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            max-width: 1900px;
+            margin: 0 auto;
+            transition: background-color 0.3s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,119,198,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120,119,198,0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        header.global-header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.8s ease-out;
+            box-shadow: var(--shadow-sm);
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        nav.navbar {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            position: relative;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            position: relative;
+            padding: 0.75rem 1.25rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: var(--border-radius-lg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--primary-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+            border-radius: var(--border-radius-lg);
+        }
+        .nav-link:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        /* Buttons in nav */
+        .btn-register {
+            background: var(--primary-gradient);
+            color: white !important;
+            font-weight: 600;
+            border-radius: var(--border-radius-xl);
+            padding: 0.75rem 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        .btn-register:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        .btn-logout {
+            background: var(--secondary-gradient);
+            color: white !important;
+            border-radius: var(--border-radius-xl);
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-statistics {
+            background: var(--success-gradient);
+            color: white !important;
+            border-radius: var(--border-radius-xl);
+            padding: 0.75rem 1.5rem;
+        }
+
+        .welcome-message {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-light);
+            white-space: nowrap;
+        }
+
+        /* Mobile Navigation */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.3s ease;
+        }
+        .mobile-toggle:hover {
+            background-color: var(--bg-tertiary);
+        }
+        .mobile-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--text-primary);
+            margin: 2px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+        @media (max-width: 768px) {
+            .mobile-toggle { display: flex; }
+            .nav-left, .nav-right {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0; right: 0;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 1rem;
+                border-top: 1px solid var(--border-light);
+                gap: 0.5rem;
+                z-index: 999;
+            }
+            .nav-left.active, .nav-right.active { display: flex; }
+            .nav-link {
+                width: 100%;
+                text-align: center;
+                padding: 1rem;
+            }
+            .welcome-message {
+                margin: 0;
+                text-align: center;
+            }
+        }
+
+        /* Container */
+        .container {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--border-radius-2xl);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+            max-width: 1900px;
+            margin: 30px auto;
+        }
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl), 0 0 40px rgba(102,126,234,0.15);
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: 2rem;
+        }
+        .message {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius-lg);
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            animation: slideInRight 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+            background: #eaeaea;
+            border: 1px solid #ccc;
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Notification */
+        #notification-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        .notification {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-lg);
+            animation: slideInNotification 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+        .notification::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+        }
+        @keyframes slideInNotification {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-gradient);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: var(--primary-gradient);
+        }
+        footer p {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div id="notification-container"></div>
+
+     <!-- Global Header -->
+    <header class="global-header">
+        <nav class="navbar">
+            <div class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu" role="button" tabindex="0">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="nav-left" id="navLeft">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="nav-link" tabindex="0">🏠 Accueil</a>
+                {% else %}
+                    <a href="{% url 'home' %}" class="nav-link" tabindex="0">🏠 Accueil</a>
+                {% endif %}
+
+                {% if user.is_authenticated and user.is_donator %}
+                    <a href="{% url 'donation_view' %}" class="nav-link" tabindex="0">💝 Faire un don</a>
+                    <a href="{% url 'mes_dons_en_attente' %}" class="nav-link" tabindex="0">⏳ Dons en Attente</a>
+                    <a href="{% url 'historique_dons' %}" class="nav-link" tabindex="0">📋 Voir les dons</a>
+                    <a href="{% url 'dashboard_donateur' %}" class="nav-link btn-statistics" tabindex="0">📊 Statistiques</a>
+                {% endif %}
+
+                {% if user.is_authenticated and user.is_vulnerable_profile %}
+                    <a href="{% url 'voir_retirer_dons' %}" class="nav-link" tabindex="0">🎁 Voir et Retirer</a>
+                {% endif %}
+
+                {% if user.is_authenticated and user.is_recenseur %}
+                    <a href="{% url 'recenser_personne' %}" class="nav-link" tabindex="0">📝 Recensement</a>
+                {% endif %}
+            </div>
+
+            <div class="nav-right" id="navRight">
+                {% if user.is_authenticated %}
+                    <span class="welcome-message" tabindex="0">👋 Bienvenue, {{ user.username }}!</span>
+                    <a href="{% url 'notifications' %}" class="nav-link" tabindex="0">🔔 Notifications</a>
+                    <a href="{% url 'logout' %}" class="nav-link btn-logout" tabindex="0">🚪 Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link" tabindex="0">🔐 Connexion</a>
+                    <a href="{% url 'register' %}" class="nav-link btn-register" tabindex="0">✨ Inscription</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+
+    <main class="container" role="main" tabindex="0">
+        <div class="messages" aria-live="polite" aria-atomic="true">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer role="contentinfo">
+        <p>&copy; 2025 LanfiaSave. Tous droits réservés. 💜</p>
+    </footer>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            document.getElementById('navLeft').classList.toggle('active');
+            document.getElementById('navRight').classList.toggle('active');
+            document.querySelector('.mobile-toggle').classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navbar = document.querySelector('.navbar');
+            const navLeft = document.getElementById('navLeft');
+            const navRight = document.getElementById('navRight');
+            const mobileToggle = document.querySelector('.mobile-toggle');
+            if (!navbar.contains(event.target)) {
+                navLeft.classList.remove('active');
+                navRight.classList.remove('active');
+                mobileToggle.classList.remove('active');
+            }
+        });
+
+        {% if user.is_authenticated %}
+        // Notification fetch and display
+        function fetchNotifications() {
+            fetch("{% url 'api_notifications' %}")
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('notification-container');
+                    data.notifications.forEach(notif => {
+                        if (!document.querySelector(`[data-notif-id="${notif.id}"]`)) {
+                            let div = document.createElement('div');
+                            div.className = 'notification';
+                            div.setAttribute('data-notif-id', notif.id);
+                            div.setAttribute('role', 'alert');
+                            div.innerHTML = `<strong>${notif.created_at}</strong>: ${notif.message} <button onclick="this.parentElement.remove()" aria-label="Fermer la notification" style="background:none;border:none;cursor:pointer;padding:0 0 0 1rem;">✕</button>`;
+                            container.appendChild(div);
+                            setTimeout(() => {
+                                if(div.parentNode) {
+                                    div.style.animation = 'slideInNotification 0.3s ease-out reverse';
+                                    setTimeout(() => div.remove(), 300);
+                                }
+                            }, 8000);
+                        }
+                    });
+                })
+                .catch(e => console.error('Erreur récupération notifications:', e));
+        }
+        setInterval(fetchNotifications, 5000);
+        fetchNotifications();
+        {% endif %}
+    </script>
+</body>
+</html>

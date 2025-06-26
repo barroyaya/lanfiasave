@@ -1,0 +1,399 @@
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+{#    <title>Tableau de bord Admin</title>#}
+{#    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>#}
+{#    <style>#}
+{#        .dashboard-container {#}
+{#            width: 90%;#}
+{#            margin: 20px auto;#}
+{#            padding: 20px;#}
+{#            background-color: #f9f9f9;#}
+{#            border-radius: 10px;#}
+{#            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);#}
+{#        }#}
+{#        .stat-card {#}
+{#            display: inline-block;#}
+{#            width: 30%;#}
+{#            padding: 20px;#}
+{#            margin: 10px;#}
+{#            background: white;#}
+{#            text-align: center;#}
+{#            border-radius: 10px;#}
+{#            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);#}
+{#        }#}
+{#        .stat-card h2 {#}
+{#            font-size: 2rem;#}
+{#            color: #3498db;#}
+{#        }#}
+{#        .chart-container, .table-container {#}
+{#            margin-top: 30px;#}
+{#        }#}
+{#        table {#}
+{#            width: 100%;#}
+{#            border-collapse: collapse;#}
+{#            margin-top: 20px;#}
+{#            background: white;#}
+{#        }#}
+{#        th, td {#}
+{#            border: 1px solid #ddd;#}
+{#            text-align: left;#}
+{#            padding: 8px;#}
+{#        }#}
+{#        th {#}
+{#            background: #3498db;#}
+{#            color: white;#}
+{#        }#}
+{#        .progress-container {#}
+{#            background: #e0e0e0;#}
+{#            border-radius: 10px;#}
+{#            overflow: hidden;#}
+{#            height: 20px;#}
+{#            margin-top: 5px;#}
+{#        }#}
+{#        .progress-bar {#}
+{#            height: 100%;#}
+{#            background: #3498db;#}
+{#            text-align: center;#}
+{#            color: white;#}
+{#            font-size: 12px;#}
+{#        }#}
+{#    </style>#}
+{#</head>#}
+{#<body>#}
+{#<div class="dashboard-container">#}
+{#    <h1>Tableau de bord Admin</h1>#}
+{##}
+{#    <!-- Section Statistiques -->#}
+{#    <div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Total Recenseurs</h3>#}
+{#            <h2>{{ total_recenseurs }}</h2>#}
+{#        </div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Total Donateurs</h3>#}
+{#            <h2>{{ total_donateurs }}</h2>#}
+{#        </div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Total Personnes Vulnerables</h3>#}
+{#            <h2>{{ total_personnes_vulnerables }}</h2>#}
+{#        </div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Total Personnes non Vulnerables</h3>#}
+{#            <h2>{{ total_personnes_non_vulnerables }}</h2>#}
+{#        </div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Recenseurs Actifs</h3>#}
+{#            <h2>{{ recenseurs_actifs }}</h2>#}
+{#        </div>#}
+{#        <div class="stat-card">#}
+{#            <h3>Recenseurs Inactifs</h3>#}
+{#            <h2>{{ recenseurs_inactifs }}</h2>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <!-- Tableau des personnes vulnérables -->#}
+{#    <div class="table-container">#}
+{#        <h2>Progression des dons par Personne Vulnérable</h2>#}
+{#        <table>#}
+{#            <thead>#}
+{#            <tr>#}
+{#                <th>Nom</th>#}
+{#                <th>Prénom</th>#}
+{#                <th>Progression des Dons</th>#}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for personne in personnes_vulnerables %}#}
+{#                <tr>#}
+{#                    <td>{{ personne.last_name }}</td>#}
+{#                    <td>{{ personne.first_name }}</td>#}
+{#                    <td>#}
+{#                        <div class="progress-container">#}
+{#                            <div class="progress-bar" style="width: {{ personne.progression_percentage }}%;">#}
+{#                                {{ personne.progression_percentage|floatformat:2 }}%#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    </div>#}
+{##}
+{#    <!-- Section Graphiques -->#}
+{#    <div class="chart-container">#}
+{#        <h2>Distribution des Personnes Vulnérables par Région</h2>#}
+{#        <canvas id="regionChart"></canvas>#}
+{#    </div>#}
+{##}
+{#    <script>#}
+{#        // Graphique des personnes vulnérables par région#}
+{#        const regionLabels = JSON.parse('{{ labels_top_regions|safe }}'.replace(/'/g, '"'));#}
+{#        const regionValues = JSON.parse('{{ values_top_regions|safe }}'.replace(/'/g, '"'));#}
+{##}
+{#        const ctxRegion = document.getElementById('regionChart').getContext('2d');#}
+{#        new Chart(ctxRegion, {#}
+{#            type: 'bar',#}
+{#            data: {#}
+{#                labels: regionLabels,#}
+{#                datasets: [{#}
+{#                    label: 'Nombre de personnes vulnérables',#}
+{#                    data: regionValues,#}
+{#                    backgroundColor: 'rgba(75, 192, 192, 0.2)',#}
+{#                    borderColor: 'rgba(75, 192, 192, 1)',#}
+{#                    borderWidth: 1#}
+{#                }]#}
+{#            },#}
+{#            options: {#}
+{#                responsive: true,#}
+{#                plugins: {#}
+{#                    legend: { display: true },#}
+{#                    tooltip: { enabled: true }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{#</div>#}
+{#</body>#}
+{#</html>#}
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Admin</title>
+    
+    <!-- Bootstrap & Chart.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Style général */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Style du titre */
+        .dashboard-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+            border-radius: 10px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Cartes statistiques */
+        .stat-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bg-blue { background: linear-gradient(135deg, #007bff, #00c6ff); }
+        .bg-green { background: linear-gradient(135deg, #28a745, #85dcb0); }
+        .bg-orange { background: linear-gradient(135deg, #fd7e14, #ffb347); }
+
+        /* Tableau */
+        .table-container {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #007bff, #4facfe);
+            color: white;
+            text-transform: uppercase;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        tr:nth-child(even) { background: #f9f9f9; }
+
+        tr:hover {
+            background: #007bff;
+            color: white;
+            transition: 0.3s;
+        }
+
+        /* Barre de progression */
+        .progress-container {
+            width: 100%;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 20px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 20px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Style des graphiques */
+        .chart-container {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <i class="bi bi-speedometer2"></i> Tableau de Bord Admin
+    </div>
+
+    <!-- Cartes Statistiques -->
+    <div class="row text-center mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="stat-card bg-blue">
+                <h3>Total Recenseurs</h3>
+                <h2>{{ total_recenseurs }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="stat-card bg-green">
+                <h3>Total Donateurs</h3>
+                <h2>{{ total_donateurs }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="stat-card bg-orange">
+                <h3>Total Personnes Vulnérables</h3>
+                <h2>{{ total_personnes_vulnerables }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des recenseurs -->
+    <div class="table-container">
+        <h2>Nombre de Personnes Recensées par Recenseur</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Recenseur</th>
+                    <th>Nombre de Personnes Recensées</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recenseur in recenseurs_counts %}
+                    <tr>
+                        <td>{{ recenseur.username }}</td>
+                        <td>{{ recenseur.count_personnes_recensees }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tableau des dons -->
+    <div class="table-container">
+        <h2>Progression des dons par Personne Vulnérable</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Progression des Dons</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for personne in personnes_vulnerables %}
+                    <tr>
+                        <td>{{ personne.last_name }}</td>
+                        <td>{{ personne.first_name }}</td>
+                        <td>
+                            <div class="progress-container">
+                                <div class="progress-bar" 
+                                     style="width: {{ personne.progression_percentage }}%;
+                                            background-color: {% if personne.progression_percentage == 100 %}#28a745{% else %}#ff6b6b{% endif %};">
+                                    {{ personne.progression_percentage|floatformat:2 }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="chart-container">
+        <h2>Distribution des Personnes Vulnérables par Région</h2>
+        <canvas id="regionChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const regionLabels = JSON.parse('{{ labels_top_regions|safe }}'.replace(/'/g, '"'));
+    const regionValues = JSON.parse('{{ values_top_regions|safe }}'.replace(/'/g, '"'));
+
+    new Chart(document.getElementById('regionChart'), {
+        type: 'bar',
+        data: {
+            labels: regionLabels,
+            datasets: [{
+                label: 'Personnes vulnérables',
+                data: regionValues,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+
+</body>
+</html>

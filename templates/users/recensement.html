@@ -1,0 +1,2588 @@
+{% extends 'base.html' %}
+
+{% block title %}Recenser une Personne{% endblock %}
+
+{% block content %}
+<div class="recensement-container">
+    <!-- En-tête avec icône et description -->
+    <div class="header-section">
+        <div class="header-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <h1 class="page-title">Recenser une Personne</h1>
+        <p class="page-subtitle">Enregistrez une nouvelle personne dans notre système de recensement</p>
+        <div class="progress-indicator">
+            <div class="step active">
+                <span class="step-number">1</span>
+                <span class="step-text">Informations</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-text">Validation</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire principal -->
+    <div class="form-container">
+        <form method="post" class="recensement-form" id="recensementForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Section Informations Personnelles -->
+<div class="form-section">
+    <div class="section-header">
+        <i class="fas fa-user section-icon"></i>
+        <h3 class="section-title">Informations Personnelles</h3>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                <i class="fas fa-signature"></i>
+                {{ form.first_name.label }} *
+            </label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <div class="error-message">
+                    {% for error in form.first_name.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                <i class="fas fa-user-tag"></i>
+                {{ form.last_name.label }} *
+            </label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <div class="error-message">
+                    {% for error in form.last_name.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}" class="form-label">
+                <i class="fas fa-envelope"></i>
+                {{ form.email.label }}
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="error-message">
+                    {% for error in form.email.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.telephone.id_for_label }}" class="form-label">
+                <i class="fas fa-phone"></i>
+                {{ form.telephone.label }}
+            </label>
+            {{ form.telephone }}
+            {% if form.telephone.errors %}
+                <div class="error-message">
+                    {% for error in form.telephone.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.age.id_for_label }}" class="form-label">
+                <i class="fas fa-birthday-cake"></i>
+                {{ form.age.label }} *
+            </label>
+            {{ form.age }}
+            {% if form.age.errors %}
+                <div class="error-message">
+                    {% for error in form.age.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.sexe.id_for_label }}" class="form-label">
+                <i class="fas fa-venus-mars"></i>
+                {{ form.sexe.label }} *
+            </label>
+            {{ form.sexe }}
+            {% if form.sexe.errors %}
+                <div class="error-message">
+                    {% for error in form.sexe.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+            <!-- Section Documents Disponibles -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-folder-open section-icon"></i>
+                    <h3 class="section-title">Documents Disponibles</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.photo.id_for_label }}" class="form-label">
+                            <i class="fas fa-camera"></i>
+                            {{ form.photo.label }}
+                        </label>
+                        <div class="file-upload-container photo">
+                            {{ form.photo }}
+                            <div class="file-upload-display">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">
+                                    <span class="upload-main">Cliquez pour ajouter une photo</span>
+                                    <span class="upload-sub">JPG, PNG, GIF (max 5MB)</span>
+                                </div>
+                            </div>
+                            <div class="file-preview" id="photoPreview" style="display: none;">
+                                <img class="preview-image" alt="Aperçu photo">
+                                <button type="button" class="remove-file" onclick="removeFile('photo')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% if form.photo.errors %}
+                            <div class="error-message">
+                                {% for error in form.photo.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.documents.id_for_label }}" class="form-label">
+                            <i class="fas fa-file-alt"></i>
+                            {{ form.document_principal.label }}
+                        </label>
+                        <div class="file-upload-container documents">
+                            {{ form.documents }}
+                            <div class="file-upload-display">
+                                <div class="upload-icon">
+                                    <i class="fas fa-folder-open"></i>
+                                </div>
+                                <div class="upload-text">
+                                    <span class="upload-main">Ajouter un document</span>
+                                    <span class="upload-sub">CNI, extrait de naissance, etc. (PDF, Images, Word)</span>
+                                </div>
+                            </div>
+                            <div class="files-list" id="documentsList"></div>
+                        </div>
+                        {% if form.documents.errors %}
+                            <div class="error-message">
+                                {% for error in form.documents.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            Vous pouvez ajouter : Carte Nationale d'Identité, extrait de naissance, certificat, etc.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Localisation -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-map-marker-alt section-icon"></i>
+                    <h3 class="section-title">Localisation</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.region.id_for_label }}" class="form-label">
+                            <i class="fas fa-map"></i>
+                            {{ form.region.label }}
+                        </label>
+                        {{ form.region }}
+                        {% if form.region.errors %}
+                            <div class="error-message">
+                                {% for error in form.region.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.region_geographique.id_for_label }}" class="form-label">
+                            <i class="fas fa-globe-africa"></i>
+                            {{ form.region_geographique.label }}
+                        </label>
+                        {{ form.region_geographique }}
+                        {% if form.region_geographique.errors %}
+                            <div class="error-message">
+                                {% for error in form.region_geographique.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Situation Familiale et Sociale -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-users section-icon"></i>
+                    <h3 class="section-title">Situation Familiale et Sociale</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.situation_matrimoniale.id_for_label }}" class="form-label">
+                            <i class="fas fa-heart"></i>
+                            {{ form.situation_matrimoniale.label }}
+                        </label>
+                        {{ form.situation_matrimoniale }}
+                        {% if form.situation_matrimoniale.errors %}
+                            <div class="error-message">
+                                {% for error in form.situation_matrimoniale.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.nombre_personnes_menage.id_for_label }}" class="form-label">
+                            <i class="fas fa-home"></i>
+                            {{ form.nombre_personnes_menage.label }}
+                        </label>
+                        {{ form.nombre_personnes_menage }}
+                        {% if form.nombre_personnes_menage.errors %}
+                            <div class="error-message">
+                                {% for error in form.nombre_personnes_menage.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.enfants_non_scolarises.id_for_label }}" class="form-label">
+                            <i class="fas fa-child"></i>
+                            {{ form.enfants_non_scolarises.label }}
+                        </label>
+                        {{ form.enfants_non_scolarises }}
+                        {% if form.enfants_non_scolarises.errors %}
+                            <div class="error-message">
+                                {% for error in form.enfants_non_scolarises.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.niveau_education.id_for_label }}" class="form-label">
+                            <i class="fas fa-graduation-cap"></i>
+                            {{ form.niveau_education.label }}
+                        </label>
+                        {{ form.niveau_education }}
+                        {% if form.niveau_education.errors %}
+                            <div class="error-message">
+                                {% for error in form.niveau_education.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Logement et Infrastructure -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-building section-icon"></i>
+                    <h3 class="section-title">Logement et Infrastructure</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.logement.id_for_label }}" class="form-label">
+                            <i class="fas fa-home"></i>
+                            {{ form.logement.label }}
+                        </label>
+                        {{ form.logement }}
+                        {% if form.logement.errors %}
+                            <div class="error-message">
+                                {% for error in form.logement.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.source_eau.id_for_label }}" class="form-label">
+                            <i class="fas fa-tint"></i>
+                            {{ form.source_eau.label }}
+                        </label>
+                        {{ form.source_eau }}
+                        {% if form.source_eau.errors %}
+                            <div class="error-message">
+                                {% for error in form.source_eau.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.type_sanitaires.id_for_label }}" class="form-label">
+                            <i class="fas fa-restroom"></i>
+                            {{ form.type_sanitaires.label }}
+                        </label>
+                        {{ form.type_sanitaires }}
+                        {% if form.type_sanitaires.errors %}
+                            <div class="error-message">
+                                {% for error in form.type_sanitaires.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.acces_electricite.id_for_label }}" class="form-label">
+                            <i class="fas fa-bolt"></i>
+                            {{ form.acces_electricite.label }}
+                        </label>
+                        {{ form.acces_electricite }}
+                        {% if form.acces_electricite.errors %}
+                            <div class="error-message">
+                                {% for error in form.acces_electricite.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Situation Économique -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-chart-line section-icon"></i>
+                    <h3 class="section-title">Situation Économique</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.emploi.id_for_label }}" class="form-label">
+                            <i class="fas fa-briefcase"></i>
+                            {{ form.emploi.label }}
+                        </label>
+                        {{ form.emploi }}
+                        {% if form.emploi.errors %}
+                            <div class="error-message">
+                                {% for error in form.emploi.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.revenu.id_for_label }}" class="form-label">
+                            <i class="fas fa-coins"></i>
+                            {{ form.revenu.label }}
+                        </label>
+                        {{ form.revenu }}
+                        {% if form.revenu.errors %}
+                            <div class="error-message">
+                                {% for error in form.revenu.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.montant_total_recu.id_for_label }}" class="form-label">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            {{ form.montant_total_recu.label }}
+                        </label>
+                        {{ form.montant_total_recu }}
+                        {% if form.montant_total_recu.errors %}
+                            <div class="error-message">
+                                {% for error in form.montant_total_recu.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Santé et Vulnérabilité -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-heart-pulse section-icon"></i>
+                    <h3 class="section-title">Santé et Vulnérabilité</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.etat_sante.id_for_label }}" class="form-label">
+                            <i class="fas fa-stethoscope"></i>
+                            {{ form.etat_sante.label }}
+                        </label>
+                        {{ form.etat_sante }}
+                        {% if form.etat_sante.errors %}
+                            <div class="error-message">
+                                {% for error in form.etat_sante.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.handicap.id_for_label }}" class="form-label">
+                            <i class="fas fa-wheelchair"></i>
+                            {{ form.handicap.label }}
+                        </label>
+                        {{ form.handicap }}
+                        {% if form.handicap.errors %}
+                            <div class="error-message">
+                                {% for error in form.handicap.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.auto_eval_vulnerabilite.id_for_label }}" class="form-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {{ form.auto_eval_vulnerabilite.label }}
+                        </label>
+                        {{ form.auto_eval_vulnerabilite }}
+                        {% if form.auto_eval_vulnerabilite.errors %}
+                            <div class="error-message">
+                                {% for error in form.auto_eval_vulnerabilite.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Commentaires -->
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-comment-alt section-icon"></i>
+                    <h3 class="section-title">Observations Complémentaires</h3>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="{{ form.commentaire.id_for_label }}" class="form-label">
+                        <i class="fas fa-pen"></i>
+                        {{ form.commentaire.label }}
+                    </label>
+                    {{ form.commentaire }}
+                    {% if form.commentaire.errors %}
+                        <div class="error-message">
+                            {% for error in form.commentaire.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="form-actions">
+                <a href="{% url 'liste_personnes_recensees' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour
+                </a>
+                <button type="reset" class="btn btn-outline">
+                    <i class="fas fa-undo"></i>
+                    Réinitialiser
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    <span class="btn-text">Enregistrer</span>
+                    <div class="btn-loader" style="display: none;">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #00bcd4;
+    --primary-dark: #0097a7;
+    --accent-color: #ff4081;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --background-light: #fafafa;
+    --background-white: #ffffff;
+    --border-color: #e0e0e0;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset et base */
+* {
+    box-sizing: border-box;
+}
+
+/* Conteneur principal */
+.recensement-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Section en-tête */
+.header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-medium);
+    animation: pulse 2s infinite;
+}
+
+.header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0 0 2rem 0;
+    line-height: 1.6;
+}
+
+/* Indicateur de progression */
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.step.active .step-number {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.step.active .step-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background: var(--border-color);
+    margin: 0 1rem;
+}
+
+/* Conteneur du formulaire */
+.form-container {
+    background: var(--background-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+/* Sections du formulaire */
+.form-section {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
+    animation: slideInLeft 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section:hover {
+    background: var(--background-light);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.section-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.1rem;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Grille du formulaire */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Groupes de formulaire */
+.form-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Labels */
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    transition: var(--transition);
+}
+
+.form-label i {
+    color: var(--primary-color);
+    width: 16px;
+    text-align: center;
+}
+
+/* Styling des champs Django */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: var(--background-white);
+    color: var(--text-primary);
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Select styling */
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Textarea */
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Upload de fichiers */
+.file-upload-container {
+    position: relative;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    background: var(--background-light);
+    min-height: 100px;
+}
+
+.file-upload-container:hover {
+    border-color: var(--primary-color);
+    background: rgba(0, 188, 212, 0.05);
+}
+
+.file-upload-container.dragover {
+    border-color: var(--primary-color);
+    background: rgba(0, 188, 212, 0.1);
+    transform: scale(1.02);
+}
+
+/* Masquer l'input file par défaut */
+.file-upload-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
+}
+
+.file-upload-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    pointer-events: none;
+}
+
+.upload-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin: 0 auto;
+}
+
+.upload-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.upload-main {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.upload-sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Aperçu photo */
+.file-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 1rem;
+}
+
+.preview-image {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    object-fit: cover;
+}
+
+.remove-file {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--error-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: var(--transition);
+}
+
+.remove-file:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+}
+
+/* Liste des fichiers */
+.files-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--background-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.file-item:hover {
+    border-color: var(--primary-color);
+    background: rgba(0, 188, 212, 0.05);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.file-icon {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.file-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.file-remove {
+    background: none;
+    border: none;
+    color: var(--error-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.file-remove:hover {
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* Texte d'aide */
+.help-text {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 188, 212, 0.05);
+    border: 1px solid rgba(0, 188, 212, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
+.help-text i {
+    color: var(--primary-color);
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+/* Upload pour photos */
+.file-upload-container.photo {
+    max-width: 300px;
+}
+
+/* Upload pour documents */
+.file-upload-container.documents {
+    min-height: 100px;
+}
+
+.file-upload-container.has-files .file-upload-display {
+    display: none;
+}
+.error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+    background: rgba(244, 67, 54, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--error-color);
+}
+
+.form-group:has(.error-message) input,
+.form-group:has(.error-message) select,
+.form-group:has(.error-message) textarea {
+    border-color: var(--error-color);
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+}
+
+/* Actions du formulaire */
+.form-actions {
+    padding: 2rem;
+    background: var(--background-light);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-width: 140px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background: var(--border-color);
+    transform: translateY(-2px);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+/* Loader du bouton */
+.btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Délais d'animation pour les sections */
+.form-section:nth-child(2) { animation-delay: 0.1s; }
+.form-section:nth-child(3) { animation-delay: 0.2s; }
+.form-section:nth-child(4) { animation-delay: 0.3s; }
+.form-section:nth-child(5) { animation-delay: 0.4s; }
+.form-section:nth-child(6) { animation-delay: 0.5s; }
+.form-section:nth-child(7) { animation-delay: 0.6s; }
+.form-section:nth-child(8) { animation-delay: 0.7s; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recensement-container {
+        padding: 1rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .progress-indicator {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .step-line {
+        width: 2px;
+        height: 30px;
+        margin: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .header-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .header-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des sections au scroll
+    const sections = document.querySelectorAll('.form-section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.transform = 'translateX(0)';
+                entry.target.style.opacity = '1';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    // Animation des inputs
+    const inputs = document.querySelectorAll('.form-group input, .form-group select, .form-group textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            const label = this.parentNode.querySelector('.form-label');
+            if (label) {
+                label.style.color = 'var(--primary-color)';
+                label.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            const label = this.parentNode.querySelector('.form-label');
+            if (label) {
+                label.style.color = 'var(--text-primary)';
+                label.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    // Gestion du formulaire
+    const form = document.getElementById('recensementForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoader = submitBtn.querySelector('.btn-loader');
+    
+    form.addEventListener('submit', function(e) {
+        // Animation du bouton de soumission
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'block';
+        submitBtn.disabled = true;
+        
+        // Note: En production, le formulaire sera soumis normalement
+        // Cette animation sera visible pendant le traitement côté serveur
+    });
+    
+    // Validation en temps réel
+    const requiredInputs = document.querySelectorAll('input[required], select[required]');
+    requiredInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.type === 'select-one' && this.value === '' || 
+                this.type !== 'select-one' && this.value.trim() === '') {
+                this.style.borderColor = 'var(--error-color)';
+                this.style.boxShadow = '0 0 0 3px rgba(244, 67, 54, 0.1)';
+            } else {
+                this.style.borderColor = 'var(--success-color)';
+                this.style.boxShadow = '0 0 0 3px rgba(76, 175, 80, 0.1)';
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.style.borderColor === 'rgb(244, 67, 54)') {
+                this.style.borderColor = 'var(--border-color)';
+                this.style.boxShadow = 'none';
+            }
+        });
+    });
+    
+    // Mise à jour de l'indicateur de progression
+    setTimeout(() => {
+        const step2 = document.querySelectorAll('.step')[1];
+        step2.classList.add('active');
+    }, 1000);
+    
+    // Gestion des uploads de fichiers
+    const photoInput = document.querySelector('input[name="photo"]');
+    const documentInput = document.querySelector('input[name="documents"]');
+    const photoPreview = document.getElementById('photoPreview');
+    const documentsList = document.getElementById('documentsList');
+    
+    // Upload photo
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    alert('La photo ne doit pas dépasser 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = photoPreview.querySelector('.preview-image');
+                    img.src = e.target.result;
+                    photoPreview.style.display = 'block';
+                    photoInput.closest('.file-upload-container').querySelector('.file-upload-display').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Upload document
+    if (documentInput) {
+        documentInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                updateDocumentDisplay(file);
+            }
+        });
+    }
+    
+    // Drag & Drop
+    const uploadContainers = document.querySelectorAll('.file-upload-container');
+    uploadContainers.forEach(container => {
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        container.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const input = this.querySelector('input[type="file"]');
+            const files = e.dataTransfer.files;
+            
+            if (input && files.length > 0) {
+                if (input.name === 'photo' && files.length === 1) {
+                    input.files = files;
+                    input.dispatchEvent(new Event('change'));
+                } else if (input.name === 'document_principal' && files.length === 1) {
+                    input.files = files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    });
+    
+    function updateDocumentDisplay(file) {
+        if (!documentsList) return;
+        
+        documentsList.innerHTML = '';
+        const container = documentInput.closest('.file-upload-container');
+        
+        if (file) {
+            container.classList.add('has-files');
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon">
+                        <i class="fas ${getFileIcon(file.type)}"></i>
+                    </div>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+                <button type="button" class="file-remove" onclick="removeDocument()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            documentsList.appendChild(fileItem);
+        } else {
+            container.classList.remove('has-files');
+        }
+    }
+    
+    function getFileIcon(fileType) {
+        if (fileType.includes('pdf')) return 'fa-file-pdf';
+        if (fileType.includes('image')) return 'fa-file-image';
+        if (fileType.includes('word') || fileType.includes('document')) return 'fa-file-word';
+        return 'fa-file';
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Fonctions globales pour les boutons de suppression
+    window.removeFile = function(type) {
+        if (type === 'photo' && photoInput) {
+            photoInput.value = '';
+            photoPreview.style.display = 'none';
+            photoInput.closest('.file-upload-container').querySelector('.file-upload-display').style.display = 'flex';
+        }
+    };
+    
+    window.removeDocument = function() {
+        if (documentInput) {
+            documentInput.value = '';
+            updateDocumentDisplay(null);
+        }
+    };
+    
+    // Animation d'entrée séquentielle des sections
+    sections.forEach((section, index) => {
+        section.style.animationDelay = (index * 0.1) + 's';
+    });
+});
+</script>
+
+{% endblock %}
+
+
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Recenser une Personne{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div class="recensement-container">#}
+{#    <!-- En-tête avec icône et description -->#}
+{#    <div class="header-section">#}
+{#        <div class="header-icon">#}
+{#            <i class="fas fa-user-plus"></i>#}
+{#        </div>#}
+{#        <h1 class="page-title">Recenser une Personne</h1>#}
+{#        <p class="page-subtitle">Enregistrez une nouvelle personne dans notre système de recensement</p>#}
+{#        <div class="progress-indicator">#}
+{#            <div class="step active">#}
+{#                <span class="step-number">1</span>#}
+{#                <span class="step-text">Informations</span>#}
+{#            </div>#}
+{#            <div class="step-line"></div>#}
+{#            <div class="step">#}
+{#                <span class="step-number">2</span>#}
+{#                <span class="step-text">Validation</span>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#    <!-- Formulaire principal -->#}
+{#    <div class="form-container">#}
+{#        <form method="post" class="recensement-form" id="recensementForm">#}
+{#            {% csrf_token %}#}
+{#            #}
+{#            <!-- Section Informations Personnelles -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-user section-icon"></i>#}
+{#                    <h3 class="section-title">Informations Personnelles</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.first_name.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-signature"></i>#}
+{#                            {{ form.first_name.label }} *#}
+{#                        </label>#}
+{#                        {{ form.first_name }}#}
+{#                        {% if form.first_name.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.first_name.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.last_name.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-user-tag"></i>#}
+{#                            {{ form.last_name.label }} *#}
+{#                        </label>#}
+{#                        {{ form.last_name }}#}
+{#                        {% if form.last_name.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.last_name.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.age.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-birthday-cake"></i>#}
+{#                            {{ form.age.label }} *#}
+{#                        </label>#}
+{#                        {{ form.age }}#}
+{#                        {% if form.age.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.age.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.sexe.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-venus-mars"></i>#}
+{#                            {{ form.sexe.label }} *#}
+{#                        </label>#}
+{#                        {{ form.sexe }}#}
+{#                        {% if form.sexe.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.sexe.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Localisation -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-map-marker-alt section-icon"></i>#}
+{#                    <h3 class="section-title">Localisation</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.region.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-map"></i>#}
+{#                            {{ form.region.label }}#}
+{#                        </label>#}
+{#                        {{ form.region }}#}
+{#                        {% if form.region.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.region.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.region_geographique.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-globe-africa"></i>#}
+{#                            {{ form.region_geographique.label }}#}
+{#                        </label>#}
+{#                        {{ form.region_geographique }}#}
+{#                        {% if form.region_geographique.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.region_geographique.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Situation Familiale et Sociale -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-users section-icon"></i>#}
+{#                    <h3 class="section-title">Situation Familiale et Sociale</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.situation_matrimoniale.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-heart"></i>#}
+{#                            {{ form.situation_matrimoniale.label }}#}
+{#                        </label>#}
+{#                        {{ form.situation_matrimoniale }}#}
+{#                        {% if form.situation_matrimoniale.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.situation_matrimoniale.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.nombre_personnes_menage.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-home"></i>#}
+{#                            {{ form.nombre_personnes_menage.label }}#}
+{#                        </label>#}
+{#                        {{ form.nombre_personnes_menage }}#}
+{#                        {% if form.nombre_personnes_menage.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.nombre_personnes_menage.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.enfants_non_scolarises.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-child"></i>#}
+{#                            {{ form.enfants_non_scolarises.label }}#}
+{#                        </label>#}
+{#                        {{ form.enfants_non_scolarises }}#}
+{#                        {% if form.enfants_non_scolarises.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.enfants_non_scolarises.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.niveau_education.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-graduation-cap"></i>#}
+{#                            {{ form.niveau_education.label }}#}
+{#                        </label>#}
+{#                        {{ form.niveau_education }}#}
+{#                        {% if form.niveau_education.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.niveau_education.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Logement et Infrastructure -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-building section-icon"></i>#}
+{#                    <h3 class="section-title">Logement et Infrastructure</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.logement.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-home"></i>#}
+{#                            {{ form.logement.label }}#}
+{#                        </label>#}
+{#                        {{ form.logement }}#}
+{#                        {% if form.logement.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.logement.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.source_eau.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-tint"></i>#}
+{#                            {{ form.source_eau.label }}#}
+{#                        </label>#}
+{#                        {{ form.source_eau }}#}
+{#                        {% if form.source_eau.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.source_eau.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.type_sanitaires.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-restroom"></i>#}
+{#                            {{ form.type_sanitaires.label }}#}
+{#                        </label>#}
+{#                        {{ form.type_sanitaires }}#}
+{#                        {% if form.type_sanitaires.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.type_sanitaires.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.acces_electricite.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-bolt"></i>#}
+{#                            {{ form.acces_electricite.label }}#}
+{#                        </label>#}
+{#                        {{ form.acces_electricite }}#}
+{#                        {% if form.acces_electricite.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.acces_electricite.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Situation Économique -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-chart-line section-icon"></i>#}
+{#                    <h3 class="section-title">Situation Économique</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.emploi.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-briefcase"></i>#}
+{#                            {{ form.emploi.label }}#}
+{#                        </label>#}
+{#                        {{ form.emploi }}#}
+{#                        {% if form.emploi.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.emploi.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.revenu.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-coins"></i>#}
+{#                            {{ form.revenu.label }}#}
+{#                        </label>#}
+{#                        {{ form.revenu }}#}
+{#                        {% if form.revenu.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.revenu.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.montant_total_recu.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-hand-holding-usd"></i>#}
+{#                            {{ form.montant_total_recu.label }}#}
+{#                        </label>#}
+{#                        {{ form.montant_total_recu }}#}
+{#                        {% if form.montant_total_recu.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.montant_total_recu.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Santé et Vulnérabilité -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-heart-pulse section-icon"></i>#}
+{#                    <h3 class="section-title">Santé et Vulnérabilité</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-grid">#}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.etat_sante.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-stethoscope"></i>#}
+{#                            {{ form.etat_sante.label }}#}
+{#                        </label>#}
+{#                        {{ form.etat_sante }}#}
+{#                        {% if form.etat_sante.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.etat_sante.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.handicap.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-wheelchair"></i>#}
+{#                            {{ form.handicap.label }}#}
+{#                        </label>#}
+{#                        {{ form.handicap }}#}
+{#                        {% if form.handicap.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.handicap.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    #}
+{#                    <div class="form-group">#}
+{#                        <label for="{{ form.auto_eval_vulnerabilite.id_for_label }}" class="form-label">#}
+{#                            <i class="fas fa-exclamation-triangle"></i>#}
+{#                            {{ form.auto_eval_vulnerabilite.label }}#}
+{#                        </label>#}
+{#                        {{ form.auto_eval_vulnerabilite }}#}
+{#                        {% if form.auto_eval_vulnerabilite.errors %}#}
+{#                            <div class="error-message">#}
+{#                                {% for error in form.auto_eval_vulnerabilite.errors %}#}
+{#                                    <span>{{ error }}</span>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Section Commentaires -->#}
+{#            <div class="form-section">#}
+{#                <div class="section-header">#}
+{#                    <i class="fas fa-comment-alt section-icon"></i>#}
+{#                    <h3 class="section-title">Observations Complémentaires</h3>#}
+{#                </div>#}
+{#                #}
+{#                <div class="form-group full-width">#}
+{#                    <label for="{{ form.commentaire.id_for_label }}" class="form-label">#}
+{#                        <i class="fas fa-pen"></i>#}
+{#                        {{ form.commentaire.label }}#}
+{#                    </label>#}
+{#                    {{ form.commentaire }}#}
+{#                    {% if form.commentaire.errors %}#}
+{#                        <div class="error-message">#}
+{#                            {% for error in form.commentaire.errors %}#}
+{#                                <span>{{ error }}</span>#}
+{#                            {% endfor %}#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Boutons d'action -->#}
+{#            <div class="form-actions">#}
+{#                <a href="{% url 'liste_personnes_recensees' %}" class="btn btn-secondary">#}
+{#                    <i class="fas fa-arrow-left"></i>#}
+{#                    Retour#}
+{#                </a>#}
+{#                <button type="reset" class="btn btn-outline">#}
+{#                    <i class="fas fa-undo"></i>#}
+{#                    Réinitialiser#}
+{#                </button>#}
+{#                <button type="submit" class="btn btn-primary" id="submitBtn">#}
+{#                    <i class="fas fa-save"></i>#}
+{#                    <span class="btn-text">Enregistrer</span>#}
+{#                    <div class="btn-loader" style="display: none;">#}
+{#                        <div class="spinner"></div>#}
+{#                    </div>#}
+{#                </button>#}
+{#            </div>#}
+{#        </form>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<style>#}
+{#/* Variables CSS */#}
+{#:root {#}
+{#    --primary-color: #00bcd4;#}
+{#    --primary-dark: #0097a7;#}
+{#    --accent-color: #ff4081;#}
+{#    --success-color: #4caf50;#}
+{#    --warning-color: #ff9800;#}
+{#    --error-color: #f44336;#}
+{#    --text-primary: #212121;#}
+{#    --text-secondary: #757575;#}
+{#    --background-light: #fafafa;#}
+{#    --background-white: #ffffff;#}
+{#    --border-color: #e0e0e0;#}
+{#    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);#}
+{#    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);#}
+{#    --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.2);#}
+{#    --border-radius: 12px;#}
+{#    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);#}
+{#}#}
+{##}
+{#/* Reset et base */#}
+{#* {#}
+{#    box-sizing: border-box;#}
+{#}#}
+{##}
+{#/* Conteneur principal */#}
+{#.recensement-container {#}
+{#    max-width: 1000px;#}
+{#    margin: 0 auto;#}
+{#    padding: 20px;#}
+{#    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);#}
+{#}#}
+{##}
+{#/* Section en-tête */#}
+{#.header-section {#}
+{#    text-align: center;#}
+{#    margin-bottom: 3rem;#}
+{#    position: relative;#}
+{#}#}
+{##}
+{#.header-icon {#}
+{#    width: 80px;#}
+{#    height: 80px;#}
+{#    margin: 0 auto 1.5rem;#}
+{#    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));#}
+{#    border-radius: 50%;#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    justify-content: center;#}
+{#    box-shadow: var(--shadow-medium);#}
+{#    animation: pulse 2s infinite;#}
+{#}#}
+{##}
+{#.header-icon i {#}
+{#    font-size: 2rem;#}
+{#    color: white;#}
+{#}#}
+{##}
+{#.page-title {#}
+{#    font-size: 2.5rem;#}
+{#    font-weight: 700;#}
+{#    color: var(--text-primary);#}
+{#    margin: 0 0 0.5rem 0;#}
+{#    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));#}
+{#    -webkit-background-clip: text;#}
+{#    -webkit-text-fill-color: transparent;#}
+{#    background-clip: text;#}
+{#}#}
+{##}
+{#.page-subtitle {#}
+{#    font-size: 1.1rem;#}
+{#    color: var(--text-secondary);#}
+{#    margin: 0 0 2rem 0;#}
+{#    line-height: 1.6;#}
+{#}#}
+{##}
+{#/* Indicateur de progression */#}
+{#.progress-indicator {#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    justify-content: center;#}
+{#    margin: 2rem 0;#}
+{#}#}
+{##}
+{#.step {#}
+{#    display: flex;#}
+{#    flex-direction: column;#}
+{#    align-items: center;#}
+{#    gap: 0.5rem;#}
+{#}#}
+{##}
+{#.step-number {#}
+{#    width: 40px;#}
+{#    height: 40px;#}
+{#    border-radius: 50%;#}
+{#    background: var(--border-color);#}
+{#    color: var(--text-secondary);#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    justify-content: center;#}
+{#    font-weight: 600;#}
+{#    transition: var(--transition);#}
+{#}#}
+{##}
+{#.step.active .step-number {#}
+{#    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));#}
+{#    color: white;#}
+{#    transform: scale(1.1);#}
+{#}#}
+{##}
+{#.step-text {#}
+{#    font-size: 0.9rem;#}
+{#    color: var(--text-secondary);#}
+{#    font-weight: 500;#}
+{#}#}
+{##}
+{#.step.active .step-text {#}
+{#    color: var(--primary-color);#}
+{#    font-weight: 600;#}
+{#}#}
+{##}
+{#.step-line {#}
+{#    width: 60px;#}
+{#    height: 2px;#}
+{#    background: var(--border-color);#}
+{#    margin: 0 1rem;#}
+{#}#}
+{##}
+{#/* Conteneur du formulaire */#}
+{#.form-container {#}
+{#    background: var(--background-white);#}
+{#    border-radius: var(--border-radius);#}
+{#    box-shadow: var(--shadow-light);#}
+{#    overflow: hidden;#}
+{#    border: 1px solid var(--border-color);#}
+{#}#}
+{##}
+{#/* Sections du formulaire */#}
+{#.form-section {#}
+{#    padding: 2rem;#}
+{#    border-bottom: 1px solid var(--border-color);#}
+{#    transition: var(--transition);#}
+{#    animation: slideInLeft 0.6s ease-out;#}
+{#    animation-fill-mode: both;#}
+{#}#}
+{##}
+{#.form-section:last-child {#}
+{#    border-bottom: none;#}
+{#}#}
+{##}
+{#.form-section:hover {#}
+{#    background: var(--background-light);#}
+{#}#}
+{##}
+{#.section-header {#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    margin-bottom: 1.5rem;#}
+{#    padding-bottom: 1rem;#}
+{#    border-bottom: 2px solid var(--border-color);#}
+{#}#}
+{##}
+{#.section-icon {#}
+{#    width: 40px;#}
+{#    height: 40px;#}
+{#    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));#}
+{#    color: white;#}
+{#    border-radius: 50%;#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    justify-content: center;#}
+{#    margin-right: 1rem;#}
+{#    font-size: 1.1rem;#}
+{#}#}
+{##}
+{#.section-title {#}
+{#    font-size: 1.3rem;#}
+{#    font-weight: 600;#}
+{#    color: var(--text-primary);#}
+{#    margin: 0;#}
+{#}#}
+{##}
+{#/* Grille du formulaire */#}
+{#.form-grid {#}
+{#    display: grid;#}
+{#    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));#}
+{#    gap: 1.5rem;#}
+{#    align-items: start;#}
+{#}#}
+{##}
+{#/* Groupes de formulaire */#}
+{#.form-group {#}
+{#    position: relative;#}
+{#    display: flex;#}
+{#    flex-direction: column;#}
+{#}#}
+{##}
+{#.form-group.full-width {#}
+{#    grid-column: 1 / -1;#}
+{#}#}
+{##}
+{#/* Labels */#}
+{#.form-label {#}
+{#    display: flex;#}
+{#    align-items: center;#}
+{#    gap: 0.5rem;#}
+{#    font-size: 0.9rem;#}
+{#    font-weight: 600;#}
+{#    color: var(--text-primary);#}
+{#    margin-bottom: 0.5rem;#}
+{#    transition: var(--transition);#}
+{#}#}
+{##}
+{#.form-label i {#}
+{#    color: var(--primary-color);#}
+{#    width: 16px;#}
+{#    text-align: center;#}
+{#}#}
+{##}
+{#/* Styling des champs Django */#}
+{#.form-group input,#}
+{#.form-group select,#}
+{#.form-group textarea {#}
+{#    width: 100%;#}
+{#    padding: 1rem;#}
+{#    border: 2px solid var(--border-color);#}
+{#    border-radius: var(--border-radius);#}
+{#    font-size: 1rem;#}
+{#    background: var(--background-white);#}
+{#    color: var(--text-primary);#}
+{#    transition: var(--transition);#}
+{#    font-family: inherit;#}
+{#}#}
+{##}
+{#.form-group input:focus,#}
+{#.form-group select:focus,#}
+{#.form-group textarea:focus {#}
+{#    outline: none;#}
+{#    border-color: var(--primary-color);#}
+{#    box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);#}
+{#    transform: translateY(-1px);#}
+{#}#}
+{##}
+{#.form-group input::placeholder,#}
+{#.form-group textarea::placeholder {#}
+{#    color: var(--text-secondary);#}
+{#    opacity: 0.7;#}
+{#}#}
+{##}
+{#/* Select styling */#}
+{#.form-group select {#}
+{#    appearance: none;#}
+{#    -webkit-appearance: none;#}
+{#    -moz-appearance: none;#}
+{#    cursor: pointer;#}
+{#    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");#}
+{#    background-position: right 0.75rem center;#}
+{#    background-repeat: no-repeat;#}
+{#    background-size: 1.5em 1.5em;#}
+{#    padding-right: 2.5rem;#}
+{#}#}
+{##}
+{#/* Textarea */#}
+{#.form-group textarea {#}
+{#    resize: vertical;#}
+{#    min-height: 120px;#}
+{#}#}
+{##}
+{#/* Messages d'erreur */#}
+{#.error-message {#}
+{#    color: var(--error-color);#}
+{#    font-size: 0.9rem;#}
+{#    margin-top: 0.25rem;#}
+{#    padding: 0.5rem;#}
+{#    background: rgba(244, 67, 54, 0.1);#}
+{#    border-radius: 6px;#}
+{#    border-left: 3px solid var(--error-color);#}
+{#}#}
+{##}
+{#.form-group:has(.error-message) input,#}
+{#.form-group:has(.error-message) select,#}
+{#.form-group:has(.error-message) textarea {#}
+{#    border-color: var(--error-color);#}
+{#    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);#}
+{#}#}
+{##}
+{#/* Actions du formulaire */#}
+{#.form-actions {#}
+{#    padding: 2rem;#}
+{#    background: var(--background-light);#}
+{#    display: flex;#}
+{#    gap: 1rem;#}
+{#    justify-content: flex-end;#}
+{#    border-top: 1px solid var(--border-color);#}
+{#}#}
+{##}
+{#/* Boutons */#}
+{#.btn {#}
+{#    display: inline-flex;#}
+{#    align-items: center;#}
+{#    justify-content: center;#}
+{#    gap: 0.5rem;#}
+{#    padding: 1rem 2rem;#}
+{#    border: none;#}
+{#    border-radius: var(--border-radius);#}
+{#    font-size: 1rem;#}
+{#    font-weight: 600;#}
+{#    text-decoration: none;#}
+{#    cursor: pointer;#}
+{#    transition: var(--transition);#}
+{#    position: relative;#}
+{#    overflow: hidden;#}
+{#    min-width: 140px;#}
+{#}#}
+{##}
+{#.btn-primary {#}
+{#    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));#}
+{#    color: white;#}
+{#    box-shadow: var(--shadow-light);#}
+{#}#}
+{##}
+{#.btn-primary:hover {#}
+{#    transform: translateY(-2px);#}
+{#    box-shadow: var(--shadow-medium);#}
+{#    color: white;#}
+{#    text-decoration: none;#}
+{#}#}
+{##}
+{#.btn-secondary {#}
+{#    background: #6c757d;#}
+{#    color: white;#}
+{#}#}
+{##}
+{#.btn-secondary:hover {#}
+{#    background: #5a6268;#}
+{#    transform: translateY(-2px);#}
+{#    color: white;#}
+{#    text-decoration: none;#}
+{#}#}
+{##}
+{#.btn-outline {#}
+{#    background: transparent;#}
+{#    color: var(--text-secondary);#}
+{#    border: 2px solid var(--border-color);#}
+{#}#}
+{##}
+{#.btn-outline:hover {#}
+{#    background: var(--border-color);#}
+{#    transform: translateY(-2px);#}
+{#    color: var(--text-primary);#}
+{#    text-decoration: none;#}
+{#}#}
+{##}
+{#/* Loader du bouton */#}
+{#.btn-loader {#}
+{#    position: absolute;#}
+{#    top: 50%;#}
+{#    left: 50%;#}
+{#    transform: translate(-50%, -50%);#}
+{#}#}
+{##}
+{#.spinner {#}
+{#    width: 20px;#}
+{#    height: 20px;#}
+{#    border: 2px solid transparent;#}
+{#    border-top: 2px solid white;#}
+{#    border-radius: 50%;#}
+{#    animation: spin 1s linear infinite;#}
+{#}#}
+{##}
+{#/* Animations */#}
+{#@keyframes fadeInUp {#}
+{#    from {#}
+{#        opacity: 0;#}
+{#        transform: translateY(30px);#}
+{#    }#}
+{#    to {#}
+{#        opacity: 1;#}
+{#        transform: translateY(0);#}
+{#    }#}
+{#}#}
+{##}
+{#@keyframes slideInLeft {#}
+{#    from {#}
+{#        opacity: 0;#}
+{#        transform: translateX(-20px);#}
+{#    }#}
+{#    to {#}
+{#        opacity: 1;#}
+{#        transform: translateX(0);#}
+{#    }#}
+{#}#}
+{##}
+{#@keyframes pulse {#}
+{#    0%, 100% {#}
+{#        transform: scale(1);#}
+{#    }#}
+{#    50% {#}
+{#        transform: scale(1.05);#}
+{#    }#}
+{#}#}
+{##}
+{#@keyframes spin {#}
+{#    to {#}
+{#        transform: rotate(360deg);#}
+{#    }#}
+{#}#}
+{##}
+{#/* Délais d'animation pour les sections */#}
+{#.form-section:nth-child(2) { animation-delay: 0.1s; }#}
+{#.form-section:nth-child(3) { animation-delay: 0.2s; }#}
+{#.form-section:nth-child(4) { animation-delay: 0.3s; }#}
+{#.form-section:nth-child(5) { animation-delay: 0.4s; }#}
+{#.form-section:nth-child(6) { animation-delay: 0.5s; }#}
+{#.form-section:nth-child(7) { animation-delay: 0.6s; }#}
+{#.form-section:nth-child(8) { animation-delay: 0.7s; }#}
+{##}
+{#/* Responsive */#}
+{#@media (max-width: 768px) {#}
+{#    .recensement-container {#}
+{#        padding: 1rem;#}
+{#    }#}
+{#    #}
+{#    .page-title {#}
+{#        font-size: 2rem;#}
+{#    }#}
+{#    #}
+{#    .form-grid {#}
+{#        grid-template-columns: 1fr;#}
+{#    }#}
+{#    #}
+{#    .form-actions {#}
+{#        flex-direction: column;#}
+{#        padding: 1.5rem;#}
+{#    }#}
+{#    #}
+{#    .btn {#}
+{#        width: 100%;#}
+{#        justify-content: center;#}
+{#    }#}
+{#    #}
+{#    .progress-indicator {#}
+{#        flex-direction: column;#}
+{#        gap: 1rem;#}
+{#    }#}
+{#    #}
+{#    .step-line {#}
+{#        width: 2px;#}
+{#        height: 30px;#}
+{#        margin: 0;#}
+{#    }#}
+{#}#}
+{##}
+{#@media (max-width: 480px) {#}
+{#    .form-section {#}
+{#        padding: 1.5rem;#}
+{#    }#}
+{#    #}
+{#    .header-icon {#}
+{#        width: 60px;#}
+{#        height: 60px;#}
+{#    }#}
+{#    #}
+{#    .header-icon i {#}
+{#        font-size: 1.5rem;#}
+{#    }#}
+{#    #}
+{#    .page-title {#}
+{#        font-size: 1.8rem;#}
+{#    }#}
+{#}#}
+{#</style>#}
+{##}
+{#<script>#}
+{#document.addEventListener('DOMContentLoaded', function() {#}
+{#    // Animation des sections au scroll#}
+{#    const sections = document.querySelectorAll('.form-section');#}
+{#    const observer = new IntersectionObserver((entries) => {#}
+{#        entries.forEach(entry => {#}
+{#            if (entry.isIntersecting) {#}
+{#                entry.target.style.transform = 'translateX(0)';#}
+{#                entry.target.style.opacity = '1';#}
+{#            }#}
+{#        });#}
+{#    }, { threshold: 0.1 });#}
+{#    #}
+{#    sections.forEach(section => {#}
+{#        observer.observe(section);#}
+{#    });#}
+{#    #}
+{#    // Animation des inputs#}
+{#    const inputs = document.querySelectorAll('.form-group input, .form-group select, .form-group textarea');#}
+{#    inputs.forEach(input => {#}
+{#        input.addEventListener('focus', function() {#}
+{#            const label = this.parentNode.querySelector('.form-label');#}
+{#            if (label) {#}
+{#                label.style.color = 'var(--primary-color)';#}
+{#                label.style.transform = 'translateY(-2px)';#}
+{#            }#}
+{#        });#}
+{#        #}
+{#        input.addEventListener('blur', function() {#}
+{#            const label = this.parentNode.querySelector('.form-label');#}
+{#            if (label) {#}
+{#                label.style.color = 'var(--text-primary)';#}
+{#                label.style.transform = 'translateY(0)';#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#    #}
+{#    // Gestion du formulaire#}
+{#    const form = document.getElementById('recensementForm');#}
+{#    const submitBtn = document.getElementById('submitBtn');#}
+{#    const btnText = submitBtn.querySelector('.btn-text');#}
+{#    const btnLoader = submitBtn.querySelector('.btn-loader');#}
+{#    #}
+{#    form.addEventListener('submit', function(e) {#}
+{#        // Animation du bouton de soumission#}
+{#        btnText.style.display = 'none';#}
+{#        btnLoader.style.display = 'block';#}
+{#        submitBtn.disabled = true;#}
+{#        #}
+{#        // Note: En production, le formulaire sera soumis normalement#}
+{#        // Cette animation sera visible pendant le traitement côté serveur#}
+{#    });#}
+{#    #}
+{#    // Validation en temps réel#}
+{#    const requiredInputs = document.querySelectorAll('input[required], select[required]');#}
+{#    requiredInputs.forEach(input => {#}
+{#        input.addEventListener('blur', function() {#}
+{#            if (this.type === 'select-one' && this.value === '' || #}
+{#                this.type !== 'select-one' && this.value.trim() === '') {#}
+{#                this.style.borderColor = 'var(--error-color)';#}
+{#                this.style.boxShadow = '0 0 0 3px rgba(244, 67, 54, 0.1)';#}
+{#            } else {#}
+{#                this.style.borderColor = 'var(--success-color)';#}
+{#                this.style.boxShadow = '0 0 0 3px rgba(76, 175, 80, 0.1)';#}
+{#            }#}
+{#        });#}
+{#        #}
+{#        input.addEventListener('input', function() {#}
+{#            if (this.style.borderColor === 'rgb(244, 67, 54)') {#}
+{#                this.style.borderColor = 'var(--border-color)';#}
+{#                this.style.boxShadow = 'none';#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#    #}
+{#    // Mise à jour de l'indicateur de progression#}
+{#    setTimeout(() => {#}
+{#        const step2 = document.querySelectorAll('.step')[1];#}
+{#        step2.classList.add('active');#}
+{#    }, 1000);#}
+{#    #}
+{#    // Animation d'entrée séquentielle des sections#}
+{#    sections.forEach((section, index) => {#}
+{#        section.style.animationDelay = (index * 0.1) + 's';#}
+{#    });#}
+{#});#}
+{#</script>#}
+{##}
+{#{% endblock %}#}
+
+
+
+
+
+
+
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Recenser une Personne{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container">#}
+{#    <h1 class="page-title">Recenser une Personne</h1>#}
+{#    <p>Utilisez ce formulaire pour enregistrer une nouvelle personne.</p>#}
+{##}
+{#    <form method="post" class="recensement-form">#}
+{#        {% csrf_token %}#}
+{#        {{ form.as_p }}#}
+{##}
+{#        <button type="submit" class="btn btn-primary">Enregistrer</button>#}
+{#        <a href="{% url 'liste_personnes_recensees' %}" class="btn btn-secondary">Retour</a>#}
+{#    </form>#}
+{#</div>#}
+{##}
+{#<style>#}
+{#/* Conteneur principal */#}
+{#.container {#}
+{#    margin: 20px auto;#}
+{#    max-width: 700px;#}
+{#    padding: 20px;#}
+{#    background: #fff;#}
+{#    border-radius: 8px;#}
+{#    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);#}
+{#}#}
+{##}
+{#.page-title {#}
+{#    font-size: 1.8rem;#}
+{#    margin-bottom: 20px;#}
+{#    color: #333;#}
+{#    text-align: center;#}
+{#}#}
+{##}
+{#/* Formulaire */#}
+{#.recensement-form {#}
+{#    width: 100%;#}
+{#    animation: fadeIn 0.5s ease-out;#}
+{#}#}
+{##}
+{#.recensement-form p {#}
+{#    margin-bottom: 15px;#}
+{#    font-size: 1rem;#}
+{#    color: #333;#}
+{#}#}
+{##}
+{#input, select, textarea {#}
+{#    width: 100%;#}
+{#    padding: 10px;#}
+{#    font-size: 1rem;#}
+{#    border: 1px solid #ddd;#}
+{#    border-radius: 5px;#}
+{#    margin-bottom: 15px;#}
+{#    box-sizing: border-box;#}
+{#    transition: border-color 0.3s ease;#}
+{#}#}
+{##}
+{#input:focus, select:focus, textarea:focus {#}
+{#    border-color: #3498db;#}
+{#    outline: none;#}
+{#}#}
+{##}
+{#/* Boutons */#}
+{#.btn {#}
+{#    display: inline-block;#}
+{#    padding: 10px 20px;#}
+{#    font-size: 1rem;#}
+{#    border-radius: 5px;#}
+{#    color: #fff;#}
+{#    text-decoration: none;#}
+{#    text-align: center;#}
+{#    transition: background-color 0.3s ease;#}
+{#}#}
+{##}
+{#.btn-primary {#}
+{#    background-color: #007bff;#}
+{#    border: none;#}
+{#}#}
+{##}
+{#.btn-primary:hover {#}
+{#    background-color: #0056b3;#}
+{#}#}
+{##}
+{#.btn-secondary {#}
+{#    background-color: #6c757d;#}
+{#    border: none;#}
+{#    margin-left: 10px;#}
+{#}#}
+{##}
+{#.btn-secondary:hover {#}
+{#    background-color: #5a6268;#}
+{#}#}
+{##}
+{#/* Animation */#}
+{#@keyframes fadeIn {#}
+{#    from {#}
+{#        opacity: 0;#}
+{#        transform: translateY(20px);#}
+{#    }#}
+{#    to {#}
+{#        opacity: 1;#}
+{#        transform: translateY(0);#}
+{#    }#}
+{#}#}
+{##}
+{#@media (max-width: 480px) {#}
+{#    .container {#}
+{#        padding: 15px;#}
+{#    }#}
+{##}
+{#    .page-title {#}
+{#        font-size: 1.5rem;#}
+{#    }#}
+{##}
+{#    .btn {#}
+{#        width: 100%;#}
+{#        margin-bottom: 10px;#}
+{#    }#}
+{#}#}
+{#</style>#}
+{#{% endblock %}#}

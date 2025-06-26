@@ -1,0 +1,28 @@
+{#{% extends "admin/base_site.html" %}#}
+{##}
+{#{% block content %}#}
+{#<h1>Bienvenue dans l'administration de LanfiaSave</h1>#}
+{##}
+{#<div>#}
+{#    <p>#}
+{#        <a href="{% url 'admin_dashboard' %}" class="button">Accéder au Tableau de bord</a>#}
+{#    </p>#}
+{#</div>#}
+{##}
+{#{% endblock %}#}
+
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Bienvenue dans l'administration de LanfiaSave</h1>
+
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'admin_dashboard' %}" class="button" style="padding: 8px 16px; background-color: #0d6efd; color: white; border-radius: 5px; text-decoration: none;">
+        📊 Accéder au Tableau de bord
+    </a>
+    <a href="{% url 'admin_personnes_carousel' %}" class="button" style="padding: 8px 16px; background-color: #198754; color: white; border-radius: 5px; text-decoration: none; margin-left: 10px;">
+        👥 Valider les personnes recensées
+    </a>
+</div>
+
+{% endblock %}

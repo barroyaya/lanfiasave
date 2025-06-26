@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Notifications - LanfiaSave{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <h1>Mes Notifications</h1>
+
+    {% if notifications %}
+        <div class="notifications-list">
+            {% for notification in notifications %}
+                <div class="notification-card {% if not notification.read %}unread{% endif %}">
+                    <div class="notification-header">
+                        <span class="notification-date">{{ notification.created_at|date }}</span>
+                        {% if not notification.read %}
+                            <span class="notification-status">Non lu</span>
+                        {% endif %}
+                    </div>
+                    <div class="notification-body">
+                        <p>{{ notification.message }}</p>
+                    </div>
+                    <div class="notification-footer">
+                        {% if not notification.read %}
+{#                            <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-read">Marquer comme lu</a>#}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-notifications">Aucune notification pour le moment.</p>
+    {% endif %}
+</div>
+
+<!-- Styles CSS Avancés pour la Page de Notifications -->
+<style>
+    /* --- Styles Généraux --- */
+    .notifications-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .notifications-container:hover {
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+        transform: translateY(-5px);
+    }
+
+    .notifications-container h1 {
+        text-align: center;
+        color: #2d3748;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    /* --- Liste des Notifications --- */
+    .notifications-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* --- Carte de Notification --- */
+    .notification-card {
+        background-color: #f7fafc;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        padding: 20px 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        position: relative;
+    }
+
+    .notification-card.unread {
+        border-left: 5px solid #5e72e4;
+    }
+
+    .notification-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        background-color: #edf2f7;
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .notification-date {
+        font-size: 0.9rem;
+        color: #a0aec0;
+    }
+
+    .notification-status {
+        background-color: #e53e3e;
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .notification-body p {
+        font-size: 1.1rem;
+        color: #4a5568;
+        margin: 10px 0;
+    }
+
+    .notification-footer {
+        text-align: right;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 5px;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+        color: #fff;
+    }
+
+    .btn-read {
+        background-color: #38a169;
+    }
+
+    .btn-read:hover {
+        background-color: #2f855a;
+        transform: scale(1.05);
+    }
+
+    /* --- Message Sans Notifications --- */
+    .no-notifications {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #718096;
+        margin-top: 20px;
+    }
+
+    /* --- Animations --- */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* --- Responsivité --- */
+    @media (max-width: 768px) {
+        .notifications-container h1 {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .notifications-container {
+            padding: 15px 20px;
+        }
+
+        .notifications-container h1 {
+            font-size: 1.8rem;
+        }
+
+        .notification-card {
+            padding: 15px 20px;
+        }
+
+        .btn-read {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{##}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}Mes Notifications - LanfiaSave{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    <h1>Mes Notifications</h1>#}
+{##}
+{#    {% if notifications %}#}
+{#        <ul>#}
+{#        {% for notification in notifications %}#}
+{#            <li>{{ notification.created_at|date:"d/m/Y H:i" }} - {{ notification.message }}</li>#}
+{#        {% endfor %}#}
+{#        </ul>#}
+{#    {% else %}#}
+{#        <p>Aucune notification pour le moment.</p>#}
+{#    {% endif %}#}
+{#{% endblock %}#}
