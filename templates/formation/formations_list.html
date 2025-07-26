@@ -1,0 +1,1116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formations Disponibles{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --pink-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        
+        /* Fond blanc sombre */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-accent: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 250px;
+        height: 250px;
+        background: var(--primary-gradient);
+        top: 5%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 180px;
+        height: 180px;
+        background: var(--secondary-gradient);
+        bottom: 15%;
+        left: 5%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 120px;
+        height: 120px;
+        background: var(--purple-gradient);
+        top: 45%;
+        right: 20%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+        box-shadow: 0 4px 20px var(--card-shadow);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--card-accent);
+    }
+
+    .card-header-modern h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    /* Formation cards spéciales */
+    .formation-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px var(--card-shadow);
+        height: 100%;
+        position: relative;
+    }
+
+    .formation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--secondary-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .formation-card:hover::before {
+        height: 8px;
+    }
+
+    .formation-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+        border-color: rgba(78, 205, 196, 0.3);
+    }
+
+    .formation-card .card-header {
+        background: var(--card-accent);
+        border-bottom: 1px solid var(--card-border);
+        padding: 1.5rem;
+    }
+
+    .formation-card .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .formation-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .formation-card .card-footer {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-top: 1px solid var(--card-border);
+        padding: 1rem 1.5rem;
+    }
+
+    /* Boutons modernes */
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-success-modern {
+        background: var(--success-gradient);
+        box-shadow: 0 4px 15px rgba(86, 204, 157, 0.3);
+    }
+
+    .btn-success-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(86, 204, 157, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--card-border);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--info-gradient);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .btn-outline-info-modern {
+        background: var(--card-bg);
+        color: var(--info-color);
+        border: 2px solid var(--info-color);
+    }
+
+    .btn-outline-info-modern:hover {
+        background: var(--info-gradient);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-success-modern {
+        background: var(--card-bg);
+        color: var(--success-color);
+        border: 2px solid var(--success-color);
+    }
+
+    .btn-outline-success-modern:hover {
+        background: var(--success-gradient);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+        color: white;
+    }
+
+    /* Formulaires */
+    .form-control-modern, .form-select-modern {
+        background: var(--bg-secondary);
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control-modern:focus, .form-select-modern:focus {
+        outline: none;
+        border-color: var(--secondary-gradient);
+        box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .form-label-modern {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Stats des formations */
+    .formation-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-icon.text-primary { background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-icon.text-info { background: var(--info-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-icon.text-success { background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Alertes modernes */
+    .alert-modern {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .alert-warning-modern {
+        background: linear-gradient(135deg, rgba(255, 217, 61, 0.1) 0%, rgba(255, 149, 0, 0.1) 100%);
+        border-left: 4px solid var(--warning-color);
+        color: var(--text-primary);
+    }
+
+    .alert-info-modern {
+        background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, rgba(9, 132, 227, 0.1) 100%);
+        border-left: 4px solid var(--info-color);
+        color: var(--text-primary);
+    }
+
+    /* Pagination moderne */
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .page-link-modern {
+        padding: 0.75rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 45px;
+        text-align: center;
+    }
+
+    .page-link-modern:hover {
+        background: var(--secondary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .page-link-modern.active {
+        background: var(--secondary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    /* Stats card */
+    .stats-card {
+        background: var(--card-bg);
+        border: 2px solid var(--info-color);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 4px 20px rgba(116, 185, 255, 0.1);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .stats-item h4 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-item .text-primary { background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stats-item .text-success { background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stats-item .text-info { background: var(--info-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stats-item .text-warning { background: var(--warning-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    /* Modals */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        border-radius: 20px 20px 0 0;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .formation-card {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .formation-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Bootstrap classes */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-12, .col-md-3, .col-md-4, .col-md-6, .col-lg-4 {
+        padding: 0 0.75rem;
+    }
+
+    .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-md-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    @media (max-width: 991px) {
+        .col-lg-4 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .col-md-3, .col-md-4, .col-md-6, .col-lg-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .d-grid {
+        display: grid;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .g-3 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+
+    .g-3 > * {
+        padding-right: calc(var(--bs-gutter-x) * 0.5);
+        padding-left: calc(var(--bs-gutter-x) * 0.5);
+        margin-top: var(--bs-gutter-y);
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .h-100 {
+        height: 100%;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    .py-5 {
+        padding: 3rem 0;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .border-info {
+        border-color: var(--info-color) !important;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .card-text {
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .text-purple {
+        color: #6c5ce7 !important;
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Formations Disponibles</h1>
+                <div>
+                    {% if user.is_authenticated and has_vulnerable_profile %}
+                    <a href="{% url 'formation:mes_demandes' %}" class="btn-modern btn-outline-info-modern">
+                        <i class="fas fa-file-alt"></i> Mes demandes
+                    </a>
+                    <a href="{% url 'formation:mon_parcours' %}" class="btn-modern btn-outline-success-modern">
+                        <i class="fas fa-route"></i> Mon parcours
+                    </a>
+                    {% endif %}
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'formation:admin_dashboard' %}" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-cog"></i> Administration
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Filtres de recherche -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-filter"></i> Filtres de Recherche</h5>
+                </div>
+                <div class="card-body-modern">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label-modern">Rechercher</label>
+                            <input type="text" name="search" class="form-control-modern" value="{{ search }}" placeholder="Nom de formation, description...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-modern">Type de formation</label>
+                            <select name="type" class="form-select-modern">
+                                <option value="">Tous les types</option>
+                                {% for type_value, type_label in types_formation %}
+                                <option value="{{ type_value }}" {% if type_filter == type_value %}selected{% endif %}>
+                                    {{ type_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-modern">&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn-modern btn-primary-modern">
+                                    <i class="fas fa-search"></i> Rechercher
+                                </button>
+                                <a href="{% url 'formation:formations_list' %}" class="btn-modern btn-outline-modern">
+                                    <i class="fas fa-times"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des formations -->
+            {% if formations %}
+                <div class="row">
+                    {% for formation in formations %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="formation-card" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">{{ formation.nom }}</h5>
+                                <small class="text-muted">
+                                    <i class="fas fa-tag"></i> {{ formation.get_type_formation_display }}
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ formation.description|truncatechars:120 }}</p>
+                                
+                                <div class="formation-stats mb-3">
+                                    <div class="stat-item">
+                                        <i class="stat-icon fas fa-clock text-primary"></i>
+                                        <br><small><strong>{{ formation.duree_semaines }}</strong><br>semaines</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="stat-icon fas fa-users text-info"></i>
+                                        <br><small><strong>{{ formation.places_restantes }}</strong><br>places</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="stat-icon fas fa-graduation-cap text-success"></i>
+                                        <br><small><strong>{{ formation.get_niveau_requis_display|truncatechars:8 }}</strong></small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Âge : {{ formation.age_min }}-{{ formation.age_max }} ans<br>
+                                        {% if formation.cout_formation > 0 %}
+                                        <i class="fas fa-money-bill-wave"></i> Coût : {{ formation.cout_formation|floatformat:0 }} FCFA<br>
+                                        {% else %}
+                                        <i class="fas fa-free-code-camp text-success"></i> Formation gratuite<br>
+                                        {% endif %}
+                                        <i class="fas fa-map-marker-alt"></i> {{ formation.competences_acquises|truncatechars:50 }}
+                                    </small>
+                                </div>
+
+                                <!-- Indicateur de disponibilité -->
+                                {% if formation.places_restantes == 0 %}
+                                <div class="alert-modern alert-warning-modern">
+                                    <i class="fas fa-exclamation-triangle"></i> Formation complète
+                                </div>
+                                {% elif formation.places_restantes <= 3 %}
+                                <div class="alert-modern alert-info-modern">
+                                    <i class="fas fa-info-circle"></i> Dernières places disponibles !
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'formation:formation_detail' formation.id %}" class="btn-modern btn-outline-modern btn-sm-modern">
+                                        <i class="fas fa-eye"></i> Voir détails
+                                    </a>
+                                    
+                                    {% if user.is_authenticated and has_vulnerable_profile %}
+                                        {% if formation.places_restantes > 0 %}
+                                        <a href="{% url 'formation:demande_formation' formation.id %}" class="btn-modern btn-success-modern btn-sm-modern">
+                                            <i class="fas fa-paper-plane"></i> Candidater
+                                        </a>
+                                        {% else %}
+                                        <button class="btn-modern btn-secondary-modern btn-sm-modern" disabled>
+                                            <i class="fas fa-ban"></i> Complet
+                                        </button>
+                                        {% endif %}
+                                    {% elif not user.is_authenticated %}
+                                    <a href="{% url 'login' %}" class="btn-modern btn-outline-success-modern btn-sm-modern">
+                                        <i class="fas fa-sign-in-alt"></i> Se connecter pour candidater
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if formations.has_other_pages %}
+                <div class="pagination-modern">
+                    {% if formations.has_previous %}
+                        <a class="page-link-modern" href="?page={{ formations.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in formations.paginator.page_range %}
+                        {% if formations.number == num %}
+                            <span class="page-link-modern active">{{ num }}</span>
+                        {% elif num > formations.number|add:'-3' and num < formations.number|add:'3' %}
+                            <a class="page-link-modern" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if formations.has_next %}
+                        <a class="page-link-modern" href="?page={{ formations.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Statistiques rapides -->
+                <div class="stats-card">
+                    <div class="stats-grid">
+                        <div class="stats-item">
+                            <h4 class="text-primary">{{ formations.paginator.count }}</h4>
+                            <small class="text-muted">Formation{{ formations.paginator.count|pluralize }} disponible{{ formations.paginator.count|pluralize }}</small>
+                        </div>
+                        <div class="stats-item">
+                            <h4 class="text-success">
+                                {{ total_places_disponibles|default:"0" }}
+                            </h4>
+                            <small class="text-muted">Places disponibles</small>
+                        </div>
+                        <div class="stats-item">
+                            <h4 class="text-info">{{ types_formation|length }}</h4>
+                            <small class="text-muted">Secteurs différents</small>
+                        </div>
+                        <div class="stats-item">
+                            <h4 class="text-warning">Gratuit</h4>
+                            <small class="text-muted">La plupart des formations</small>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- État vide -->
+                <div class="empty-state">
+                    <div class="mb-4">
+                        {% if search or type_filter %}
+                            <i class="fas fa-search fa-4x"></i>
+                        {% else %}
+                            <i class="fas fa-graduation-cap fa-4x"></i>
+                        {% endif %}
+                    </div>
+                    {% if search or type_filter %}
+                        <h4>Aucune formation trouvée</h4>
+                        <p>Aucune formation ne correspond à vos critères de recherche.</p>
+                        <div class="mt-4">
+                            <a href="{% url 'formation:formations_list' %}" class="btn-modern btn-primary-modern">
+                                <i class="fas fa-list"></i> Voir toutes les formations
+                            </a>
+                        </div>
+                    {% else %}
+                        <h4>Aucune formation disponible</h4>
+                        <p>Il n'y a actuellement aucune formation disponible.</p>
+                        {% if user.is_staff or user.is_superuser %}
+                        <div class="mt-4">
+                            <a href="{% url 'formation:admin_formation_create' %}" class="btn-modern btn-primary-modern">
+                                <i class="fas fa-plus"></i> Créer une formation
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'information pour les nouveaux utilisateurs -->
+{% if user.is_authenticated and not user.is_staff and not user.is_superuser and not has_vulnerable_profile %}
+<div class="modal fade" id="profileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--warning-gradient); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Profil incomplet
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Pour candidater aux formations, vous devez compléter votre profil de personne vulnérable.</p>
+                <div class="alert-modern alert-info-modern">
+                    <i class="fas fa-info-circle"></i> 
+                    Cela nous permet de mieux évaluer vos besoins et de vous proposer les formations les plus adaptées.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Plus tard</button>
+                <a href="{% url 'profile' %}" class="btn-modern" style="background: var(--warning-gradient);">
+                    <i class="fas fa-user-edit"></i> Compléter mon profil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Guide pour les nouveaux utilisateurs -->
+{% if user.is_authenticated and has_vulnerable_profile %}
+<div class="modal fade" id="guideModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--secondary-gradient); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-graduation-cap"></i> Bienvenue dans les formations
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-search" style="background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i> Étape 1 : Explorer</h6>
+                        <p class="small">Parcourez les formations disponibles et utilisez les filtres pour trouver celles qui vous intéressent.</p>
+                        
+                        <h6><i class="fas fa-eye" style="background: var(--info-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i> Étape 2 : Consulter</h6>
+                        <p class="small">Cliquez sur "Voir détails" pour avoir toutes les informations sur une formation.</p>
+                        
+                        <h6><i class="fas fa-paper-plane" style="background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i> Étape 3 : Candidater</h6>
+                        <p class="small">Remplissez le formulaire de candidature avec votre motivation et votre projet.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-robot" style="background: var(--warning-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i> Analyse automatique</h6>
+                        <p class="small">Notre IA analysera automatiquement votre candidature et calculera un score de formabilité.</p>
+                        
+                        <h6><i class="fas fa-route text-purple"></i> Suivi personnalisé</h6>
+                        <p class="small">Si vous êtes accepté(e), vous aurez accès à votre parcours de formation personnalisé.</p>
+                        
+                        <div class="alert-modern alert-info-modern">
+                            <i class="fas fa-lightbulb"></i> 
+                            <strong>Astuce :</strong> Vous pouvez aussi créer un projet de vie pour définir vos objectifs post-formation !
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="d-flex justify-content-between w-100">
+                    <small class="text-muted">
+                        <i class="fas fa-question-circle"></i> 
+                        Des questions ? Contactez notre équipe.
+                    </small>
+                    <button type="button" class="btn-modern btn-primary-modern" data-bs-dismiss="modal">
+                        C'est parti ! <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée progressive pour les cartes
+    const cards = document.querySelectorAll('.formation-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Modal pour profil incomplet
+    {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+        {% if not has_vulnerable_profile %}
+        setTimeout(() => {
+            if (!localStorage.getItem('profileModalShown')) {
+                const modal = new bootstrap.Modal(document.getElementById('profileModal'));
+                modal.show();
+                localStorage.setItem('profileModalShown', 'true');
+            }
+        }, 2000);
+        {% endif %}
+    {% endif %}
+
+    // Guide pour les nouveaux utilisateurs
+    {% if user.is_authenticated and has_vulnerable_profile %}
+    if (!localStorage.getItem('formationGuideShown')) {
+        setTimeout(() => {
+            const modal = new bootstrap.Modal(document.getElementById('guideModal'));
+            modal.show();
+            localStorage.setItem('formationGuideShown', 'true');
+        }, 1000);
+    }
+    {% endif %}
+
+    // Amélioration de l'accessibilité
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.closest('form').submit();
+            }
+        });
+    }
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.2 + index * 0.1);
+            shape.style.transform = `translateY(${rate}px)`;
+        });
+    });
+
+    // Animation des stats au scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statsItems = entry.target.querySelectorAll('.stats-item h4');
+                statsItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            item.style.transform = 'scale(1)';
+                        }, 200);
+                    }, index * 100);
+                });
+            }
+        });
+    });
+
+    const statsCard = document.querySelector('.stats-card');
+    if (statsCard) {
+        observer.observe(statsCard);
+    }
+
+    // Effet de ripple sur les boutons
+    const buttons = document.querySelectorAll('.btn-modern');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Ajout de l'animation ripple en CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
+{% endblock %}

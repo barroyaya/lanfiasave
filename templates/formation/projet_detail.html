@@ -1,0 +1,1085 @@
+{#formation/templates/formation/projet_detail.html#}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Projet de Vie{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --pink-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        --gray-gradient: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+        
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+        --purple-color: #6c5ce7;
+    }
+
+    body {
+        background: var(--bg-primary) !important;
+        min-height: 100vh;
+        color: var(--text-primary) !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 300px;
+        height: 300px;
+        background: var(--secondary-gradient);
+        top: 5%;
+        right: 10%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 200px;
+        height: 200px;
+        background: var(--purple-gradient);
+        bottom: 15%;
+        left: 5%;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 150px;
+        height: 150px;
+        background: var(--pink-gradient);
+        top: 40%;
+        right: 25%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .shape-4 {
+        width: 120px;
+        height: 120px;
+        background: var(--warning-gradient);
+        bottom: 30%;
+        left: 15%;
+        animation: float 5s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        50% { transform: translateY(-30px) rotate(180deg) scale(1.1); }
+    }
+
+    .container {
+        max-width: 1400px !important;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* En-tête de page */
+    .page-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 2rem !important;
+        animation: slideDown 0.6s ease-out;
+        background: var(--card-bg);
+        padding: 1.5rem 2rem;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 20px var(--card-shadow);
+        backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+        font-size: 2.2rem !important;
+        font-weight: 800 !important;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 !important;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cartes modernes */
+    .card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 20px !important;
+        overflow: hidden !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 8px 32px var(--card-shadow) !important;
+        position: relative !important;
+        animation: slideUp 0.6s ease-out !important;
+        animation-fill-mode: both !important;
+        backdrop-filter: blur(10px) !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--secondary-gradient);
+        transition: height 0.3s ease;
+        z-index: 1;
+    }
+
+    .card:hover {
+        transform: translateY(-8px) scale(1.01) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+        border-color: rgba(78, 205, 196, 0.3) !important;
+    }
+
+    .card:hover::before {
+        height: 8px;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+
+    .card-header {
+        background: var(--card-accent) !important;
+        border-bottom: 1px solid var(--card-border) !important;
+        padding: 1.5rem 2rem !important;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-header h5 {
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        font-size: 1.3rem !important;
+        margin-bottom: 0 !important;
+        background: linear-gradient(45deg, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-body {
+        padding: 2rem !important;
+        background: var(--card-bg) !important;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-body h6 {
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.8px !important;
+        margin-bottom: 0.8rem !important;
+        position: relative;
+    }
+
+    .card-body h6::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 30px;
+        height: 2px;
+        background: var(--secondary-gradient);
+        border-radius: 1px;
+    }
+
+    .card-body p {
+        color: var(--text-secondary) !important;
+        line-height: 1.6 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* Badges modernes */
+    .badge {
+        padding: 0.6rem 1.2rem !important;
+        border-radius: 20px !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        border: none !important;
+    }
+
+    .bg-success {
+        background: var(--success-gradient) !important;
+    }
+
+    .bg-primary {
+        background: var(--secondary-gradient) !important;
+    }
+
+    .bg-info {
+        background: var(--info-gradient) !important;
+    }
+
+    .bg-warning {
+        background: var(--warning-gradient) !important;
+    }
+
+    .bg-danger {
+        background: var(--primary-gradient) !important;
+    }
+
+    .bg-secondary {
+        background: var(--gray-gradient) !important;
+    }
+
+    /* Barres de progression modernes */
+    .progress {
+        height: 15px !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        border-radius: 15px !important;
+        overflow: hidden !important;
+        border: 1px solid var(--card-border) !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .progress-bar {
+        border-radius: 15px !important;
+        transition: width 1.5s ease-in-out !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .progress-bar.bg-success {
+        background: var(--success-gradient) !important;
+        box-shadow: 0 2px 8px rgba(86, 204, 157, 0.4) !important;
+    }
+
+    .progress-bar.bg-warning {
+        background: var(--warning-gradient) !important;
+        box-shadow: 0 2px 8px rgba(255, 149, 0, 0.4) !important;
+    }
+
+    .progress-bar.bg-danger {
+        background: var(--primary-gradient) !important;
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4) !important;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Alertes modernes */
+    .alert {
+        border: none !important;
+        border-radius: 15px !important;
+        padding: 1rem 1.5rem !important;
+        margin-bottom: 1rem !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border-left: 4px solid transparent !important;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, rgba(168, 230, 207, 0.2) 0%, rgba(86, 204, 157, 0.2) 100%) !important;
+        color: var(--success-color) !important;
+        border-left-color: var(--success-color) !important;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 217, 61, 0.2) 0%, rgba(255, 149, 0, 0.2) 100%) !important;
+        color: var(--warning-color) !important;
+        border-left-color: var(--warning-color) !important;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(238, 90, 82, 0.2) 100%) !important;
+        color: var(--danger-color) !important;
+        border-left-color: var(--danger-color) !important;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(116, 185, 255, 0.2) 0%, rgba(9, 132, 227, 0.2) 100%) !important;
+        color: var(--info-color) !important;
+        border-left-color: var(--info-color) !important;
+    }
+
+    /* Boutons modernes */
+    .btn {
+        padding: 0.75rem 1.5rem !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        font-size: 0.9rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-outline-secondary {
+        background: var(--card-bg) !important;
+        color: var(--text-secondary) !important;
+        border: 2px solid var(--card-border) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--gray-gradient) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 25px rgba(99, 110, 114, 0.3) !important;
+    }
+
+    .btn-outline-primary {
+        background: var(--card-bg) !important;
+        color: var(--info-color) !important;
+        border: 2px solid rgba(78, 205, 196, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--secondary-gradient) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3) !important;
+    }
+
+    .btn-outline-info {
+        background: var(--card-bg) !important;
+        color: var(--info-color) !important;
+        border: 2px solid rgba(9, 132, 227, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .btn-outline-info:hover {
+        background: var(--info-gradient) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 25px rgba(9, 132, 227, 0.3) !important;
+    }
+
+    .btn:disabled {
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+    }
+
+    .btn:disabled:hover {
+        transform: none !important;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
+
+    .w-100 {
+        width: 100% !important;
+    }
+
+    /* Icônes améliorées */
+    .fa-3x {
+        font-size: 3em !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .text-success {
+        color: var(--success-color) !important;
+    }
+
+    .text-primary {
+        color: var(--info-color) !important;
+    }
+
+    .text-info {
+        color: var(--info-color) !important;
+    }
+
+    .text-warning {
+        color: var(--warning-color) !important;
+    }
+
+    .text-danger {
+        color: var(--danger-color) !important;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+
+    /* Classes utilitaires */
+    .mb-2 { margin-bottom: 0.5rem !important; }
+    .mb-3 { margin-bottom: 1rem !important; }
+    .mb-4 { margin-bottom: 1.5rem !important; }
+    .mt-4 { margin-top: 1.5rem !important; }
+
+    .d-flex { display: flex !important; }
+    .justify-content-between { justify-content: space-between !important; }
+    .justify-content-center { justify-content: center !important; }
+    .align-items-center { align-items: center !important; }
+
+    .small {
+        font-size: 0.875rem !important;
+    }
+
+    .fs-5 {
+        font-size: 1.25rem !important;
+    }
+
+    .fs-6 {
+        font-size: 1rem !important;
+    }
+
+    /* Grid responsive */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        margin: 0 -0.75rem !important;
+    }
+
+    .col-md-8, .col-md-4, .col-md-6, .col-md-10 {
+        padding: 0 0.75rem !important;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333333% !important;
+        max-width: 33.333333% !important;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+
+    .col-md-8 {
+        flex: 0 0 66.666667% !important;
+        max-width: 66.666667% !important;
+    }
+
+    .col-md-10 {
+        flex: 0 0 83.333333% !important;
+        max-width: 83.333333% !important;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Score circulaire amélioré */
+    .score-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .score-circle.high-score {
+        background: var(--success-gradient);
+        box-shadow: 0 8px 25px rgba(86, 204, 157, 0.4);
+    }
+
+    .score-circle.medium-score {
+        background: var(--warning-gradient);
+        box-shadow: 0 8px 25px rgba(255, 149, 0, 0.4);
+    }
+
+    .score-circle.low-score {
+        background: var(--primary-gradient);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+        animation: rotate 3s linear infinite;
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem 0.5rem !important;
+        }
+        
+        .page-header {
+            flex-direction: column !important;
+            gap: 1rem !important;
+            text-align: center !important;
+        }
+        
+        .page-title {
+            font-size: 1.8rem !important;
+        }
+        
+        .col-md-4, .col-md-6, .col-md-8, .col-md-10 {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .card-header {
+            padding: 1.5rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.5rem !important;
+        }
+        
+        .card-body {
+            padding: 1rem !important;
+        }
+        
+        .card-header {
+            padding: 1rem !important;
+        }
+    }
+
+    /* État de chargement pour impression */
+    @media print {
+        .decoration-shape {
+            display: none !important;
+        }
+        
+        .btn {
+            display: none !important;
+        }
+        
+        body {
+            background: white !important;
+        }
+        
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+<div class="decoration-shape shape-4"></div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="page-header">
+                <h1 class="page-title">Mon Projet de Vie</h1>
+                <a href="{% url 'formation:mes_projets' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à mes projets
+                </a>
+            </div>
+
+            <div class="row">
+                <!-- Informations du projet -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>{{ projet.titre_projet }}</h5>
+                                <span class="badge bg-{% if projet.statut == 'realise' %}success{% elif projet.statut == 'en_cours' %}primary{% elif projet.statut == 'finance' %}info{% elif projet.statut == 'abandonne' %}danger{% else %}secondary{% endif %}">
+                                    {{ projet.get_statut_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h6>
+                                    <i class="fas fa-file-alt"></i> Description du projet
+                                </h6>
+                                <p>{{ projet.description }}</p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6>
+                                        <i class="fas fa-industry"></i> Secteur d'activité
+                                    </h6>
+                                    <p>{{ projet.secteur_activite }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>
+                                        <i class="fas fa-euro-sign"></i> Budget estimé
+                                    </h6>
+                                    <p>
+                                        <strong style="background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 1.2rem;">
+                                            {{ projet.budget_estime|floatformat:0 }} FCFA
+                                        </strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6>
+                                    <i class="fas fa-hand-holding-usd"></i> Type de financement souhaité
+                                </h6>
+                                <p>{{ projet.get_type_financement_display }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> Créé le {{ projet.date_creation|date:"d/m/Y à H:i" }}
+                                    {% if projet.date_maj != projet.date_creation %}
+                                    <br><i class="fas fa-edit"></i> Modifié le {{ projet.date_maj|date:"d/m/Y à H:i" }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analyse de faisabilité -->
+                    {% if projet.analyse_ia %}
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>
+                                    <i class="fas fa-brain"></i> Analyse de Faisabilité
+                                </h5>
+                                {% if projet.faisabilite_score %}
+                                <span class="badge bg-{% if projet.faisabilite_score >= 70 %}success{% elif projet.faisabilite_score >= 40 %}warning{% else %}danger{% endif %} fs-6">
+                                    Score : {{ projet.faisabilite_score }}%
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if projet.faisabilite_score %}
+                            <div class="mb-4">
+                                <h6>
+                                    <i class="fas fa-chart-line"></i> Score de faisabilité
+                                </h6>
+                                <div class="progress">
+                                    <div class="progress-bar bg-{% if projet.faisabilite_score >= 70 %}success{% elif projet.faisabilite_score >= 40 %}warning{% else %}danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ projet.faisabilite_score }}%">
+                                        {{ projet.faisabilite_score }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    {% if projet.faisabilite_score >= 70 %}
+                                        <i class="fas fa-thumbs-up text-success"></i> Projet très prometteur
+                                    {% elif projet.faisabilite_score >= 40 %}
+                                        <i class="fas fa-exclamation-triangle text-warning"></i> Projet réalisable avec des ajustements
+                                    {% else %}
+                                        <i class="fas fa-info-circle text-danger"></i> Projet nécessitant des améliorations significatives
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% endif %}
+
+                            <h6>
+                                <i class="fas fa-microscope"></i> Analyse détaillée
+                            </h6>
+                            <p>{{ projet.analyse_ia }}</p>
+                            
+                            {% if projet.recommandations %}
+                            <h6>
+                                <i class="fas fa-lightbulb"></i> Recommandations
+                            </h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                {{ projet.recommandations }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informations latérales -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>
+                                <i class="fas fa-tasks"></i> Statut du projet
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-{% if projet.statut == 'realise' %}check-circle text-success{% elif projet.statut == 'en_cours' %}spinner text-primary{% elif projet.statut == 'finance' %}dollar-sign text-info{% elif projet.statut == 'abandonne' %}times-circle text-danger{% else %}lightbulb text-warning{% endif %} fa-3x"></i>
+                            </div>
+                            <h6 class="text-center">{{ projet.get_statut_display }}</h6>
+                            
+                            {% if projet.statut == 'idee' %}
+                            <p class="text-muted small text-center">Votre projet est en phase d'idéation. Continuez à le développer !</p>
+                            {% elif projet.statut == 'planification' %}
+                            <p class="text-muted small text-center">Votre projet est en cours de planification.</p>
+                            {% elif projet.statut == 'validation' %}
+                            <p class="text-muted small text-center">Votre projet est en cours de validation par nos experts.</p>
+                            {% elif projet.statut == 'finance' %}
+                            <p class="text-success small text-center">Félicitations ! Votre projet a obtenu un financement.</p>
+                            {% elif projet.statut == 'en_cours' %}
+                            <p class="text-primary small text-center">Votre projet est en cours de réalisation. Bon courage !</p>
+                            {% elif projet.statut == 'realise' %}
+                            <p class="text-success small text-center">Félicitations ! Votre projet est réalisé avec succès.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if projet.faisabilite_score %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>
+                                <i class="fas fa-star"></i> Évaluation
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                <div class="score-circle {% if projet.faisabilite_score >= 70 %}high-score{% elif projet.faisabilite_score >= 40 %}medium-score{% else %}low-score{% endif %}">
+                                    {{ projet.faisabilite_score }}
+                                </div>
+                                <p class="text-muted small">Score de faisabilité sur 100</p>
+                            </div>
+                            
+                            {% if projet.faisabilite_score >= 70 %}
+                            <div class="alert alert-success small">
+                                <i class="fas fa-thumbs-up"></i> Excellent projet ! Nous recommandons de poursuivre son développement.
+                            </div>
+                            {% elif projet.faisabilite_score >= 40 %}
+                            <div class="alert alert-warning small">
+                                <i class="fas fa-exclamation-triangle"></i> Projet prometteur avec quelques points à améliorer.
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger small">
+                                <i class="fas fa-info-circle"></i> Projet nécessitant des ajustements importants.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>
+                                <i class="fas fa-calculator"></i> Détails financiers
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6>Budget estimé</h6>
+                                <p style="background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; font-size: 1.1rem;">
+                                    {{ projet.budget_estime|floatformat:0 }} FCFA
+                                </p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6>Type de financement</h6>
+                                <p>{{ projet.get_type_financement_display }}</p>
+                            </div>
+                            
+                            {% if projet.statut == 'validation' %}
+                            <div class="alert alert-info small">
+                                <i class="fas fa-clock"></i> En attente de validation pour le financement.
+                            </div>
+                            {% elif projet.statut == 'finance' %}
+                            <div class="alert alert-success small">
+                                <i class="fas fa-check"></i> Financement accordé !
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions disponibles -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>
+                                <i class="fas fa-cogs"></i> Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if projet.statut == 'idee' or projet.statut == 'planification' %}
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-2" disabled>
+                                <i class="fas fa-edit"></i> Modifier le projet
+                            </button>
+                            {% endif %}
+                            
+                            {% if projet.statut == 'finance' or projet.statut == 'en_cours' %}
+                            <button class="btn btn-outline-info btn-sm w-100 mb-2" disabled>
+                                <i class="fas fa-chart-line"></i> Suivre le progrès
+                            </button>
+                            {% endif %}
+                            
+                            <button class="btn btn-outline-secondary btn-sm w-100" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée pour les cartes
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+
+    // Animation des barres de progression
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 1500 + index * 300);
+    });
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.1 + index * 0.05);
+            shape.style.transform = `translateY(${rate}px) rotate(${rate * 0.3}deg)`;
+        });
+    });
+
+    // Animation des badges au survol
+    const badges = document.querySelectorAll('.badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(3deg)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+
+    // Effet de ripple sur les boutons
+    const buttons = document.querySelectorAll('.btn:not(:disabled)');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                if (ripple && ripple.parentNode) {
+                    ripple.remove();
+                }
+            }, 600);
+        });
+    });
+
+    // Animation du score circulaire
+    const scoreCircles = document.querySelectorAll('.score-circle');
+    scoreCircles.forEach(circle => {
+        circle.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(10deg)';
+        });
+        
+        circle.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+
+    // Tooltip pour les boutons désactivés
+    const disabledButtons = document.querySelectorAll('button[disabled]');
+    disabledButtons.forEach(button => {
+        button.setAttribute('title', 'Fonctionnalité à venir');
+        button.style.cursor = 'not-allowed';
+    });
+
+    // Animation des icônes au chargement
+    const icons = document.querySelectorAll('.fa-3x');
+    icons.forEach((icon, index) => {
+        icon.style.opacity = '0';
+        icon.style.transform = 'scale(0.5)';
+        
+        setTimeout(() => {
+            icon.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            icon.style.opacity = '1';
+            icon.style.transform = 'scale(1)';
+        }, 500 + index * 200);
+    });
+
+    // Ajout de l'animation ripple en CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Animation des alertes
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach((alert, index) => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+            alert.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            alert.style.opacity = '1';
+            alert.style.transform = 'translateX(0)';
+        }, 1000 + index * 200);
+    });
+});
+
+// Amélioration de l'accessibilité
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+        document.body.classList.add('keyboard-navigation');
+    }
+});
+
+document.addEventListener('mousedown', function() {
+    document.body.classList.remove('keyboard-navigation');
+});
+</script>
+
+<style>
+/* Style pour la navigation au clavier */
+.keyboard-navigation .btn:focus,
+.keyboard-navigation .card:focus {
+    outline: 3px solid #4ecdc4;
+    outline-offset: 2px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,713 @@
+{% extends 'formation/base_formation.html' %}
+{% load static %}
+
+{% block title %}Configuration IA{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-separator">/</span>
+<a href="{% url 'formation:admin_dashboard' %}" class="breadcrumb-item">Admin</a>
+<span class="breadcrumb-separator">/</span>
+<span class="breadcrumb-current">Configuration IA</span>
+{% endblock %}
+
+{% block formation_content %}
+<div class="config-ia-container">
+    <!-- Header -->
+    <div class="config-header">
+        <div class="header-content">
+            <h2 class="config-title">
+                <i class="fas fa-cog"></i>
+                Configuration de l'IA
+            </h2>
+            <p class="config-subtitle">
+                Paramètres d'analyse automatique et critères d'évaluation
+            </p>
+        </div>
+        
+        <div class="header-actions">
+            <button type="button" class="btn btn-info" onclick="testIaConnection()">
+                <i class="fas fa-wifi"></i> Test Connexion
+            </button>
+            <a href="{% url 'formation:admin_lancer_analyses_lot' %}" class="btn btn-primary">
+                <i class="fas fa-brain"></i> Lancer Analyses
+            </a>
+        </div>
+    </div>
+
+    <!-- État de l'IA -->
+    <div class="ia-status-section">
+        <h3 class="section-title">
+            <i class="fas fa-heartbeat"></i>
+            État du Système IA
+        </h3>
+        
+        <div class="status-cards">
+            <div class="status-card" id="ia-status-card">
+                <div class="status-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="status-content">
+                    <h4>Connexion IA</h4>
+                    <p id="ia-status-text">Test en cours...</p>
+                    <button class="btn btn-sm btn-outline-primary" onclick="testIaConnection()">
+                        <i class="fas fa-sync"></i> Tester
+                    </button>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon success">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="status-content">
+                    <h4>Base de données</h4>
+                    <p class="text-success">Opérationnelle</p>
+                    <small>Dernière analyse: il y a 2 min</small>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="status-content">
+                    <h4>Analyses aujourd'hui</h4>
+                    <p class="stat-number" id="analyses-today">{{ analyses_today|default:"0" }}</p>
+                    <small>Analyses réalisées</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration principale -->
+    <div class="config-main-section">
+        <h3 class="section-title">
+            <i class="fas fa-sliders-h"></i>
+            Paramètres Principaux
+        </h3>
+        
+        <form method="post" class="config-form">
+            {% csrf_token %}
+            
+            <div class="config-card">
+                <div class="config-header-card">
+                    <h4>
+                        <i class="fas fa-robot"></i>
+                        Analyse Automatique
+                    </h4>
+                    <p>Paramètres d'exécution automatique des analyses IA</p>
+                </div>
+                
+                <div class="config-body">
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" 
+                                   name="auto_analyse" 
+                                   id="auto_analyse"
+                                   {% if config.auto_analyse %}checked{% endif %}>
+                            <label for="auto_analyse" class="switch-label">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-content">
+                            <h5>Analyse automatique</h5>
+                            <p>Lance automatiquement l'analyse IA lors de la création d'une demande</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-card">
+                <div class="config-header-card">
+                    <h4>
+                        <i class="fas fa-target"></i>
+                        Critères d'Acceptation
+                    </h4>
+                    <p>Seuils et critères pour l'acceptation automatique</p>
+                </div>
+                
+                <div class="config-body">
+                    <div class="form-group">
+                        <label for="seuil_acceptation" class="form-label">
+                            Seuil d'acceptation automatique
+                        </label>
+                        <div class="range-input-group">
+                            <input type="range" 
+                                   name="seuil_acceptation" 
+                                   id="seuil_acceptation"
+                                   min="0" max="100" 
+                                   value="{{ config.seuil_acceptation }}"
+                                   oninput="updateSeuilValue(this.value)">
+                            <div class="range-display">
+                                <span id="seuil-value">{{ config.seuil_acceptation }}</span>/100
+                            </div>
+                        </div>
+                        <small class="form-text">
+                            Les demandes avec un score ≥ ce seuil seront automatiquement acceptées
+                        </small>
+                    </div>
+                    
+                    <div class="seuil-indicators">
+                        <div class="seuil-indicator seuil-faible">
+                            <span class="indicator-label">Faible</span>
+                            <span class="indicator-range">0-49</span>
+                        </div>
+                        <div class="seuil-indicator seuil-moyen">
+                            <span class="indicator-label">Moyen</span>
+                            <span class="indicator-range">50-69</span>
+                        </div>
+                        <div class="seuil-indicator seuil-bon">
+                            <span class="indicator-label">Bon</span>
+                            <span class="indicator-range">70-84</span>
+                        </div>
+                        <div class="seuil-indicator seuil-excellent">
+                            <span class="indicator-label">Excellent</span>
+                            <span class="indicator-range">85-100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-card">
+                <div class="config-header-card">
+                    <h4>
+                        <i class="fas fa-shield-alt"></i>
+                        Sécurité et Validation
+                    </h4>
+                    <p>Paramètres de sécurité pour les analyses IA</p>
+                </div>
+                
+                <div class="config-body">
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" 
+                                   name="validation_humaine" 
+                                   id="validation_humaine"
+                                   checked>
+                            <label for="validation_humaine" class="switch-label">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-content">
+                            <h5>Validation humaine requise</h5>
+                            <p>Nécessite une validation manuelle même pour les scores élevés</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="toggle-switch">
+                            <input type="checkbox" 
+                                   name="log_analyses" 
+                                   id="log_analyses"
+                                   checked>
+                            <label for="log_analyses" class="switch-label">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-content">
+                            <h5>Journalisation des analyses</h5>
+                            <p>Enregistre un historique détaillé de toutes les analyses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-save"></i> Sauvegarder la Configuration
+                </button>
+                <button type="reset" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-undo"></i> Réinitialiser
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Informations sur le modèle -->
+    <div class="model-info-section">
+        <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Informations sur le Modèle IA
+        </h3>
+        
+        <div class="info-cards">
+            <div class="info-card">
+                <h4>Modèle utilisé</h4>
+                <p><strong>Mistral via Ollama</strong></p>
+                <p>Modèle de langage optimisé pour l'analyse de profils</p>
+            </div>
+            
+            <div class="info-card">
+                <h4>Critères d'évaluation</h4>
+                <ul>
+                    <li><strong>Compatibilité (20 pts)</strong> - Âge et prérequis</li>
+                    <li><strong>Motivation (25 pts)</strong> - Engagement et détermination</li>
+                    <li><strong>Capacité d'apprentissage (20 pts)</strong> - Niveau éducatif</li>
+                    <li><strong>Faisabilité du projet (20 pts)</strong> - Réalisme du projet</li>
+                    <li><strong>Contexte socio-économique (15 pts)</strong> - Situation sociale</li>
+                </ul>
+            </div>
+            
+            <div class="info-card">
+                <h4>Recommandations</h4>
+                <ul>
+                    <li>Vérifiez la connexion Ollama avant les analyses en lot</li>
+                    <li>Surveillez les performances du modèle régulièrement</li>
+                    <li>Validez manuellement les cas limites (score 60-75)</li>
+                    <li>Ajustez le seuil selon vos critères organisationnels</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.config-ia-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.config-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.config-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.config-subtitle {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary { background: #3b82f6; color: white; }
+.btn-secondary { background: #6b7280; color: white; }
+.btn-success { background: #10b981; color: white; }
+.btn-info { background: #06b6d4; color: white; }
+.btn-outline-secondary { border-color: #6b7280; color: #6b7280; background: transparent; }
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.section-title {
+    font-size: 1.4rem;
+    color: #1f2937;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.status-cards, .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.status-card, .info-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    transition: all 0.3s;
+}
+
+.status-card:hover, .info-card:hover {
+    border-color: #8b5cf6;
+    transform: translateY(-3px);
+}
+
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #6b7280;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.status-icon.success {
+    background: #10b981;
+}
+
+.status-content h4 {
+    color: #1f2937;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #8b5cf6;
+}
+
+.config-form {
+    display: grid;
+    gap: 30px;
+}
+
+.config-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.config-card:hover {
+    border-color: #8b5cf6;
+}
+
+.config-header-card {
+    background: #f9fafb;
+    padding: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.config-header-card h4 {
+    color: #1f2937;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.config-header-card p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.config-body {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.form-group:has(.toggle-switch) {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+.switch-label {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #e5e7eb;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.switch-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .switch-label {
+    background: #8b5cf6;
+}
+
+.toggle-switch input:checked + .switch-label .switch-slider {
+    transform: translateX(30px);
+}
+
+.toggle-content h5 {
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.toggle-content p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.form-label {
+    display: block;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.range-input-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.range-input-group input[type="range"] {
+    flex: 1;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.range-input-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #8b5cf6;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.range-input-group input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #8b5cf6;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.range-display {
+    background: #8b5cf6;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    min-width: 70px;
+    text-align: center;
+}
+
+.form-text {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.seuil-indicators {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.seuil-indicator {
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid;
+}
+
+.seuil-faible {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.seuil-moyen {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.seuil-bon {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1e40af;
+}
+
+.seuil-excellent {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.indicator-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.indicator-range {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 30px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    margin: 0 10px;
+}
+
+.info-card h4 {
+    color: #1f2937;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.info-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-card li {
+    padding: 5px 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.info-card li strong {
+    color: #374151;
+}
+
+@media (max-width: 768px) {
+    .config-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .status-cards, .info-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .seuil-indicators {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-group:has(.toggle-switch) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+</style>
+
+<script>
+// Mettre à jour l'affichage du seuil
+function updateSeuilValue(value) {
+    document.getElementById('seuil-value').textContent = value;
+    
+    // Mettre à jour la couleur en fonction du seuil
+    const display = document.querySelector('.range-display');
+    if (value < 50) {
+        display.style.background = '#ef4444';
+    } else if (value < 70) {
+        display.style.background = '#f59e0b';
+    } else if (value < 85) {
+        display.style.background = '#3b82f6';
+    } else {
+        display.style.background = '#10b981';
+    }
+}
+
+// Tester la connexion IA
+async function testIaConnection() {
+    const statusCard = document.getElementById('ia-status-card');
+    const statusText = document.getElementById('ia-status-text');
+    const statusIcon = statusCard.querySelector('.status-icon');
+    
+    // État de chargement
+    statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test en cours...';
+    statusIcon.className = 'status-icon';
+    statusIcon.style.background = '#6b7280';
+    
+    try {
+        const response = await fetch('/formation/admin/test-ia-connection/');
+        const data = await response.json();
+        
+        if (data.success) {
+            statusText.innerHTML = `<span class="text-success">${data.message}</span><br><small>${data.model}</small>`;
+            statusIcon.className = 'status-icon success';
+            statusIcon.style.background = '#10b981';
+        } else {
+            statusText.innerHTML = `<span class="text-danger">${data.error}</span><br><small>${data.solution || ''}</small>`;
+            statusIcon.style.background = '#ef4444';
+        }
+    } catch (error) {
+        statusText.innerHTML = `<span class="text-danger">Erreur de connexion</span><br><small>Vérifiez que Ollama est démarré</small>`;
+        statusIcon.style.background = '#ef4444';
+    }
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Test automatique de la connexion IA au chargement
+    testIaConnection();
+    
+    // Initialiser l'affichage du seuil
+    const seuilInput = document.getElementById('seuil_acceptation');
+    updateSeuilValue(seuilInput.value);
+});
+</script>
+{% endblock %}

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'notifications',
     'rest_framework',
     'rest_framework.authtoken',
+    'formation',
+
 ]
 
 MIDDLEWARE = [
@@ -56,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -81,6 +82,14 @@ CSRF_COOKIE_HTTPONLY = True  # Autoriser la lecture via JavaScript
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = False    # Désactivé en développement
 SESSION_COOKIE_SECURE = False # Désactivé en développement
+# Exécution synchrone des tâches Celery en local
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+
 
 # Configuration d'authentification REST
 REST_FRAMEWORK = {

@@ -1,0 +1,1075 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail de la Demande{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --pink-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        
+        /* Fond avec mélange de couleurs */
+        --bg-primary: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 50%, #fce4ec 100%);
+        --bg-secondary: #ffffff;
+        --bg-accent: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs colorés */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.06;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 300px;
+        height: 300px;
+        background: var(--primary-gradient);
+        top: 8%;
+        right: 12%;
+        animation: float 7s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 200px;
+        height: 200px;
+        background: var(--secondary-gradient);
+        bottom: 10%;
+        left: 8%;
+        animation: float 9s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 150px;
+        height: 150px;
+        background: var(--purple-gradient);
+        top: 40%;
+        right: 25%;
+        animation: float 5s ease-in-out infinite;
+    }
+
+    .shape-4 {
+        width: 120px;
+        height: 120px;
+        background: var(--pink-gradient);
+        top: 20%;
+        left: 15%;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+        box-shadow: 0 8px 32px var(--card-shadow);
+        backdrop-filter: blur(10px);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--card-accent);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header-modern h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header-modern i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+        background: var(--card-bg);
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        display: inline-block;
+        color: white;
+    }
+
+    .badge-success-modern {
+        background: var(--success-gradient);
+    }
+
+    .badge-warning-modern {
+        background: var(--warning-gradient);
+    }
+
+    .badge-danger-modern {
+        background: var(--primary-gradient);
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+    }
+
+    .info-section {
+        margin-bottom: 2rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--info-color);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        background: var(--info-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        border-left: 4px solid var(--secondary-gradient);
+    }
+
+    .info-value strong {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .info-muted {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    .divider-modern {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--secondary-gradient), transparent);
+        margin: 2rem 0;
+        border-radius: 2px;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        color: white;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-success-modern {
+        background: var(--success-gradient);
+        box-shadow: 0 6px 20px rgba(86, 204, 157, 0.4);
+        font-weight: 700;
+    }
+
+    .btn-success-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(86, 204, 157, 0.5);
+        color: white;
+    }
+
+    .btn-danger-modern {
+        background: var(--primary-gradient);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        font-weight: 700;
+    }
+
+    .btn-danger-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--secondary-gradient);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--secondary-gradient);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .form-control-modern {
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        border-radius: 12px;
+        padding: 0.875rem 1.25rem;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        resize: vertical;
+        font-weight: 500;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control-modern::placeholder {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--secondary-gradient);
+        box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-1px);
+    }
+
+    .form-label-modern {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .profile-header {
+        text-align: center;
+        padding: 2rem;
+        background: var(--card-accent);
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--card-border);
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-age {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .profile-info {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .profile-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        border-left: 4px solid var(--success-gradient);
+        transition: all 0.3s ease;
+    }
+
+    .profile-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-label {
+        font-weight: 600;
+        color: var(--success-color);
+        font-size: 0.9rem;
+    }
+
+    .profile-value {
+        color: var(--text-primary);
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .score-badge {
+        font-size: 1.2rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .analysis-section {
+        background: var(--card-accent);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--info-gradient);
+        border: 1px solid var(--card-border);
+    }
+
+    .analysis-title {
+        color: var(--info-color);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .analysis-title i {
+        background: var(--info-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .analysis-content {
+        color: var(--text-primary);
+        line-height: 1.6;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    .criteria-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .criteria-item {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        border-top: 4px solid var(--success-gradient);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .criteria-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .criteria-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .criteria-score {
+        background: var(--success-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.4rem;
+        font-weight: 800;
+    }
+
+    .project-section {
+        background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(168, 230, 207, 0.1) 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        border: 2px solid rgba(78, 205, 196, 0.2);
+    }
+
+    .project-title {
+        color: var(--secondary-gradient);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .project-title i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .decision-section {
+        background: var(--card-accent);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border-left: 4px solid var(--warning-gradient);
+        border: 1px solid var(--card-border);
+    }
+
+    .decision-meta {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 1rem;
+        font-style: italic;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    .action-form {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .action-form:hover {
+        border-color: rgba(78, 205, 196, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes pulse {
+        0%, 100% { 
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% { 
+            transform: scale(1.1);
+            opacity: 0.7;
+        }
+    }
+
+    .pulse-animation {
+        animation: pulse 3s infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(180deg); }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .criteria-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .container-fluid {
+            padding: 1rem;
+        }
+
+        .card-body-modern {
+            padding: 1.5rem 1rem;
+        }
+
+        .profile-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .profile-value {
+            text-align: center;
+        }
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-lg-8, .col-lg-4, .col-md-6 {
+        padding: 0 0.75rem;
+    }
+
+    .col-lg-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+
+    .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    @media (max-width: 991px) {
+        .col-lg-8, .col-lg-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+</style>
+
+<!-- Éléments décoratifs colorés -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+<div class="decoration-shape shape-4"></div>
+
+<div class="container-fluid">
+    <!-- En-tête de page -->
+    <div class="page-header">
+        <h1 class="page-title">Détail de la Demande</h1>
+        <a href="{% url 'formation:admin_demandes_list' %}" class="btn-modern btn-outline-modern" style="width: auto;">
+            <i class="fas fa-arrow-left"></i>
+            Retour à la liste
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Informations de la demande -->
+        <div class="col-lg-8">
+            <div class="modern-card pulse-animation">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-file-alt"></i> Informations de la Demande</h5>
+                    <div class="status-indicator">
+                        <span class="status-dot" style="background: {% if demande.statut == 'acceptee' %}var(--success-color){% elif demande.statut == 'refusee' %}var(--danger-color){% elif demande.statut == 'en_attente' %}var(--warning-color){% else %}#636e72{% endif %};"></span>
+                        <span class="badge-modern {% if demande.statut == 'acceptee' %}badge-success-modern{% elif demande.statut == 'refusee' %}badge-danger-modern{% elif demande.statut == 'en_attente' %}badge-warning-modern{% else %}badge-secondary-modern{% endif %}">
+                            {{ demande.get_statut_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body-modern">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-graduation-cap"></i> Formation demandée</div>
+                                <div class="info-value"><strong>{{ demande.formation_souhaitee.nom }}</strong></div>
+                                <div class="info-muted">{{ demande.formation_souhaitee.get_type_formation_display }} - {{ demande.formation_souhaitee.duree_semaines }} semaines</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-heart"></i> Motivation principale</div>
+                                <div class="info-value">{{ demande.get_motivation_principale_display }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider-modern"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-history"></i> Expérience antérieure</div>
+                                <div class="info-value">{{ demande.experience_anterieure|default:"Non renseignée" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-tools"></i> Compétences actuelles</div>
+                                <div class="info-value">{{ demande.competences_actuelles|default:"Non renseignées" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-clock"></i> Disponibilité</div>
+                                <div class="info-value">{{ demande.disponibilite_horaire }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-exclamation-triangle"></i> Contraintes</div>
+                                <div class="info-value">{{ demande.contraintes_personnelles|default:"Aucune contrainte" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if demande.a_idee_projet %}
+                    <div class="project-section">
+                        <div class="project-title">
+                            <i class="fas fa-lightbulb"></i>
+                            Projet post-formation
+                        </div>
+                        <div class="info-value">{{ demande.description_projet }}</div>
+                        {% if demande.souhaite_financement %}
+                        <div style="margin-top: 1rem;">
+                            <strong style="color: var(--success-color);">Financement souhaité :</strong> 
+                            <span style="color: var(--text-primary); font-weight: 600;">{{ demande.montant_financement|floatformat:0 }} FCFA</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="divider-modern"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-calendar"></i> Date de demande</div>
+                                <div class="info-value">{{ demande.date_demande|date:"d/m/Y à H:i" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label"><i class="fas fa-user-friends"></i> Accepte mentoring</div>
+                                <div class="info-value">
+                                    {% if demande.accepte_mentoring %}
+                                        <span style="color: var(--success-color);"><i class="fas fa-check"></i> Oui</span>
+                                    {% else %}
+                                        <span style="color: var(--danger-color);"><i class="fas fa-times"></i> Non</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyse IA -->
+            {% if demande.analyse_llm %}
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-brain"></i> Analyse par Intelligence Artificielle</h5>
+                    {% if demande.score_formabilite %}
+                    <span class="badge-modern score-badge {% if demande.score_formabilite >= 70 %}badge-success-modern{% elif demande.score_formabilite >= 40 %}badge-warning-modern{% else %}badge-danger-modern{% endif %}">
+                        Score : {{ demande.score_formabilite }}%
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="card-body-modern">
+                    <div class="analysis-section">
+                        <div class="analysis-title">
+                            <i class="fas fa-search"></i>
+                            Analyse détaillée
+                        </div>
+                        <div class="analysis-content">{{ demande.analyse_llm }}</div>
+                    </div>
+                    
+                    {% if demande.recommandations_llm %}
+                    <div class="analysis-section">
+                        <div class="analysis-title">
+                            <i class="fas fa-lightbulb"></i>
+                            Recommandations
+                        </div>
+                        <div class="analysis-content">{{ demande.recommandations_llm }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if demande.criteres_evaluacion %}
+                    <div class="analysis-section">
+                        <div class="analysis-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Critères d'évaluation
+                        </div>
+                        <div class="criteria-grid">
+                            {% for critere, score in demande.criteres_evaluacion.items %}
+                            <div class="criteria-item">
+                                <div class="criteria-label">{{ critere|title }}</div>
+                                <div class="criteria-score">{{ score }}/20</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <small style="color: var(--text-secondary); font-style: italic;">
+                            <i class="fas fa-clock"></i> Analyse effectuée le {{ demande.date_analyse|date:"d/m/Y à H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Profil du demandeur et actions -->
+        <div class="col-lg-4">
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-user"></i> Profil du Demandeur</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="profile-header">
+                        <div class="profile-name">{{ demande.personne.get_full_name }}</div>
+                        <div class="profile-age">{{ demande.personne.age }} ans</div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <div class="profile-item">
+                            <span class="profile-label">Éducation</span>
+                            <span class="profile-value">{{ demande.personne.get_niveau_education_display }}</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Emploi</span>
+                            <span class="profile-value">{{ demande.personne.emploi }}</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Revenu</span>
+                            <span class="profile-value">{{ demande.personne.revenu|floatformat:0 }} FCFA</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Région</span>
+                            <span class="profile-value">{{ demande.personne.region_geographique }}</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Ménage</span>
+                            <span class="profile-value">{{ demande.personne.nombre_personnes_menage }} personnes</span>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-label">Santé</span>
+                            <span class="profile-value">{{ demande.personne.get_etat_sante_display }}</span>
+                        </div>
+                        {% if demande.personne.handicap %}
+                        <div class="profile-item">
+                            <span class="profile-label">Handicap</span>
+                            <span class="profile-value">{{ demande.personne.get_handicap_display }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-cogs"></i> Actions</h5>
+                </div>
+                <div class="card-body-modern">
+                    {% if demande.statut == 'en_attente' or demande.statut == 'analysee' %}
+                    <div class="action-form">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label-modern">Commentaire</label>
+                                <textarea name="commentaire" class="form-control-modern" rows="3" 
+                                          placeholder="Commentaire sur la décision..."></textarea>
+                            </div>
+                            <button type="submit" name="action" value="accepter" class="btn-modern btn-success-modern">
+                                <i class="fas fa-check"></i>
+                                Accepter
+                                <div class="loading-spinner"></div>
+                            </button>
+                            <button type="submit" name="action" value="refuser" class="btn-modern btn-danger-modern">
+                                <i class="fas fa-times"></i>
+                                Refuser
+                                <div class="loading-spinner"></div>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    {% if demande.statut != 'en_attente' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="reanalyser" class="btn-modern btn-outline-modern">
+                            <i class="fas fa-sync"></i>
+                            Relancer l'analyse IA
+                            <div class="loading-spinner"></div>
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if demande.statut == 'acceptee' and parcours %}
+                    <a href="{% url 'formation:admin_parcours_detail' parcours.id %}" class="btn-modern btn-primary-modern">
+                        <i class="fas fa-route"></i>
+                        Voir le parcours
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if demande.commentaire_decision %}
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-gavel"></i> Décision</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="decision-section">
+                        <div class="analysis-content">{{ demande.commentaire_decision }}</div>
+                        <div class="decision-meta">
+                            <i class="fas fa-user"></i> Par {{ demande.responsable_decision.username }} 
+                            le {{ demande.date_decision|date:"d/m/Y à H:i" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée des cartes
+    const cards = document.querySelectorAll('.modern-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.2) + 's';
+    });
+
+    // Gestion des formulaires avec loading
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const button = e.submitter;
+            if (button) {
+                const icon = button.querySelector('i:not(.loading-spinner)');
+                const spinner = button.querySelector('.loading-spinner');
+                
+                if (icon && spinner) {
+                    icon.style.display = 'none';
+                    spinner.style.display = 'inline-block';
+                    button.disabled = true;
+                    
+                    // Simuler un délai pour les tests
+                    setTimeout(() => {
+                        // Le formulaire sera soumis normalement
+                    }, 100);
+                }
+            }
+        });
+    });
+
+    // Animation des scores IA
+    const scoreElements = document.querySelectorAll('.criteria-score');
+    scoreElements.forEach((element, index) => {
+        const scoreText = element.textContent;
+        const score = parseInt(scoreText.split('/')[0]);
+        element.style.opacity = '0';
+        setTimeout(() => {
+            element.style.opacity = '1';
+            element.style.transition = 'opacity 0.5s ease';
+            
+            // Animation du compteur
+            let currentScore = 0;
+            const increment = score / 20;
+            const timer = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= score) {
+                    currentScore = score;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(currentScore) + '/20';
+            }, 50);
+        }, index * 200);
+    });
+
+    // Animation de pulsation pour les éléments importants
+    const statusDots = document.querySelectorAll('.status-dot');
+    statusDots.forEach(dot => {
+        dot.style.animationDelay = Math.random() * 2 + 's';
+    });
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.2 + index * 0.1);
+            shape.style.transform = `translateY(${rate}px) rotate(${rate * 0.5}deg)`;
+        });
+    });
+});
+</script>
+
+{% endblock %}

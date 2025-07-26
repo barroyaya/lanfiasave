@@ -23,7 +23,7 @@
             <span class="stat-label">Personnes aidées</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number" id="totalMontant">0F</span>
+            <span class="stat-number" id="totalMontant">0 FCFA</span>
             <span class="stat-label">Collectés ce mois</span>
           </div>
           <div class="stat-item">
@@ -98,18 +98,18 @@
         <!-- Étape 3 -->
         <div class="form-step" data-step="3">
           <div class="step-header">
-            <h3><i class="fas fa-euro-sign"></i> Montant et détails</h3>
+            <h3><i class="fas fa-money-bill-wave"></i> Montant et détails</h3>
             <p>Précisez le montant de votre don et ajoutez des informations</p>
           </div>
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-money-bill-wave"></i> Montant du don (€)</label>
+            <label class="form-label"><i class="fas fa-money-bill-wave"></i> Montant du don (FCFA)</label>
             <div class="amount-input-container">
-              <input type="number" name="montant" id="montant" class="form-input amount-input" min="1" step="0.01" required>
+              <input type="number" name="montant" id="montant" class="form-input amount-input" min="100" step="50" required>
               <div class="amount-suggestions">
-                <button type="button" class="amount-btn" data-amount="10">10€</button>
-                <button type="button" class="amount-btn" data-amount="25">25€</button>
-                <button type="button" class="amount-btn" data-amount="50">50€</button>
-                <button type="button" class="amount-btn" data-amount="100">100€</button>
+                <button type="button" class="amount-btn" data-amount="5000">5 000 F</button>
+                <button type="button" class="amount-btn" data-amount="10000">10 000 F</button>
+                <button type="button" class="amount-btn" data-amount="25000">25 000 F</button>
+                <button type="button" class="amount-btn" data-amount="50000">50 000 F</button>
               </div>
             </div>
             <div class="amount-impact" id="amountImpact"></div>
@@ -1061,14 +1061,14 @@
           animateNumber('totalPersonnes', 0, data.total_personnes, 2000);
         }
         if (data.total_montant !== undefined) {
-          animateNumber('totalMontant', 0, Math.round(data.total_montant), 2000, ' Fcfa');
+          animateNumber('totalMontant', 0, Math.round(data.total_montant), 2000, ' FCFA');
         }
       })
       .catch(error => {
         console.log('Erreur chargement stats:', error);
         // Valeurs par défaut en cas d'erreur
         animateNumber('totalPersonnes', 0, 247, 2000);
-        animateNumber('totalMontant', 0, 15420, 2000, '€');
+        animateNumber('totalMontant', 0, 1542000, 2000, ' FCFA');
       });
   }
 
@@ -1087,7 +1087,7 @@
         current = end;
         clearInterval(timer);
       }
-      element.textContent = Math.floor(current) + suffix;
+      element.textContent = Math.floor(current).toLocaleString() + suffix;
     }, 16);
   }
 
@@ -1118,17 +1118,17 @@
             const option = document.createElement('option');
             option.value = personne.id;
             
-            // Formater le texte de manière plus lisible
+            // Formater le texte avec FCFA
             const nomComplet = personne.nom_complet || 'Nom inconnu';
             const username = personne.username || 'utilisateur';
             const pourcentage = personne.pourcentage_atteint || 0;
-            const montantRestant = (personne.montant_requis - personne.montant_recu).toFixed(2);
+            const montantRestant = (personne.montant_requis - personne.montant_recu).toLocaleString();
             
-            option.textContent = `${nomComplet} (@${username}) - ${pourcentage}% financé (reste ${montantRestant}€)`;
+            option.textContent = `${nomComplet} (@${username}) - ${pourcentage}% financé (reste ${montantRestant} FCFA)`;
             option.dataset.personData = JSON.stringify(personne);
             
             // Ajouter un titre pour l'info-bulle
-            option.title = `${nomComplet} - ${personne.entite || ''}\nDéjà reçu: ${personne.montant_recu}€ / ${personne.montant_requis}€\nManque: ${montantRestant}€`;
+            option.title = `${nomComplet} - ${personne.entite || ''}\nDéjà reçu: ${personne.montant_recu.toLocaleString()} FCFA / ${personne.montant_requis.toLocaleString()} FCFA\nManque: ${montantRestant} FCFA`;
             
             elements.personneField.appendChild(option);
           });
@@ -1214,8 +1214,8 @@
             <h4>${person.nom_complet}</h4>
             <p>@${person.username} • ${person.entite}</p>
             <p style="font-size: 0.75rem; color: #10b981;">
-              <i class="fas fa-euro-sign" style="margin-right: 0.25rem;"></i>
-              ${person.montant_recu}€ / ${person.montant_requis}€ collectés
+              <i class="fas fa-money-bill-wave" style="margin-right: 0.25rem;"></i>
+              ${person.montant_recu.toLocaleString()} FCFA / ${person.montant_requis.toLocaleString()} FCFA collectés
             </p>
           </div>
         </div>
@@ -1227,7 +1227,7 @@
           <div style="margin-top: 0.5rem;">
             <small style="color: #ef4444;">
               <i class="fas fa-target" style="margin-right: 0.25rem;"></i>
-              Encore ${(person.montant_requis - person.montant_recu).toFixed(2)}€ nécessaires
+              Encore ${(person.montant_requis - person.montant_recu).toLocaleString()} FCFA nécessaires
             </small>
           </div>
         </div>
@@ -1266,7 +1266,7 @@
           <div style="font-size: 0.8rem; opacity: 0.9;">Progression moy.</div>
         </div>
         <div>
-          <div style="font-size: 1.2rem; font-weight: bold;">${totalNeeded.toFixed(0)}€</div>
+          <div style="font-size: 1.2rem; font-weight: bold;">${totalNeeded.toLocaleString()} F</div>
           <div style="font-size: 0.8rem; opacity: 0.9;">Total nécessaire</div>
         </div>
       </div>
@@ -1292,14 +1292,14 @@
 
     if (amount && amount > 0) {
       let impactText = '';
-      if (amount >= 100) {
+      if (amount >= 50000) {
         impactText = `<i class="fas fa-star text-warning"></i> <strong>Impact exceptionnel !</strong> Votre don peut transformer une vie entière.`;
-      } else if (amount >= 50) {
+      } else if (amount >= 25000) {
         impactText = `<i class="fas fa-heart text-danger"></i> <strong>Impact significatif !</strong> Votre don couvre les besoins essentiels pendant plusieurs jours.`;
-      } else if (amount >= 25) {
+      } else if (amount >= 10000) {
         impactText = `<i class="fas fa-thumbs-up text-success"></i> <strong>Impact important !</strong> Votre don aide concrètement au quotidien.`;
       } else {
-        impactText = `<i class="fas fa-smile text-primary"></i> <strong>Chaque euro compte !</strong> Votre geste solidaire fait la différence.`;
+        impactText = `<i class="fas fa-smile text-primary"></i> <strong>Chaque franc compte !</strong> Votre geste solidaire fait la différence.`;
       }
 
       impactElement.innerHTML = impactText;
@@ -1353,7 +1353,7 @@
         console.log(`Validation étape 2: ✅ (sélection optionnelle)`);
         break;
       case 3:
-        const montantValid = elements.montantField && elements.montantField.value && parseFloat(elements.montantField.value) > 0;
+        const montantValid = elements.montantField && elements.montantField.value && parseFloat(elements.montantField.value) >= 100;
         const provenanceValid = elements.provenanceField && elements.provenanceField.value.trim() !== '';
         isValid = montantValid && provenanceValid;
         console.log(`Validation étape 3: ${isValid ? '✅' : '❌'} (montant: ${montantValid ? '✅' : '❌'}, provenance: ${provenanceValid ? '✅' : '❌'})`);
@@ -1385,8 +1385,8 @@
           helpMessage = 'Veuillez sélectionner une catégorie de vulnérabilité.';
           break;
         case 3:
-          if (!elements.montantField || !elements.montantField.value || parseFloat(elements.montantField.value) <= 0) {
-            helpMessage = 'Veuillez saisir un montant supérieur à 0€.';
+          if (!elements.montantField || !elements.montantField.value || parseFloat(elements.montantField.value) < 100) {
+            helpMessage = 'Veuillez saisir un montant d\'au moins 100 FCFA.';
           } else if (!elements.provenanceField || !elements.provenanceField.value.trim()) {
             helpMessage = 'Veuillez indiquer la provenance de votre don.';
           }
@@ -1506,8 +1506,8 @@
         <strong>${beneficiairesText}</strong>
       </div>
       <div class="summary-item">
-        <span><i class="fas fa-euro-sign"></i> Montant</span>
-        <strong>${montant}€</strong>
+        <span><i class="fas fa-money-bill-wave"></i> Montant</span>
+        <strong>${parseInt(montant).toLocaleString()} FCFA</strong>
       </div>
       <div class="summary-item">
         <span><i class="fas fa-map-marker-alt"></i> Provenance</span>
@@ -1521,7 +1521,7 @@
       ` : ''}
       <div class="summary-item">
         <span><i class="fas fa-heart"></i> Total de votre don</span>
-        <strong style="color: #fa709a; font-size: 1.3rem;">${montant}€</strong>
+        <strong style="color: #fa709a; font-size: 1.3rem;">${parseInt(montant).toLocaleString()} FCFA</strong>
       </div>
     `;
   }
@@ -1582,7 +1582,7 @@
         <div style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;">
           <i class="fas fa-check-circle"></i>
         </div>
-        <p><strong>Montant:</strong> ${montant}€</p>
+        <p><strong>Montant:</strong> ${parseInt(montant).toLocaleString()} FCFA</p>
         <p><strong>Référence:</strong> DON-${Date.now().toString().slice(-6)}</p>
         <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
           Vous recevrez une confirmation par email dans quelques minutes.
@@ -1652,442 +1652,3 @@
   </script>
 
 {% endblock %}
-
-
-{##}
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block title %}Faire un Don - LanfiaSave{% endblock %}#}
-{##}
-{#{% block content %}#}
-{#  <div class="donation-container">#}
-{#    <h2>Faire un Don</h2>#}
-{#    <form method="post" id="don_form" class="donation-form">#}
-{#      {% csrf_token %}#}
-{#      <div class="form-group">#}
-{#        {{ form.as_p }}#}
-{#      </div>#}
-{#      <button type="submit" class="btn-submit">Faire un Don</button>#}
-{#    </form>#}
-{#  </div>#}
-{##}
-{#  <script>#}
-{#    // Sélectionner les éléments du formulaire#}
-{#    const entiteField = document.querySelector('select[name="entite_vulnerable"]');#}
-{#    const personneField = document.querySelector('select[name="personne_vulnerable"]');#}
-{#    const montantField = document.querySelector('input[name="montant"]');#}
-{##}
-{#    // Fonction pour charger les personnes vulnérables en fonction de l'entité sélectionnée#}
-{#    function loadPersonnesVulnerables(entite) {#}
-{#    fetch(`/donations/get_personnes_vulnerables/${entite}/`)#}
-{#        .then(response => response.json())#}
-{#        .then(data => {#}
-{#            personneField.innerHTML = '';  #}
-{##}
-{#            const defaultOption = document.createElement('option');#}
-{#            defaultOption.value = '';#}
-{#            defaultOption.textContent = 'Sélectionner une personne';#}
-{#            personneField.appendChild(defaultOption);#}
-{##}
-{#            if (data && data.personnes && data.personnes.length > 0) {#}
-{#                data.personnes.forEach(personne => {#}
-{#                    const option = document.createElement('option');#}
-{#                    option.value = personne.id;#}
-{#                    // Afficher le nom complet + nom d'utilisateur + pourcentage d'aide reçue#}
-{#                    option.textContent = `${personne.nom_complet} (@${personne.username}) - ${personne.pourcentage_atteint}% financé`;#}
-{#                    personneField.appendChild(option);#}
-{#                });#}
-{#            } else {#}
-{#                const noOption = document.createElement('option');#}
-{#                noOption.disabled = true;#}
-{#                noOption.textContent = 'Aucune personne vulnérable validée pour cette catégorie';#}
-{#                personneField.appendChild(noOption);#}
-{#            }#}
-{#        })#}
-{#        .catch(error => console.error('Erreur lors du chargement des personnes vulnérables:', error));#}
-{#}#}
-{##}
-{#    // Ajouter un événement pour quand l'entité est changée#}
-{#    entiteField.addEventListener('change', function() {#}
-{#        const entite = entiteField.value;#}
-{#        loadPersonnesVulnerables(entite);  // Charger les personnes vulnérables pour l'entité sélectionnée#}
-{#    });#}
-{##}
-{#    // Charger les personnes vulnérables si une entité est déjà sélectionnée lors de l'affichage du formulaire#}
-{#    if (entiteField.value) {#}
-{#        loadPersonnesVulnerables(entiteField.value);#}
-{#    }#}
-{##}
-{#    // Lorsque la personne vulnérable est sélectionnée, ajuster le montant à répartir#}
-{#    personneField.addEventListener('change', function() {#}
-{#        const personnesSelectionnees = personneField.selectedOptions.length;#}
-{#        const montant = parseFloat(montantField.value);#}
-{##}
-{#        if (personnesSelectionnees > 0 && montant > 0) {#}
-{#            const montantParPersonne = montant / personnesSelectionnees;#}
-{#            console.log(`Montant par personne : ${montantParPersonne}`);#}
-{#        } else if (montant > 0) {#}
-{#            const entite = entiteField.value;#}
-{#            fetch(`/donations/get_personnes_vulnerables/${entite}/`)#}
-{#                .then(response => response.json())#}
-{#                .then(data => {#}
-{#                    const personnes = data.personnes;#}
-{#                    const montantParPersonne = montant / personnes.length;#}
-{#                    console.log(`Montant par personne (divisé parmi toutes) : ${montantParPersonne}`);#}
-{#                })#}
-{#                .catch(error => console.error('Erreur lors du calcul du montant par personne', error));#}
-{#        }#}
-{#    });#}
-{#  </script>#}
-{##}
-{#  <style>#}
-{#    /* Conteneur principal */#}
-{#    .donation-container {#}
-{#        width: 100%;#}
-{#        max-width: 800px;#}
-{#        margin: 0 auto;#}
-{#        padding: 40px;#}
-{#        background: rgba(255, 255, 255, 0.8); /* Couleur légèrement blanche et translucide */#}
-{#        color: #333; /* Texte sombre */#}
-{#        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15); /* Ombre subtile mais présente */#}
-{#        border-radius: 10px;#}
-{#        text-align: center;#}
-{#        animation: fadeIn 1s ease-out;#}
-{#    }#}
-{##}
-{#    h2 {#}
-{#        font-size: 2rem;#}
-{#        color: #333;#}
-{#        margin-bottom: 20px;#}
-{#    }#}
-{##}
-{#    /* Styles pour le formulaire */#}
-{#    .donation-form {#}
-{#        width: 100%;#}
-{#        margin: 0 auto;#}
-{#        animation: slideIn 0.5s ease-out;#}
-{#    }#}
-{##}
-{#    .form-group {#}
-{#        margin-bottom: 20px;#}
-{#        text-align: left;#}
-{#    }#}
-{##}
-{#    /* Champ de saisie */#}
-{#    input, select {#}
-{#        width: 100%;#}
-{#        padding: 12px;#}
-{#        font-size: 1rem;#}
-{#        border: 1px solid #ddd;#}
-{#        border-radius: 8px;#}
-{#        margin-top: 8px;#}
-{#        box-sizing: border-box;#}
-{#        transition: border-color 0.3s ease;#}
-{#        background-color: rgba(50, 50, 50, 0.1); /* Fond légèrement sombre pour les champs */#}
-{#        color: #333; /* Texte sombre */#}
-{#    }#}
-{##}
-{#    input:focus, select:focus {#}
-{#        outline: none;#}
-{#        border-color: #3498db; /* Bordure bleue au focus */#}
-{#    }#}
-{##}
-{#    /* Bouton de soumission */#}
-{#    .btn-submit {#}
-{#        width: 100%;#}
-{#        padding: 12px;#}
-{#        font-size: 1.1rem;#}
-{#        color: #fff;#}
-{#        background-color: #3498db; /* Bleu clair pour le bouton */#}
-{#        border: none;#}
-{#        border-radius: 8px;#}
-{#        cursor: pointer;#}
-{#        transition: background-color 0.3s ease, transform 0.3s ease;#}
-{#    }#}
-{##}
-{#    .btn-submit:hover {#}
-{#        background-color: #2980b9;#}
-{#        transform: translateY(-3px); /* Légère animation au survol */#}
-{#    }#}
-{##}
-{#    /* Animation d'apparition du formulaire */#}
-{#    @keyframes slideIn {#}
-{#        0% {#}
-{#            opacity: 0;#}
-{#            transform: translateY(20px);#}
-{#        }#}
-{#        100% {#}
-{#            opacity: 1;#}
-{#            transform: translateY(0);#}
-{#        }#}
-{#    }#}
-{##}
-{#    /* Animation de la page d'inscription */#}
-{#    @keyframes fadeIn {#}
-{#        0% {#}
-{#            opacity: 0;#}
-{#        }#}
-{#        100% {#}
-{#            opacity: 1;#}
-{#        }#}
-{#    }#}
-{##}
-{#    /* Responsivité */#}
-{#    @media (max-width: 480px) {#}
-{#        .donation-container {#}
-{#            padding: 20px;#}
-{#        }#}
-{##}
-{#        h2 {#}
-{#            font-size: 1.5rem;#}
-{#        }#}
-{#    }#}
-{#  </style>#}
-{##}
-{#{% endblock %}#}
-
-
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block title %}Faire un Don - LanfiaSave{% endblock %}#}
-{##}
-{#{% block content %}#}
-{#  <div class="donation-container">#}
-{#    <h2>Faire un Don</h2>#}
-{#    <form method="post" id="don_form" class="donation-form">#}
-{#      {% csrf_token %}#}
-{#      <div class="form-group">#}
-{#       #}
-{#        {{form.as_p}}#}
-{#      </div>#}
-{#      <button type="submit" class="btn-submit">Faire un Don</button>#}
-{#    </form>#}
-{#  </div>#}
-{##}
-{#  <script>#}
-{#    // Sélectionner les éléments du formulaire#}
-{#    const entiteField = document.querySelector('select[name="entite_vulnerable"]');#}
-{#    const personneField = document.querySelector('select[name="personne_vulnerable"]');#}
-{##}
-{#    // Fonction pour charger les personnes vulnérables#}
-{#    function loadPersonnesVulnerables(entite) {#}
-{#        fetch(`/donations/get_personnes_vulnerables/${entite}/`)  // Requête à l'API pour récupérer les personnes vulnérables#}
-{#            .then(response => response.json())#}
-{#            .then(data => {#}
-{#                // Vider le champ des personnes vulnérables avant d'ajouter les nouvelles options#}
-{#                personneField.innerHTML = '';  #}
-{##}
-{#                // Ajouter une option vide par défaut#}
-{#                const defaultOption = document.createElement('option');#}
-{#                defaultOption.value = '';#}
-{#                defaultOption.textContent = 'Sélectionner une personne';#}
-{#                personneField.appendChild(defaultOption);#}
-{##}
-{#                // Vérifier que les données sont présentes et que 'personnes' n'est pas vide#}
-{#                if (data && data.personnes) {#}
-{#                    // Ajouter chaque personne vulnérable comme option#}
-{#                    data.personnes.forEach(personne => {#}
-{#                        const option = document.createElement('option');#}
-{#                        option.value = personne.id;  // L'ID de la personne vulnérable#}
-{#                        option.textContent = `${personne.nom_complet}`;  // Affichage du username de la personne#}
-{#                        personneField.appendChild(option);#}
-{#                    });#}
-{#                } else {#}
-{#                    // Afficher un message si aucune personne vulnérable n'est trouvée#}
-{#                    const noOption = document.createElement('option');#}
-{#                    noOption.disabled = true;#}
-{#                    noOption.textContent = 'Aucune personne vulnérable disponible pour cette entité';#}
-{#                    personneField.appendChild(noOption);#}
-{#                }#}
-{#            })#}
-{#            .catch(error => console.error('Erreur lors du chargement des personnes vulnérables:', error));#}
-{#    }#}
-{##}
-{#    // Ajouter un événement pour quand l'entité est changée#}
-{#    entiteField.addEventListener('change', function() {#}
-{#        const entite = entiteField.value;#}
-{#        loadPersonnesVulnerables(entite);  // Charger les personnes vulnérables pour l'entité sélectionnée#}
-{#    });#}
-{##}
-{#    // Charger les personnes vulnérables si une entité est déjà sélectionnée lors de l'affichage du formulaire#}
-{#    if (entiteField.value) {#}
-{#        loadPersonnesVulnerables(entiteField.value);#}
-{#    }#}
-{#  </script>#}
-{##}
-{#  <style>#}
-{#    /* Conteneur principal */#}
-{#    .donation-container {#}
-{#        width: 100%;#}
-{#        max-width: 800px;#}
-{#        margin: 0 auto;#}
-{#        padding: 40px;#}
-{#        background: rgba(255, 255, 255, 0.8); /* Couleur légèrement blanche et translucide */#}
-{#        color: #333; /* Texte sombre */#}
-{#        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15); /* Ombre subtile mais présente */#}
-{#        border-radius: 10px;#}
-{#        text-align: center;#}
-{#        animation: fadeIn 1s ease-out;#}
-{#    }#}
-{##}
-{#    h2 {#}
-{#        font-size: 2rem;#}
-{#        color: #333;#}
-{#        margin-bottom: 20px;#}
-{#    }#}
-{##}
-{#    /* Styles pour le formulaire */#}
-{#    .donation-form {#}
-{#        width: 100%;#}
-{#        margin: 0 auto;#}
-{#        animation: slideIn 0.5s ease-out;#}
-{#    }#}
-{##}
-{#    .form-group {#}
-{#        margin-bottom: 20px;#}
-{#        text-align: left;#}
-{#    }#}
-{##}
-{#    /* Champ de saisie */#}
-{#    input, select {#}
-{#        width: 100%;#}
-{#        padding: 12px;#}
-{#        font-size: 1rem;#}
-{#        border: 1px solid #ddd;#}
-{#        border-radius: 8px;#}
-{#        margin-top: 8px;#}
-{#        box-sizing: border-box;#}
-{#        transition: border-color 0.3s ease;#}
-{#        background-color: rgba(50, 50, 50, 0.1); /* Fond légèrement sombre pour les champs */#}
-{#        color: #333; /* Texte sombre */#}
-{#    }#}
-{##}
-{#    input:focus, select:focus {#}
-{#        outline: none;#}
-{#        border-color: #3498db; /* Bordure bleue au focus */#}
-{#    }#}
-{##}
-{#    /* Bouton de soumission */#}
-{#    .btn-submit {#}
-{#        width: 100%;#}
-{#        padding: 12px;#}
-{#        font-size: 1.1rem;#}
-{#        color: #fff;#}
-{#        background-color: #3498db; /* Bleu clair pour le bouton */#}
-{#        border: none;#}
-{#        border-radius: 8px;#}
-{#        cursor: pointer;#}
-{#        transition: background-color 0.3s ease, transform 0.3s ease;#}
-{#    }#}
-{##}
-{#    .btn-submit:hover {#}
-{#        background-color: #2980b9;#}
-{#        transform: translateY(-3px); /* Légère animation au survol */#}
-{#    }#}
-{##}
-{#    /* Animation d'apparition du formulaire */#}
-{#    @keyframes slideIn {#}
-{#        0% {#}
-{#            opacity: 0;#}
-{#            transform: translateY(20px);#}
-{#        }#}
-{#        100% {#}
-{#            opacity: 1;#}
-{#            transform: translateY(0);#}
-{#        }#}
-{#    }#}
-{##}
-{#    /* Animation de la page d'inscription */#}
-{#    @keyframes fadeIn {#}
-{#        0% {#}
-{#            opacity: 0;#}
-{#        }#}
-{#        100% {#}
-{#            opacity: 1;#}
-{#        }#}
-{#    }#}
-{##}
-{#    /* Responsivité */#}
-{#    @media (max-width: 480px) {#}
-{#        .donation-container {#}
-{#            padding: 20px;#}
-{#        }#}
-{##}
-{#        h2 {#}
-{#            font-size: 1.5rem;#}
-{#        }#}
-{#    }#}
-{#  </style>#}
-{##}
-{#{% endblock %}#}
-
-
-
-
-{##}
-{##}
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block title %}Faire un Don - LanfiaSave{% endblock %}#}
-{##}
-{#{% block content %}#}
-{#  <h2>Faire un Don</h2>#}
-{#  <form method="post" id="don_form">#}
-{#    {% csrf_token %}#}
-{#    {{ form.as_p }}#}
-{#    <button type="submit">Faire un Don</button>#}
-{#  </form>#}
-{##}
-{# <script>#}
-{#// Sélectionner les éléments du formulaire#}
-{#const entiteField = document.querySelector('select[name="entite_vulnerable"]');#}
-{#const personneField = document.querySelector('select[name="personne_vulnerable"]');#}
-{##}
-{#// Fonction pour charger les personnes vulnérables#}
-{#function loadPersonnesVulnerables(entite) {#}
-{#    fetch(`/donations/get_personnes_vulnerables/${entite}/`)  // Requête à l'API pour récupérer les personnes vulnérables#}
-{#        .then(response => response.json())#}
-{#        .then(data => {#}
-{#            // Vider le champ des personnes vulnérables avant d'ajouter les nouvelles options#}
-{#            personneField.innerHTML = '';  #}
-{##}
-{#            // Ajouter une option vide par défaut#}
-{#            const defaultOption = document.createElement('option');#}
-{#            defaultOption.value = '';#}
-{#            defaultOption.textContent = 'Sélectionner une personne';#}
-{#            personneField.appendChild(defaultOption);#}
-{##}
-{#            // Vérifier que les données sont présentes et que 'personnes' n'est pas vide#}
-{#            if (data && data.personnes) {#}
-{#                // Ajouter chaque personne vulnérable comme option#}
-{#                data.personnes.forEach(personne => {#}
-{#                    const option = document.createElement('option');#}
-{#                    option.value = personne.id;  // L'ID de la personne vulnérable#}
-{#                    option.textContent = `${personne.username}`;  // Affichage du username de la personne#}
-{#                    personneField.appendChild(option);#}
-{#                });#}
-{#            } else {#}
-{#                // Afficher un message si aucune personne vulnérable n'est trouvée#}
-{#                const noOption = document.createElement('option');#}
-{#                noOption.disabled = true;#}
-{#                noOption.textContent = 'Aucune personne vulnérable disponible pour cette entité';#}
-{#                personneField.appendChild(noOption);#}
-{#            }#}
-{#        })#}
-{#        .catch(error => console.error('Erreur lors du chargement des personnes vulnérables:', error));#}
-{#}#}
-{##}
-{#// Ajouter un événement pour quand l'entité est changée#}
-{#entiteField.addEventListener('change', function() {#}
-{#    const entite = entiteField.value;#}
-{#    loadPersonnesVulnerables(entite);  // Charger les personnes vulnérables pour l'entité sélectionnée#}
-{#});#}
-{##}
-{#// Charger les personnes vulnérables si une entité est déjà sélectionnée lors de l'affichage du formulaire#}
-{#if (entiteField.value) {#}
-{#    loadPersonnesVulnerables(entiteField.value);#}
-{#}#}
-{#</script>#}
-{##}
-{##}
-{#{% endblock %}#}

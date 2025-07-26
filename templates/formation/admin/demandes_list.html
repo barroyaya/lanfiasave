@@ -1,0 +1,808 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Demandes{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --border-glass: rgba(255, 255, 255, 0.2);
+        --text-light: rgba(255, 255, 255, 0.9);
+        --text-muted: rgba(255, 255, 255, 0.6);
+        --success-color: #4facfe;
+        --warning-color: #f093fb;
+        --danger-color: #f5576c;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: var(--text-light);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #fff, #f8f9fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .modern-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group-modern {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label-modern {
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-select-modern,
+    .form-input-modern {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: var(--text-light);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-select-modern:focus,
+    .form-input-modern:focus {
+        outline: none;
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-select-modern option {
+        background: #2d3748;
+        color: white;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(45deg, var(--success-color), #00f2fe);
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-success-modern {
+        background: linear-gradient(45deg, #4facfe, #00f2fe);
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-success-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    .table-modern {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .table-modern th {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        font-weight: 700;
+        padding: 1.2rem 1rem;
+        border: none;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-modern td {
+        padding: 1.2rem 1rem;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        vertical-align: middle;
+    }
+
+    .table-modern tr:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.002);
+        transition: all 0.2s ease;
+    }
+
+    .badge-modern {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        display: inline-block;
+    }
+
+    .badge-success-modern {
+        background: linear-gradient(45deg, #4facfe, #00f2fe);
+        color: white;
+    }
+
+    .badge-warning-modern {
+        background: linear-gradient(45deg, #f093fb, #f5576c);
+        color: white;
+    }
+
+    .badge-danger-modern {
+        background: linear-gradient(45deg, #f5576c, #ff6b6b);
+        color: white;
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-icon-modern {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+        transition: all 0.3s ease;
+    }
+
+    .btn-icon-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+        color: white;
+    }
+
+    .btn-icon-success:hover {
+        background: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .btn-icon-danger:hover {
+        background: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .page-item-modern {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .page-item-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .page-item-modern.active {
+        background: linear-gradient(45deg, var(--success-color), #00f2fe);
+    }
+
+    .page-link-modern {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 600;
+        min-width: 44px;
+        text-align: center;
+    }
+
+    .page-item-modern.active .page-link-modern {
+        color: white;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-light);
+    }
+
+    .user-details {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .formation-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .formation-name {
+        font-weight: 600;
+        color: var(--text-light);
+    }
+
+    .formation-type {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .score-display {
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .table-responsive {
+            margin: -1rem;
+        }
+
+        .pagination-modern {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .btn-sm-modern {
+            padding: 0.4rem 0.6rem;
+            min-width: 36px;
+            height: 36px;
+        }
+    }
+
+    .filter-summary {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tag {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+    }
+</style>
+
+<div class="animated-bg"></div>
+
+<div class="container-fluid">
+    <!-- En-tête de page -->
+    <div class="page-header">
+        <h1 class="page-title">Gestion des Demandes</h1>
+        <a href="{% url 'formation:export_demandes_csv' %}" class="btn-modern btn-success-modern">
+            <i class="fas fa-download"></i>
+            Exporter CSV
+        </a>
+    </div>
+
+    <!-- Filtres -->
+    <div class="modern-card">
+        <div class="card-header-modern">
+            <h5 style="margin: 0; color: var(--text-light); font-weight: 600;">
+                <i class="fas fa-filter"></i> Filtres de recherche
+            </h5>
+        </div>
+        <div class="card-body-modern">
+            <form method="get" class="filters-grid">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Statut</label>
+                    <select name="statut" class="form-select-modern">
+                        <option value="">Tous les statuts</option>
+                        {% for statut_value, statut_label in statuts %}
+                        <option value="{{ statut_value }}" {% if statut_filter == statut_value %}selected{% endif %}>
+                            {{ statut_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Formation</label>
+                    <select name="formation" class="form-select-modern">
+                        <option value="">Toutes les formations</option>
+                        {% for formation in formations %}
+                        <option value="{{ formation.id }}" {% if formation_filter == formation.id|stringformat:"s" %}selected{% endif %}>
+                            {{ formation.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group-modern">
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-search"></i>
+                            Filtrer
+                        </button>
+                        <a href="{% url 'formation:admin_demandes_list' %}" class="btn-modern btn-outline-modern">
+                            <i class="fas fa-redo"></i>
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Résumé des filtres actifs -->
+            {% if statut_filter or formation_filter %}
+            <div class="filter-summary">
+                {% if statut_filter %}
+                <span class="filter-tag">
+                    <i class="fas fa-tag"></i> Statut: {{ statut_filter }}
+                </span>
+                {% endif %}
+                {% if formation_filter %}
+                <span class="filter-tag">
+                    <i class="fas fa-graduation-cap"></i> Formation filtrée
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Liste des demandes -->
+    <div class="modern-card">
+        <div class="card-header-modern">
+            <h5 style="margin: 0; color: var(--text-light); font-weight: 600;">
+                <i class="fas fa-list"></i> 
+                Liste des demandes 
+                {% if demandes %}
+                    <span style="color: var(--text-muted); font-weight: 400; font-size: 0.9rem;">
+                        ({{ demandes|length }} résultat{{ demandes|length|pluralize }})
+                    </span>
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body-modern">
+            {% if demandes %}
+                <div style="overflow-x: auto;">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Demandeur</th>
+                                <th>Formation</th>
+                                <th>Motivation</th>
+                                <th>Statut</th>
+                                <th>Score IA</th>
+                                <th>Date demande</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for demande in demandes %}
+                            <tr class="fade-in" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+                                <td>
+                                    <div class="user-info">
+                                        <span class="user-name">{{ demande.personne.get_full_name }}</span>
+                                        <span class="user-details">{{ demande.personne.age }} ans - {{ demande.personne.region_geographique }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="formation-info">
+                                        <span class="formation-name">{{ demande.formation_souhaitee.nom }}</span>
+                                        <span class="formation-type">{{ demande.formation_souhaitee.get_type_formation_display }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ demande.get_motivation_principale_display }}</td>
+                                <td>
+                                    <span class="badge-modern {% if demande.statut == 'acceptee' %}badge-success-modern{% elif demande.statut == 'refusee' %}badge-danger-modern{% elif demande.statut == 'en_attente' %}badge-warning-modern{% else %}badge-secondary-modern{% endif %}">
+                                        {{ demande.get_statut_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if demande.score_formabilite %}
+                                        <span class="badge-modern score-display {% if demande.score_formabilite >= 70 %}badge-success-modern{% elif demande.score_formabilite >= 40 %}badge-warning-modern{% else %}badge-danger-modern{% endif %}">
+                                            {{ demande.score_formabilite }}%
+                                        </span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ demande.date_demande|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'formation:admin_demande_detail' demande.id %}" 
+                                           class="btn-modern btn-sm-modern btn-icon-modern" 
+                                           title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if demande.statut == 'en_attente' %}
+                                        <button class="btn-modern btn-sm-modern btn-icon-modern btn-icon-success" 
+                                                onclick="accepterDemande('{{ demande.id }}')"
+                                                title="Accepter">
+                                            <i class="fas fa-check"></i>
+                                            <div class="loading-spinner"></div>
+                                        </button>
+                                        <button class="btn-modern btn-sm-modern btn-icon-modern btn-icon-danger" 
+                                                onclick="refuserDemande('{{ demande.id }}')"
+                                                title="Refuser">
+                                            <i class="fas fa-times"></i>
+                                            <div class="loading-spinner"></div>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if demandes.has_other_pages %}
+                <div class="pagination-modern">
+                    {% if demandes.has_previous %}
+                        <div class="page-item-modern">
+                            <a class="page-link-modern" href="?page={{ demandes.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    {% for num in demandes.paginator.page_range %}
+                        {% if demandes.number == num %}
+                            <div class="page-item-modern active">
+                                <span class="page-link-modern">{{ num }}</span>
+                            </div>
+                        {% else %}
+                            <div class="page-item-modern">
+                                <a class="page-link-modern" href="?page={{ num }}">{{ num }}</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if demandes.has_next %}
+                        <div class="page-item-modern">
+                            <a class="page-link-modern" href="?page={{ demandes.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h4>Aucune demande trouvée</h4>
+                    <p>Aucune demande ne correspond aux critères sélectionnés.</p>
+                    <a href="{% url 'formation:admin_demandes_list' %}" class="btn-modern btn-outline-modern" style="margin-top: 1rem;">
+                        <i class="fas fa-refresh"></i>
+                        Voir toutes les demandes
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function showLoading(button) {
+    const icon = button.querySelector('i');
+    const spinner = button.querySelector('.loading-spinner');
+    icon.style.display = 'none';
+    spinner.style.display = 'block';
+    button.disabled = true;
+}
+
+function hideLoading(button) {
+    const icon = button.querySelector('i');
+    const spinner = button.querySelector('.loading-spinner');
+    icon.style.display = 'block';
+    spinner.style.display = 'none';
+    button.disabled = false;
+}
+
+function accepterDemande(demandeId) {
+    if (confirm('Êtes-vous sûr de vouloir accepter cette demande ?')) {
+        const button = event.target.closest('button');
+        showLoading(button);
+
+        fetch(`/formation/api/demande/${demandeId}/accepter/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(button);
+            if (data.success) {
+                // Animation de succès
+                button.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Erreur lors de l\'acceptation: ' + (data.error || 'Erreur inconnue'));
+            }
+        })
+        .catch(error => {
+            hideLoading(button);
+            alert('Erreur réseau lors de l\'acceptation');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function refuserDemande(demandeId) {
+    const commentaire = prompt('Commentaire (optionnel) :');
+    if (commentaire !== null) {
+        const button = event.target.closest('button');
+        showLoading(button);
+
+        const formData = new FormData();
+        formData.append('commentaire', commentaire);
+        
+        fetch(`/formation/api/demande/${demandeId}/refuser/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading(button);
+            if (data.success) {
+                // Animation de succès
+                button.style.background = 'linear-gradient(45deg, #f5576c, #ff6b6b)';
+                button.innerHTML = '<i class="fas fa-times"></i>';
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Erreur lors du refus: ' + (data.error || 'Erreur inconnue'));
+            }
+        })
+        .catch(error => {
+            hideLoading(button);
+            alert('Erreur réseau lors du refus');
+            console.error('Error:', error);
+        });
+    }
+}
+
+// Animation au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation progressive des lignes du tableau
+    const rows = document.querySelectorAll('.fade-in');
+    rows.forEach((row, index) => {
+        row.style.animationDelay = (index * 0.05) + 's';
+    });
+
+    // Effet de survol sur les lignes du tableau
+    const tableRows = document.querySelectorAll('.table-modern tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+
+// Auto-submit du formulaire de filtres avec délai
+let filterTimeout;
+document.querySelectorAll('.form-select-modern').forEach(select => {
+    select.addEventListener('change', function() {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(() => {
+            this.closest('form').submit();
+        }, 300);
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,804 @@
+{#formation/templates/formation/admin/projets_list.html#}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Projets{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --pink-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        
+        /* Fond blanc sombre */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-accent: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 250px;
+        height: 250px;
+        background: var(--primary-gradient);
+        top: 5%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 180px;
+        height: 180px;
+        background: var(--secondary-gradient);
+        bottom: 15%;
+        left: 5%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 120px;
+        height: 120px;
+        background: var(--purple-gradient);
+        top: 45%;
+        right: 20%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+        box-shadow: 0 4px 20px var(--card-shadow);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--card-accent);
+    }
+
+    .card-header-modern h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header-modern i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    /* Formulaire de filtres */
+    .filter-form {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label-modern {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-modern, .form-select-modern {
+        background: var(--bg-secondary);
+        border: 2px solid rgba(78, 205, 196, 0.3);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control-modern:focus, .form-select-modern:focus {
+        outline: none;
+        border-color: var(--secondary-gradient);
+        box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--card-border);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    /* Table moderne */
+    .table-modern-container {
+        background: var(--bg-secondary);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-modern {
+        width: 100%;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .table-modern th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-primary);
+        font-weight: 700;
+        padding: 1rem;
+        border: none;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid var(--card-border);
+        vertical-align: middle;
+    }
+
+    .table-modern tr:hover {
+        background: #f8f9fa;
+        transform: translateX(2px);
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tr {
+        transition: all 0.3s ease;
+        animation: fadeInRow 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .table-modern tr:nth-child(1) { animation-delay: 0.1s; }
+    .table-modern tr:nth-child(2) { animation-delay: 0.2s; }
+    .table-modern tr:nth-child(3) { animation-delay: 0.3s; }
+    .table-modern tr:nth-child(4) { animation-delay: 0.4s; }
+    .table-modern tr:nth-child(5) { animation-delay: 0.5s; }
+
+    /* Badges modernes */
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+        display: inline-block;
+    }
+
+    .badge-success-modern {
+        background: var(--success-gradient);
+    }
+
+    .badge-info-modern {
+        background: var(--info-gradient);
+    }
+
+    .badge-primary-modern {
+        background: var(--secondary-gradient);
+    }
+
+    .badge-warning-modern {
+        background: var(--warning-gradient);
+    }
+
+    .badge-danger-modern {
+        background: var(--primary-gradient);
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+    }
+
+    /* Pagination moderne */
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .page-link-modern {
+        padding: 0.75rem 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 45px;
+        text-align: center;
+    }
+
+    .page-link-modern:hover {
+        background: var(--secondary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .page-link-modern.active {
+        background: var(--secondary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    /* Actions des boutons */
+    .btn-group-modern {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon-modern {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .btn-icon-modern:hover {
+        background: var(--info-gradient);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+    }
+
+    /* Info boxes */
+    .info-box {
+        background: linear-gradient(135deg, rgba(248, 249, 250, 0.8) 0%, rgba(255, 255, 255, 0.8) 100%);
+        border-radius: 10px;
+        padding: 0.75rem;
+        border-left: 4px solid var(--secondary-gradient);
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box strong {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .info-box small {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInRow {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .card-body-modern {
+            padding: 1.5rem 1rem;
+        }
+        
+        .table-modern th, .table-modern td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-group-modern {
+            flex-direction: column;
+        }
+    }
+
+    /* Bootstrap Grid */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-12, .col-md-3 {
+        padding: 0 0.75rem;
+    }
+
+    .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-md-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    @media (max-width: 767px) {
+        .col-md-3 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .py-5 {
+        padding: 3rem 0;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Gestion des Projets de Vie</h1>
+            </div>
+
+            <!-- Filtres -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-filter"></i> Filtres de Recherche</h5>
+                </div>
+                <div class="card-body-modern">
+                    <form method="get" class="filter-form">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label-modern">Statut</label>
+                                <select name="statut" class="form-select-modern">
+                                    <option value="">Tous les statuts</option>
+                                    {% for statut_value, statut_label in statuts %}
+                                    <option value="{{ statut_value }}" {% if statut_filter == statut_value %}selected{% endif %}>
+                                        {{ statut_label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label-modern">Secteur</label>
+                                <input type="text" name="secteur" class="form-control-modern" value="{{ secteur_filter }}" placeholder="Secteur d'activité">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label-modern">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn-modern btn-primary-modern">
+                                        <i class="fas fa-search"></i>
+                                        Filtrer
+                                    </button>
+                                    <a href="{% url 'formation:admin_projets_list' %}" class="btn-modern btn-outline-modern">
+                                        <i class="fas fa-undo"></i>
+                                        Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des projets -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h5><i class="fas fa-lightbulb"></i> Liste des Projets</h5>
+                </div>
+                <div class="card-body-modern">
+                    {% if projets %}
+                        <div class="table-modern-container">
+                            <table class="table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>Porteur</th>
+                                        <th>Projet</th>
+                                        <th>Secteur</th>
+                                        <th>Budget</th>
+                                        <th>Financement</th>
+                                        <th>Statut</th>
+                                        <th>Score IA</th>
+                                        <th>Date création</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for projet in projets %}
+                                    <tr>
+                                        <td>
+                                            <div class="info-box">
+                                                <strong>{{ projet.personne.get_full_name }}</strong><br>
+                                                <small>{{ projet.personne.age }} ans - {{ projet.personne.region_geographique }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="info-box">
+                                                <strong>{{ projet.titre_projet }}</strong><br>
+                                                <small>{{ projet.description|truncatechars:50 }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span style="font-weight: 600; color: var(--text-primary);">{{ projet.secteur_activite }}</span>
+                                        </td>
+                                        <td>
+                                            <strong style="color: var(--success-color);">{{ projet.budget_estime|floatformat:0 }} FCFA</strong>
+                                        </td>
+                                        <td>
+                                            <span style="color: var(--info-color); font-weight: 500;">{{ projet.get_type_financement_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge-modern {% if projet.statut == 'realise' %}badge-success-modern{% elif projet.statut == 'finance' %}badge-info-modern{% elif projet.statut == 'en_cours' %}badge-primary-modern{% elif projet.statut == 'abandonne' %}badge-danger-modern{% else %}badge-secondary-modern{% endif %}">
+                                                {{ projet.get_statut_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if projet.faisabilite_score %}
+                                                <span class="badge-modern {% if projet.faisabilite_score >= 70 %}badge-success-modern{% elif projet.faisabilite_score >= 40 %}badge-warning-modern{% else %}badge-danger-modern{% endif %}">
+                                                    {{ projet.faisabilite_score }}%
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span style="font-weight: 500; color: var(--text-secondary);">{{ projet.date_creation|date:"d/m/Y" }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group-modern">
+                                                <a href="{% url 'formation:admin_projet_detail' projet.id %}" class="btn-icon-modern" title="Voir détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if projets.has_other_pages %}
+                        <div class="pagination-modern">
+                            {% if projets.has_previous %}
+                                <a class="page-link-modern" href="?page={{ projets.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for num in projets.paginator.page_range %}
+                                {% if projets.number == num %}
+                                    <span class="page-link-modern active">{{ num }}</span>
+                                {% else %}
+                                    <a class="page-link-modern" href="?page={{ num }}">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if projets.has_next %}
+                                <a class="page-link-modern" href="?page={{ projets.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-lightbulb fa-3x"></i>
+                            <h4>Aucun projet trouvé</h4>
+                            <p>Aucun projet ne correspond aux critères sélectionnés.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée des cartes
+    const cards = document.querySelectorAll('.modern-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.2) + 's';
+    });
+
+    // Animation des lignes du tableau
+    const tableRows = document.querySelectorAll('.table-modern tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = (0.5 + index * 0.1) + 's';
+    });
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.2 + index * 0.1);
+            shape.style.transform = `translateY(${rate}px)`;
+        });
+    });
+
+    // Animation des badges de score au survol
+    const scoreBadges = document.querySelectorAll('.badge-modern');
+    scoreBadges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(2deg)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+
+    // Amélioration des interactions sur les boutons
+    const buttons = document.querySelectorAll('.btn-modern, .btn-icon-modern');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Effet de ripple
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Ajout de styles CSS pour l'animation ripple
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        .d-flex.gap-2 {
+            gap: 0.5rem;
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
+{% endblock %}

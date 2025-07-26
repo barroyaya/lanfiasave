@@ -1,0 +1,740 @@
+
+<!-- formation/templates/formation/demande_formation.html -->
+{% extends 'formation/base_formation.html' %}
+
+{% block title %}Demande de Formation - {{ formation.nom }} - LanfiaSave{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-separator">/</span>
+<a href="{% url 'formation:formation_detail' formation.id %}" class="breadcrumb-item">{{ formation.nom }}</a>
+<span class="breadcrumb-separator">/</span>
+<span class="breadcrumb-current">Faire une demande</span>
+{% endblock %}
+
+{% block formation_content %}
+<div class="demande-formation-container">
+    <!-- En-tête de la demande -->
+    <div class="demande-header">
+        <div class="formation-info">
+            <div class="formation-badge">{{ formation.get_type_formation_display }}</div>
+            <h1 class="demande-title">Demande de Formation</h1>
+            <h2 class="formation-name">{{ formation.nom }}</h2>
+            <div class="formation-summary">
+                <span class="summary-item">
+                    <i class="fas fa-clock"></i>
+                    {{ formation.duree_semaines }} semaines
+                </span>
+                <span class="summary-item">
+                    <i class="fas fa-users"></i>
+                    {{ formation.age_min }}-{{ formation.age_max }} ans
+                </span>
+                <span class="summary-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    {{ formation.get_niveau_requis_display }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="progress-indicator">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-label">Formulaire</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-label">Analyse IA</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">Validation</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-label">Formation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire de demande -->
+    <div class="demande-form-container">
+        <form method="post" class="demande-form" id="demandeForm">
+            {% csrf_token %}
+            
+            <!-- Section 1: Motivation -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-heart"></i>
+                        1. Votre Motivation
+                    </h3>
+                    <p class="section-description">
+                        Parlez-nous de vos motivations et de votre expérience
+                    </p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.motivation_principale.id_for_label }}" class="form-label required">
+                            {{ form.motivation_principale.label }}
+                        </label>
+                        {{ form.motivation_principale }}
+                        {% if form.motivation_principale.errors %}
+                            <div class="form-errors">
+                                {% for error in form.motivation_principale.errors %}
+                                    <span class="error-message">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.experience_anterieure.id_for_label }}" class="form-label">
+                            {{ form.experience_anterieure.label }}
+                        </label>
+                        {{ form.experience_anterieure }}
+                        <small class="form-help">Décrivez toute expérience que vous avez dans ce domaine, même informelle</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.competences_actuelles.id_for_label }}" class="form-label">
+                            {{ form.competences_actuelles.label }}
+                        </label>
+                        {{ form.competences_actuelles }}
+                        <small class="form-help">Listez vos compétences actuelles en rapport avec la formation</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Disponibilité -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        2. Votre Disponibilité
+                    </h3>
+                    <p class="section-description">
+                        Informez-nous de vos disponibilités et contraintes
+                    </p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.disponibilite_horaire.id_for_label }}" class="form-label required">
+                            {{ form.disponibilite_horaire.label }}
+                        </label>
+                        {{ form.disponibilite_horaire }}
+                        <small class="form-help">Ex: Lundi-Vendredi 9h-17h, disponible week-ends</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.contraintes_personnelles.id_for_label }}" class="form-label">
+                            {{ form.contraintes_personnelles.label }}
+                        </label>
+                        {{ form.contraintes_personnelles }}
+                        <small class="form-help">Contraintes familiales, de transport, de santé, etc.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Projet post-formation -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        3. Votre Projet
+                    </h3>
+                    <p class="section-description">
+                        Parlez-nous de vos projets après la formation
+                    </p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        {{ form.a_idee_projet }}
+                        <label for="{{ form.a_idee_projet.id_for_label }}" class="checkbox-label">
+                            {{ form.a_idee_projet.label }}
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-row" id="projetFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="{{ form.description_projet.id_for_label }}" class="form-label">
+                            {{ form.description_projet.label }}
+                        </label>
+                        {{ form.description_projet }}
+                        <small class="form-help">Décrivez votre idée de projet ou d'entreprise</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        {{ form.souhaite_financement }}
+                        <label for="{{ form.souhaite_financement.id_for_label }}" class="checkbox-label">
+                            {{ form.souhaite_financement.label }}
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-row" id="financementFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="{{ form.montant_financement.id_for_label }}" class="form-label">
+                            {{ form.montant_financement.label }}
+                        </label>
+                        <div class="input-group">
+                            {{ form.montant_financement }}
+                            <span class="input-suffix">FCFA</span>
+                        </div>
+                        <small class="form-help">Montant approximatif pour démarrer votre projet</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group checkbox-group">
+                        {{ form.accepte_mentoring }}
+                        <label for="{{ form.accepte_mentoring.id_for_label }}" class="checkbox-label">
+                            {{ form.accepte_mentoring.label }}
+                        </label>
+                        <small class="form-help">Un mentor vous accompagnera dans votre parcours</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé de la candidature -->
+            <div class="candidature-summary">
+                <h3 class="summary-title">
+                    <i class="fas fa-user-check"></i>
+                    Résumé de votre candidature
+                </h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Candidat</span>
+                        <span class="summary-value">{{ personne.get_full_name }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Âge</span>
+                        <span class="summary-value">{{ personne.age }} ans</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Niveau d'éducation</span>
+                        <span class="summary-value">{{ personne.niveau_education|default:"Non renseigné" }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Région</span>
+                        <span class="summary-value">{{ personne.region_geographique|default:"Non renseignée" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="{% url 'formation:formation_detail' formation.id %}" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour
+                </a>
+                <button type="submit" class="btn-primary btn-large">
+                    <i class="fas fa-paper-plane"></i>
+                    Soumettre ma demande
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Styles pour la demande de formation */
+.demande-formation-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.demande-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.formation-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.demande-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    opacity: 0.9;
+}
+
+.formation-name {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.formation-summary {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.summary-item i {
+    opacity: 0.8;
+}
+
+.progress-indicator {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.step.active .step-number {
+    background: white;
+    color: #667eea;
+}
+
+.step-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.demande-form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.form-section {
+    padding: 40px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.section-header {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+.section-description {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.form-row {
+    margin-bottom: 25px;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: #ef4444;
+}
+
+.form-control, .form-select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background: #fafafa;
+}
+
+.form-control:focus, .form-select:focus, textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-help {
+    display: block;
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.form-errors {
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.85rem;
+    display: block;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.checkbox-label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.input-suffix {
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-left: none;
+    padding: 12px 16px;
+    border-radius: 0 12px 12px 0;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.candidature-summary {
+    background: #f8fafc;
+    padding: 30px 40px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.summary-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.summary-title i {
+    color: #667eea;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.summary-grid .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.form-actions {
+    padding: 30px 40px;
+    background: #f8fafc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-large {
+    padding: 18px 35px;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #e5e7eb;
+}
+
+.btn-secondary:hover {
+    border-color: #667eea;
+    background: #f8fafc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .demande-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .progress-indicator {
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .step-label {
+        display: none;
+    }
+    
+    .form-section {
+        padding: 25px 20px;
+    }
+    
+    .candidature-summary {
+        padding: 25px 20px;
+    }
+    
+    .form-actions {
+        padding: 25px 20px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .formation-name {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
+<script>
+// JavaScript pour la gestion du formulaire
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('demandeForm');
+    const aIdeeProjet = document.getElementById('id_a_idee_projet');
+    const souhaiteFinancement = document.getElementById('id_souhaite_financement');
+    const projetFields = document.getElementById('projetFields');
+    const financementFields = document.getElementById('financementFields');
+    
+    // Fonction pour gérer l'affichage des champs conditionnels
+    function toggleProjetFields() {
+        if (aIdeeProjet.checked) {
+            projetFields.style.display = 'block';
+            projetFields.querySelector('textarea').setAttribute('required', 'required');
+        } else {
+            projetFields.style.display = 'none';
+            projetFields.querySelector('textarea').removeAttribute('required');
+            projetFields.querySelector('textarea').value = '';
+        }
+    }
+    
+    function toggleFinancementField() {
+        if (souhaiteFinancement.checked) {
+            financementFields.style.display = 'block';
+            financementFields.querySelector('input').setAttribute('required', 'required');
+        } else {
+            financementFields.style.display = 'none';
+            financementFields.querySelector('input').removeAttribute('required');
+            financementFields.querySelector('input').value = '';
+        }
+    }
+    
+    // Event listeners
+    aIdeeProjet.addEventListener('change', toggleProjetFields);
+    souhaiteFinancement.addEventListener('change', toggleFinancementField);
+    
+    // Initialisation
+    toggleProjetFields();
+    toggleFinancementField();
+    
+    // Validation du formulaire
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let hasErrors = false;
+        
+        // Nettoyer les erreurs précédentes
+        document.querySelectorAll('.form-errors').forEach(error => error.remove());
+        document.querySelectorAll('.error').forEach(field => field.classList.remove('error'));
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                hasErrors = true;
+                field.classList.add('error');
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'form-errors';
+                errorDiv.innerHTML = '<span class="error-message">Ce champ est requis</span>';
+                field.parentNode.appendChild(errorDiv);
+            }
+        });
+        
+        if (hasErrors) {
+            e.preventDefault();
+            // Scroll vers la première erreur
+            const firstError = document.querySelector('.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Animation des sections
+    const sections = document.querySelectorAll('.form-section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'all 0.6s ease';
+        observer.observe(section);
+    });
+});
+
+// Fonctions globales pour la compatibilité avec les widgets Django
+function toggleProjetFields() {
+    const checkbox = document.getElementById('id_a_idee_projet');
+    const fields = document.getElementById('projetFields');
+    
+    if (checkbox.checked) {
+        fields.style.display = 'block';
+    } else {
+        fields.style.display = 'none';
+    }
+}
+
+function toggleFinancementField() {
+    const checkbox = document.getElementById('id_souhaite_financement');
+    const fields = document.getElementById('financementFields');
+    
+    if (checkbox.checked) {
+        fields.style.display = 'block';
+    } else {
+        fields.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,935 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Formation - Administration{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+            --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+            --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            
+            /* Fond blanc sombre */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-dark: #2d3436;
+            
+            /* Couleurs de cartes */
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            
+            /* Texte */
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --text-muted: #b2bec3;
+            --text-light: #ffffff;
+            
+            /* Glass effect pour les cartes colorées */
+            --glass-overlay: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Éléments décoratifs */
+        .decoration-shape {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape-1 {
+            width: 200px;
+            height: 200px;
+            background: var(--primary-gradient);
+            top: 10%;
+            right: 5%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            background: var(--secondary-gradient);
+            bottom: 20%;
+            left: 8%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            background: var(--success-gradient);
+            top: 50%;
+            right: 15%;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.6s ease-out;
+            animation-fill-mode: both;
+            box-shadow: 0 4px 20px var(--card-shadow);
+        }
+
+        .stat-card:nth-child(1) { 
+            animation-delay: 0.1s;
+        }
+        .stat-card:nth-child(2) { 
+            animation-delay: 0.2s;
+        }
+        .stat-card:nth-child(3) { 
+            animation-delay: 0.3s;
+        }
+        .stat-card:nth-child(4) { 
+            animation-delay: 0.4s;
+        }
+
+        .stat-card:nth-child(1)::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:nth-child(2)::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--secondary-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:nth-child(3)::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--warning-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:nth-child(4)::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            height: 8px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: var(--warning-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card:hover .stat-icon {
+            opacity: 1;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideUp 0.8s ease-out;
+            box-shadow: 0 4px 20px var(--card-shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--card-border);
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #f1f2f6 100%);
+        }
+
+        .card-header h5 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header i {
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .table-responsive {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .table {
+            width: 100%;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 1rem;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            border: none;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .badge.bg-success {
+            background: var(--success-gradient) !important;
+        }
+
+        .badge.bg-warning {
+            background: var(--warning-gradient) !important;
+        }
+
+        .badge.bg-primary {
+            background: var(--primary-gradient) !important;
+        }
+
+        .badge.bg-secondary {
+            background: linear-gradient(45deg, #636e72, #2d3436) !important;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--card-shadow);
+            background: var(--secondary-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .formation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--card-border);
+        }
+
+        .formation-item:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px var(--card-shadow);
+        }
+
+        .formation-info h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .formation-info small {
+            color: var(--text-secondary);
+        }
+
+        .score-card {
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--info-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: block;
+            box-shadow: 0 4px 15px var(--card-shadow);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            color: var(--text-primary);
+        }
+
+        .action-btn:nth-child(1):hover {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 82, 0.1) 100%);
+            border-color: #ff6b6b;
+        }
+
+        .action-btn:nth-child(2):hover {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(68, 160, 141, 0.1) 100%);
+            border-color: #4ecdc4;
+        }
+
+        .action-btn:nth-child(3):hover {
+            background: linear-gradient(135deg, rgba(168, 230, 207, 0.1) 0%, rgba(86, 204, 157, 0.1) 100%);
+            border-color: #56cc9d;
+        }
+
+        .action-btn:nth-child(4):hover {
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, rgba(9, 132, 227, 0.1) 100%);
+            border-color: #74b9ff;
+        }
+
+        .action-btn i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .action-btn:nth-child(1) i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .action-btn:nth-child(2) i {
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .action-btn:nth-child(3) i {
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .action-btn:nth-child(4) i {
+            background: var(--info-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .container-fluid {
+                padding: 1rem;
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 20px var(--card-shadow); }
+            70% { box-shadow: 0 4px 30px rgba(255, 107, 107, 0.3); }
+            100% { box-shadow: 0 4px 20px var(--card-shadow); }
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Éléments décoratifs -->
+    <div class="decoration-shape shape-1"></div>
+    <div class="decoration-shape shape-2"></div>
+    <div class="decoration-shape shape-3"></div>
+    
+    <div class="container-fluid">
+        <div class="header">
+            <h1 class="floating">Dashboard Formation</h1>
+            <p>Administration intelligente et moderne</p>
+        </div>
+
+        <!-- Statistiques générales -->
+        <div class="stats-grid">
+            <div class="stat-card pulse-animation">
+                <div class="stat-content">
+                    <div>
+                        <div class="stat-number counter-animation" data-target="{{ stats.total_formations }}">0</div>
+                        <div class="stat-label">Formations actives</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div>
+                        <div class="stat-number counter-animation" data-target="{{ stats.total_demandes }}">0</div>
+                        <div class="stat-label">Demandes totales</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div>
+                        <div class="stat-number counter-animation" data-target="{{ stats.demandes_en_attente }}">0</div>
+                        <div class="stat-label">En attente</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div>
+                        <div class="stat-number counter-animation" data-target="{{ stats.formations_terminees }}">0</div>
+                        <div class="stat-label">Formations terminées</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Demandes récentes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Demandes récentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if demandes_recentes %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Demandeur</th>
+                                        <th>Formation</th>
+                                        <th>Statut</th>
+                                        <th>Score IA</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for demande in demandes_recentes %}
+                                    <tr>
+                                        <td>{{ demande.personne.get_full_name }}</td>
+                                        <td>{{ demande.formation_souhaitee.nom }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if demande.statut == 'acceptee' %}success{% elif demande.statut == 'en_attente' %}warning{% elif demande.statut == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                                                {{ demande.get_statut_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if demande.score_formabilite %}
+                                                <strong>{{ demande.score_formabilite }}%</strong>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ demande.date_demande|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <a href="{% url 'formation:admin_demande_detail' demande.id %}" class="btn">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>Aucune demande récente.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Formations populaires et métriques -->
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-fire"></i> Formations populaires</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if formations_populaires %}
+                            {% for formation in formations_populaires %}
+                            <div class="formation-item">
+                                <div class="formation-info">
+                                    <h6>{{ formation.nom }}</h6>
+                                    <small>{{ formation.get_type_formation_display }}</small>
+                                </div>
+                                <span class="badge bg-primary">{{ formation.nb_demandes }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <p>Aucune donnée disponible.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if score_moyen_formabilite %}
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <h5><i class="fas fa-brain"></i> Analyse IA</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="score-card">
+                            <div class="score-number">{{ score_moyen_formabilite|floatformat:1 }}%</div>
+                            <p style="color: var(--text-secondary); margin: 0;">Score moyen de formabilité</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt"></i> Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="actions-grid">
+                    <a href="{% url 'formation:admin_demandes_list' %}" class="action-btn">
+                        <i class="fas fa-list"></i>
+                        <strong>Gérer les demandes</strong>
+                        <small style="color: var(--text-secondary);">Traiter les nouvelles demandes</small>
+                    </a>
+                    <a href="{% url 'formation:admin_formations_manage' %}" class="action-btn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <strong>Gérer les formations</strong>
+                        <small style="color: var(--text-secondary);">Créer et modifier les formations</small>
+                    </a>
+                    <a href="{% url 'formation:admin_parcours_list' %}" class="action-btn">
+                        <i class="fas fa-route"></i>
+                        <strong>Parcours de formation</strong>
+                        <small style="color: var(--text-secondary);">Définir les parcours d'apprentissage</small>
+                    </a>
+                    <a href="{% url 'formation:rapports_formation' %}" class="action-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        <strong>Rapports</strong>
+                        <small style="color: var(--text-secondary);">Analyser les performances</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation d'entrée progressive des cartes
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stat-card, .card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+            });
+
+            // Animation des compteurs
+            function animateCounter(element) {
+                const target = parseInt(element.getAttribute('data-target'));
+                let current = 0;
+                const increment = target / 100;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.floor(current).toLocaleString();
+                }, 20);
+            }
+
+            // Lancer l'animation des compteurs avec délai
+            setTimeout(() => {
+                const counters = document.querySelectorAll('.counter-animation');
+                counters.forEach(counter => {
+                    animateCounter(counter);
+                });
+            }, 500);
+
+            // Graphique des scores IA (si données disponibles)
+            {% if score_moyen_formabilite %}
+            const ctx = document.getElementById('scoreChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Score actuel', 'Marge de progression'],
+                        datasets: [{
+                            data: [{{ score_moyen_formabilite|floatformat:1 }}, {{ 100|add:score_moyen_formabilite|floatformat:1|add:"-"|add:score_moyen_formabilite|floatformat:1 }}],
+                            backgroundColor: [
+                                'rgba(78, 205, 196, 0.8)',
+                                'rgba(241, 242, 246, 0.5)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#636e72',
+                                    usePointStyle: true,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            {% endif %}
+
+            // Effet de parallax léger pour les formes décoratives
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const shapes = document.querySelectorAll('.decoration-shape');
+                shapes.forEach((shape, index) => {
+                    const rate = scrolled * (0.2 + index * 0.1);
+                    shape.style.transform = `translateY(${rate}px)`;
+                });
+            });
+        });
+
+        // Effet de particules flottantes (version simplifiée)
+        function createFloatingParticles() {
+            for (let i = 0; i < 2; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '3px';
+                particle.style.height = '3px';
+                particle.style.background = 'rgba(78, 205, 196, 0.4)';
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '-1';
+                
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                
+                document.body.appendChild(particle);
+                
+                const animation = particle.animate([
+                    { transform: 'translateY(0px)', opacity: 0.4 },
+                    { transform: 'translateY(-100vh)', opacity: 0 }
+                ], {
+                    duration: Math.random() * 4000 + 3000,
+                    easing: 'linear'
+                });
+                
+                animation.onfinish = () => {
+                    particle.remove();
+                };
+            }
+        }
+
+        // Créer des particules périodiquement
+        setInterval(createFloatingParticles, 4000);
+
+        // Actualisation automatique des données toutes les 30 secondes
+        setInterval(function() {
+            // Ici vous pouvez ajouter un appel AJAX pour actualiser les stats
+            console.log('Actualisation des données...');
+        }, 30000);
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,94 @@
+# formation/templates/formation/admin/parcours_suivi.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ajouter un Suivi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Ajouter un Suivi</h4>
+                    <small class="text-muted">
+                        Parcours de {{ parcours.demande_formation.personne.get_full_name }} 
+                        - {{ parcours.demande_formation.formation_souhaitee.nom }}
+                    </small>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.type_suivi.id_for_label }}" class="form-label">{{ form.type_suivi.label }}</label>
+                                    {{ form.type_suivi }}
+                                    {% if form.type_suivi.errors %}
+                                        <div class="text-danger small">{{ form.type_suivi.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.note_progression.id_for_label }}" class="form-label">{{ form.note_progression.label }}</label>
+                                    {{ form.note_progression }}
+                                    {% if form.note_progression.errors %}
+                                        <div class="text-danger small">{{ form.note_progression.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.titre.id_for_label }}" class="form-label">{{ form.titre.label }}</label>
+                            {{ form.titre }}
+                            {% if form.titre.errors %}
+                                <div class="text-danger small">{{ form.titre.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.points_forts.id_for_label }}" class="form-label">{{ form.points_forts.label }}</label>
+                            {{ form.points_forts }}
+                            {% if form.points_forts.errors %}
+                                <div class="text-danger small">{{ form.points_forts.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.points_amelioration.id_for_label }}" class="form-label">{{ form.points_amelioration.label }}</label>
+                            {{ form.points_amelioration }}
+                            {% if form.points_amelioration.errors %}
+                                <div class="text-danger small">{{ form.points_amelioration.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.prochaines_etapes.id_for_label }}" class="form-label">{{ form.prochaines_etapes.label }}</label>
+                            {{ form.prochaines_etapes }}
+                            {% if form.prochaines_etapes.errors %}
+                                <div class="text-danger small">{{ form.prochaines_etapes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'formation:admin_parcours_detail' parcours.id %}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer le suivi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

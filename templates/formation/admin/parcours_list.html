@@ -1,0 +1,972 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Parcours{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --border-glass: rgba(255, 255, 255, 0.2);
+        --text-light: rgba(255, 255, 255, 0.9);
+        --text-muted: rgba(255, 255, 255, 0.6);
+        --success-color: #4facfe;
+        --warning-color: #f093fb;
+        --danger-color: #f5576c;
+        --info-color: #00f2fe;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: var(--text-light);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #fff, #f8f9fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .modern-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group-modern {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label-modern {
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-select-modern {
+        background: rgba(255, 255, 255, 0.25);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: #2d3748;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+    }
+
+    .form-select-modern:focus {
+        outline: none;
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        background: rgba(255, 255, 255, 0.35);
+        color: #1a202c;
+    }
+
+    .form-select-modern option {
+        background: white;
+        color: #2d3748;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(45deg, var(--success-color), #00f2fe);
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-success-modern {
+        background: linear-gradient(45deg, #4facfe, #00f2fe);
+        color: white;
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-success-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        color: white;
+    }
+
+    .table-modern {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .table-modern th {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        font-weight: 700;
+        padding: 1.2rem 1rem;
+        border: none;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-modern td {
+        padding: 1.2rem 1rem;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        vertical-align: middle;
+    }
+
+    .table-modern tr:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.002);
+        transition: all 0.2s ease;
+    }
+
+    .badge-modern {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        display: inline-block;
+    }
+
+    .badge-success-modern {
+        background: linear-gradient(45deg, #4facfe, #00f2fe);
+        color: white;
+    }
+
+    .badge-primary-modern {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+        color: white;
+    }
+
+    .participant-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .participant-name {
+        font-weight: 600;
+        color: var(--text-light);
+    }
+
+    .participant-details {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .formation-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .formation-name {
+        font-weight: 600;
+        color: var(--text-light);
+    }
+
+    .formation-type {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .progress-modern {
+        width: 120px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid var(--border-glass);
+    }
+
+    .progress-bar-modern {
+        height: 100%;
+        background: linear-gradient(45deg, var(--success-color), #00f2fe);
+        border-radius: 12px;
+        transition: width 0.8s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar-modern::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.2));
+        animation: shimmer 2s infinite;
+    }
+
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .mentor-display {
+        font-weight: 600;
+        color: var(--success-color);
+    }
+
+    .note-display {
+        font-weight: 700;
+        color: var(--success-color);
+        font-size: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-icon-modern {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+    }
+
+    .btn-icon-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+        color: white;
+    }
+
+    .btn-icon-primary:hover {
+        background: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .btn-icon-info:hover {
+        background: var(--info-color);
+        border-color: var(--info-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .pagination-modern {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .page-item-modern {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-glass);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .page-item-modern:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .page-item-modern.active {
+        background: linear-gradient(45deg, var(--success-color), #00f2fe);
+    }
+
+    .page-link-modern {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 600;
+        min-width: 44px;
+        text-align: center;
+    }
+
+    .page-item-modern.active .page-link-modern {
+        color: white;
+    }
+
+    .filter-summary {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tag {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        border: 1px solid var(--border-glass);
+    }
+
+    .stats-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--success-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-bar {
+            flex-direction: column;
+        }
+
+        .table-responsive {
+            margin: -1rem;
+        }
+
+        .pagination-modern {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .btn-sm-modern {
+            padding: 0.4rem 0.6rem;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .progress-modern {
+            width: 100px;
+            height: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot.success {
+        background: var(--success-color);
+    }
+
+    .status-dot.primary {
+        background: #667eea;
+    }
+
+    .status-dot.secondary {
+        background: #636e72;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+</style>
+
+<div class="animated-bg"></div>
+
+<div class="container-fluid">
+    <!-- En-tête de page -->
+    <div class="page-header">
+        <h1 class="page-title">Gestion des Parcours</h1>
+        <a href="{% url 'formation:export_parcours_csv' %}" class="btn-modern btn-success-modern">
+            <i class="fas fa-download"></i>
+            Exporter CSV
+        </a>
+    </div>
+
+    <!-- Statistiques rapides -->
+    {% if parcours %}
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-number">{{ parcours|length }}</div>
+            <div class="stat-label">Total Parcours</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">
+                {% for p in parcours %}
+                    {% if p.statut_actuel == 'en_cours' %}{{ forloop.counter }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">En cours</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">
+                {% for p in parcours %}
+                    {% if p.statut_actuel == 'autonome' %}{{ forloop.counter }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Terminés</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">
+                {% for p in parcours %}
+                    {% if not p.mentor_assigne %}{{ forloop.counter }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Sans mentor</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filtres -->
+    <div class="modern-card">
+        <div class="card-header-modern">
+            <h5 style="margin: 0; color: var(--text-light); font-weight: 600;">
+                <i class="fas fa-filter"></i> Filtres de recherche
+            </h5>
+        </div>
+        <div class="card-body-modern">
+            <form method="get" class="filters-grid">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Statut</label>
+                    <select name="statut" class="form-select-modern">
+                        <option value="">Tous les statuts</option>
+                        {% for statut_value, statut_label in statuts %}
+                        <option value="{{ statut_value }}" {% if statut_filter == statut_value %}selected{% endif %}>
+                            {{ statut_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group-modern">
+                    <label class="form-label-modern">Mentor</label>
+                    <select name="mentor" class="form-select-modern">
+                        <option value="">Tous les mentors</option>
+                        {% for mentor in mentors %}
+                        <option value="{{ mentor.id }}" {% if mentor_filter == mentor.id|stringformat:"s" %}selected{% endif %}>
+                            {{ mentor.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group-modern">
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn-modern btn-primary-modern">
+                            <i class="fas fa-search"></i>
+                            Filtrer
+                        </button>
+                        <a href="{% url 'formation:admin_parcours_list' %}" class="btn-modern btn-outline-modern">
+                            <i class="fas fa-redo"></i>
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Résumé des filtres actifs -->
+            {% if statut_filter or mentor_filter %}
+            <div class="filter-summary">
+                {% if statut_filter %}
+                <span class="filter-tag">
+                    <i class="fas fa-tag"></i> Statut: {{ statut_filter }}
+                </span>
+                {% endif %}
+                {% if mentor_filter %}
+                <span class="filter-tag">
+                    <i class="fas fa-user"></i> Mentor filtré
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Liste des parcours -->
+    <div class="modern-card">
+        <div class="card-header-modern">
+            <h5 style="margin: 0; color: var(--text-light); font-weight: 600;">
+                <i class="fas fa-route"></i> 
+                Liste des parcours 
+                {% if parcours %}
+                    <span style="color: var(--text-muted); font-weight: 400; font-size: 0.9rem;">
+                        ({{ parcours|length }} résultat{{ parcours|length|pluralize }})
+                    </span>
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body-modern">
+            {% if parcours %}
+                <div style="overflow-x: auto;">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Participant</th>
+                                <th>Formation</th>
+                                <th>Statut</th>
+                                <th>Progression</th>
+                                <th>Mentor</th>
+                                <th>Date début</th>
+                                <th>Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in parcours %}
+                            <tr class="fade-in" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+                                <td>
+                                    <div class="participant-info">
+                                        <span class="participant-name">{{ p.demande_formation.personne.get_full_name }}</span>
+                                        <span class="participant-details">{{ p.demande_formation.personne.age }} ans</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="formation-info">
+                                        <span class="formation-name">{{ p.demande_formation.formation_souhaitee.nom }}</span>
+                                        <span class="formation-type">{{ p.demande_formation.formation_souhaitee.get_type_formation_display }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot {% if p.statut_actuel == 'autonome' %}success{% elif p.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}"></span>
+                                        <span class="badge-modern {% if p.statut_actuel == 'autonome' %}badge-success-modern{% elif p.statut_actuel == 'en_cours' %}badge-primary-modern{% else %}badge-secondary-modern{% endif %}">
+                                            {{ p.get_statut_actuel_display }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="progress-modern">
+                                        <div class="progress-bar-modern" style="width: {{ p.pourcentage_completion }}%"></div>
+                                        <span class="progress-text">{{ p.pourcentage_completion }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if p.mentor_assigne %}
+                                        <span class="mentor-display">{{ p.mentor_assigne.username }}</span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">Aucun mentor</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if p.date_debut_formation %}
+                                        <strong>{{ p.date_debut_formation|date:"d/m/Y" }}</strong>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">Non démarré</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if p.note_formation %}
+                                        <span class="note-display">{{ p.note_formation }}/20</span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">En cours</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'formation:admin_parcours_detail' p.id %}" 
+                                           class="btn-modern btn-sm-modern btn-icon-modern btn-icon-primary" 
+                                           title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'formation:admin_parcours_suivi' p.id %}" 
+                                           class="btn-modern btn-sm-modern btn-icon-modern btn-icon-info" 
+                                           title="Ajouter suivi">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if parcours.has_other_pages %}
+                <div class="pagination-modern">
+                    {% if parcours.has_previous %}
+                        <div class="page-item-modern">
+                            <a class="page-link-modern" href="?page={{ parcours.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    {% for num in parcours.paginator.page_range %}
+                        {% if parcours.number == num %}
+                            <div class="page-item-modern active">
+                                <span class="page-link-modern">{{ num }}</span>
+                            </div>
+                        {% else %}
+                            <div class="page-item-modern">
+                                <a class="page-link-modern" href="?page={{ num }}">{{ num }}</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if parcours.has_next %}
+                        <div class="page-item-modern">
+                            <a class="page-link-modern" href="?page={{ parcours.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-route"></i>
+                    <h4>Aucun parcours trouvé</h4>
+                    <p>Aucun parcours ne correspond aux critères sélectionnés.</p>
+                    <a href="{% url 'formation:admin_parcours_list' %}" class="btn-modern btn-outline-modern" style="margin-top: 1rem;">
+                        <i class="fas fa-refresh"></i>
+                        Voir tous les parcours
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation progressive des lignes du tableau
+    const rows = document.querySelectorAll('.fade-in');
+    rows.forEach((row, index) => {
+        row.style.animationDelay = (index * 0.05) + 's';
+    });
+
+    // Animation des barres de progression
+    const progressBars = document.querySelectorAll('.progress-bar-modern');
+    progressBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500 + (index * 100));
+    });
+
+    // Effet de survol sur les lignes du tableau
+    const tableRows = document.querySelectorAll('.table-modern tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+    // Compteur animé pour les statistiques
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(number => {
+        const target = parseInt(number.textContent);
+        let current = 0;
+        const increment = target / 50;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            number.textContent = Math.floor(current);
+        }, 30);
+    });
+
+    // Auto-submit du formulaire de filtres avec délai
+    let filterTimeout;
+    document.querySelectorAll('.form-select-modern').forEach(select => {
+        select.addEventListener('change', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 300);
+        });
+    });
+
+    // Tooltip pour les actions
+    const actionButtons = document.querySelectorAll('[title]');
+    actionButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) translateY(-2px)';
+        });
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) translateY(0)';
+        });
+    });
+
+    // Animation des dots de statut
+    const statusDots = document.querySelectorAll('.status-dot');
+    statusDots.forEach((dot, index) => {
+        dot.style.animationDelay = (index * 0.2) + 's';
+    });
+
+    // Recherche en temps réel (optionnel)
+    function initSearch() {
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Rechercher un participant...';
+        searchInput.className = 'form-select-modern';
+        searchInput.style.marginBottom = '1rem';
+        
+        const table = document.querySelector('.table-modern');
+        if (table) {
+            table.parentNode.insertBefore(searchInput, table);
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.table-modern tbody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        row.style.display = '';
+                        row.style.animation = 'fadeIn 0.3s ease-out';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    }
+
+    // Activer la recherche si il y a plus de 10 parcours
+    if (document.querySelectorAll('.table-modern tbody tr').length > 10) {
+        initSearch();
+    }
+});
+
+// Fonction pour rafraîchir automatiquement la page (optionnel)
+function autoRefresh() {
+    setTimeout(() => {
+        location.reload();
+    }, 300000); // 5 minutes
+}
+
+// Activer le rafraîchissement auto pour les parcours en cours
+if (document.querySelectorAll('.status-dot.primary').length > 0) {
+    autoRefresh();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,201 @@
+# formation/templates/formation/demande_detail.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ma Demande de Formation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Ma Demande de Formation</h1>
+                <a href="{% url 'formation:mes_demandes' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à mes demandes
+                </a>
+            </div>
+
+            <div class="row">
+                <!-- Informations principales -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>{{ demande.formation_souhaitee.nom }}</h5>
+                            <span class="badge bg-{% if demande.statut == 'acceptee' %}success{% elif demande.statut == 'refusee' %}danger{% elif demande.statut == 'en_attente' %}warning{% else %}secondary{% endif %}">
+                                {{ demande.get_statut_display }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Type de formation :</strong> {{ demande.formation_souhaitee.get_type_formation_display }}<br>
+                                <strong>Durée :</strong> {{ demande.formation_souhaitee.duree_semaines }} semaines<br>
+                                <strong>Date de demande :</strong> {{ demande.date_demande|date:"d/m/Y à H:i" }}
+                            </div>
+
+                            <h6>Ma motivation</h6>
+                            <p>{{ demande.get_motivation_principale_display }}</p>
+
+                            {% if demande.experience_anterieure %}
+                            <h6>Mon expérience</h6>
+                            <p>{{ demande.experience_anterieure }}</p>
+                            {% endif %}
+
+                            {% if demande.competences_actuelles %}
+                            <h6>Mes compétences actuelles</h6>
+                            <p>{{ demande.competences_actuelles }}</p>
+                            {% endif %}
+
+                            <h6>Ma disponibilité</h6>
+                            <p>{{ demande.disponibilite_horaire }}</p>
+
+                            {% if demande.contraintes_personnelles %}
+                            <h6>Mes contraintes</h6>
+                            <p>{{ demande.contraintes_personnelles }}</p>
+                            {% endif %}
+
+                            {% if demande.a_idee_projet %}
+                            <h6>Mon projet post-formation</h6>
+                            <p>{{ demande.description_projet }}</p>
+                            {% if demande.souhaite_financement %}
+                            <p><strong>Financement souhaité :</strong> {{ demande.montant_financement|floatformat:0 }} FCFA</p>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Résultat de l'analyse -->
+                    {% if demande.analyse_llm %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Résultat de l'évaluation</h5>
+                            {% if demande.score_formabilite %}
+                            <span class="badge bg-{% if demande.score_formabilite >= 70 %}success{% elif demande.score_formabilite >= 40 %}warning{% else %}danger{% endif %} fs-6">
+                                Score : {{ demande.score_formabilite }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if demande.score_formabilite %}
+                            <div class="mb-3">
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-{% if demande.score_formabilite >= 70 %}success{% elif demande.score_formabilite >= 40 %}warning{% else %}danger{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ demande.score_formabilite }}%">
+                                        {{ demande.score_formabilite }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    {% if demande.score_formabilite >= 70 %}
+                                        Excellent profil pour cette formation
+                                    {% elif demande.score_formabilite >= 40 %}
+                                        Profil acceptable avec quelques points d'attention
+                                    {% else %}
+                                        Profil nécessitant des améliorations
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% endif %}
+
+                            <h6>Évaluation détaillée</h6>
+                            <p>{{ demande.analyse_llm }}</p>
+                            
+                            {% if demande.recommandations_llm %}
+                            <h6>Recommandations</h6>
+                            <div class="alert alert-info">
+                                {{ demande.recommandations_llm }}
+                            </div>
+                            {% endif %}
+
+                            <small class="text-muted">Évaluation effectuée le {{ demande.date_analyse|date:"d/m/Y à H:i" }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Décision et commentaires -->
+                    {% if demande.commentaire_decision %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Décision de l'administration</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ demande.commentaire_decision }}</p>
+                            <small class="text-muted">
+                                Décision prise le {{ demande.date_decision|date:"d/m/Y à H:i" }}
+                                {% if demande.responsable_decision %}
+                                    par {{ demande.responsable_decision.username }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informations latérales -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Statut de ma demande</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-{% if demande.statut == 'acceptee' %}check-circle text-success{% elif demande.statut == 'refusee' %}times-circle text-danger{% elif demande.statut == 'en_attente' %}clock text-warning{% else %}question-circle text-secondary{% endif %} fa-3x"></i>
+                            </div>
+                            <h6 class="text-center">{{ demande.get_statut_display }}</h6>
+                            
+                            {% if demande.statut == 'en_attente' %}
+                            <p class="text-muted small text-center">Votre demande est en cours d'analyse. Vous recevrez une réponse sous peu.</p>
+                            {% elif demande.statut == 'analysee' %}
+                            <p class="text-muted small text-center">Votre demande a été analysée et est en attente de décision finale.</p>
+                            {% elif demande.statut == 'acceptee' %}
+                            <p class="text-success small text-center">Félicitations ! Votre demande a été acceptée.</p>
+                            {% elif demande.statut == 'refusee' %}
+                            <p class="text-danger small text-center">Votre demande n'a pas pu être acceptée cette fois.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Formation demandée</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>{{ demande.formation_souhaitee.nom }}</h6>
+                            <p class="text-muted">{{ demande.formation_souhaitee.get_type_formation_display }}</p>
+                            <p><strong>Durée :</strong> {{ demande.formation_souhaitee.duree_semaines }} semaines</p>
+                            <p><strong>Niveau requis :</strong> {{ demande.formation_souhaitee.get_niveau_requis_display }}</p>
+                            <p><strong>Âge :</strong> {{ demande.formation_souhaitee.age_min }}-{{ demande.formation_souhaitee.age_max }} ans</p>
+                            {% if demande.formation_souhaitee.cout_formation > 0 %}
+                            <p><strong>Coût :</strong> {{ demande.formation_souhaitee.cout_formation|floatformat:0 }} FCFA</p>
+                            {% endif %}
+                            
+                            <a href="{% url 'formation:formation_detail' demande.formation_souhaitee.id %}" class="btn btn-outline-primary btn-sm w-100">
+                                Voir la formation
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if demande.statut == 'acceptee' %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Prochaines étapes</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-success">Votre demande a été acceptée !</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Demande acceptée</li>
+                                <li><i class="fas fa-clock text-muted"></i> Création du parcours de formation</li>
+                                <li><i class="fas fa-clock text-muted"></i> Attribution d'un mentor</li>
+                                <li><i class="fas fa-clock text-muted"></i> Début de la formation</li>
+                            </ul>
+                            <a href="{% url 'formation:mon_parcours' %}" class="btn btn-primary btn-sm w-100">
+                                Voir mon parcours
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

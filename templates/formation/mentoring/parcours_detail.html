@@ -1,0 +1,276 @@
+# formation/templates/formation/mentoring/parcours_detail.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail du Mentoring{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Mentoring - {{ parcours.demande_formation.personne.get_full_name }}</h1>
+                <div>
+                    <a href="{% url 'formation:mentoring_evaluation' parcours.id %}" class="btn btn-primary">
+                        <i class="fas fa-star"></i> Nouvelle évaluation
+                    </a>
+                    <a href="{% url 'formation:mentoring_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations du participant -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ parcours.demande_formation.formation_souhaitee.nom }}</h5>
+                    <span class="badge bg-{% if parcours.statut_actuel == 'autonome' %}success{% elif parcours.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                        {{ parcours.get_statut_actuel_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Progression actuelle</h6>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ parcours.pourcentage_completion }}%">
+                                    {{ parcours.pourcentage_completion }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Note actuelle</h6>
+                            {% if parcours.note_formation %}
+                                <h4 class="text-primary">{{ parcours.note_formation }}/20</h4>
+                            {% else %}
+                                <p class="text-muted">Pas encore notée</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        {% if parcours.date_debut_formation %}
+                        <div class="col-md-4">
+                            <h6>Date de début</h6>
+                            <p><i class="fas fa-calendar"></i> {{ parcours.date_debut_formation|date:"d/m/Y" }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if parcours.date_fin_formation %}
+                        <div class="col-md-4">
+                            <h6>Date de fin prévue</h6>
+                            <p><i class="fas fa-calendar-check"></i> {{ parcours.date_fin_formation|date:"d/m/Y" }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-4">
+                            <h6>Durée du mentoring</h6>
+                            {% if parcours.date_debut_formation %}
+                                <p><i class="fas fa-clock"></i> {{ parcours.get_duree_formation_jours|default:"En cours" }} jours</p>
+                            {% else %}
+                                <p class="text-muted">Non commencé</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if parcours.competences_validees %}
+                    <div class="mb-4">
+                        <h6>Compétences validées</h6>
+                        <p>{{ parcours.competences_validees }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historique des suivis -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5>Historique des évaluations</h5>
+                        <small class="text-muted">{{ suivis|length }} évaluation{{ suivis|length|pluralize }}</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if suivis %}
+                        {% for suivi in suivis %}
+                        <div class="card border-start border-3 border-{% if suivi.type_suivi == 'evaluation' %}success{% elif suivi.type_suivi == 'mentoring' %}info{% else %}primary{% endif %} mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="card-title mb-1">{{ suivi.titre }}</h6>
+                                        <small class="text-muted">
+                                            {{ suivi.get_type_suivi_display }} - {{ suivi.date_suivi|date:"d/m/Y à H:i" }}
+                                        </small>
+                                    </div>
+                                    {% if suivi.note_progression %}
+                                    <span class="badge bg-{% if suivi.note_progression >= 8 %}success{% elif suivi.note_progression >= 5 %}warning{% else %}danger{% endif %} fs-6">
+                                        {{ suivi.note_progression }}/10
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="card-text mt-2">{{ suivi.description }}</p>
+                                
+                                {% if suivi.points_forts %}
+                                <div class="mt-2">
+                                    <strong class="text-success">Points forts :</strong>
+                                    <p class="small">{{ suivi.points_forts }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if suivi.points_amelioration %}
+                                <div class="mt-2">
+                                    <strong class="text-warning">Points à améliorer :</strong>
+                                    <p class="small">{{ suivi.points_amelioration }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if suivi.prochaines_etapes %}
+                                <div class="mt-2">
+                                    <strong class="text-info">Prochaines étapes :</strong>
+                                    <p class="small">{{ suivi.prochaines_etapes }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5>Aucune évaluation</h5>
+                            <p class="text-muted">Commencez par créer une première évaluation pour ce participant.</p>
+                            <a href="{% url 'formation:mentoring_evaluation' parcours.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Première évaluation
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations du participant -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Profil du Participant</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-3x text-primary"></i>
+                        <h6 class="mt-2">{{ parcours.demande_formation.personne.get_full_name }}</h6>
+                        <small class="text-muted">{{ parcours.demande_formation.personne.age }} ans</small>
+                    </div>
+                    
+                    <hr>
+                    
+                    <p><strong>Éducation :</strong> {{ parcours.demande_formation.personne.get_niveau_education_display }}</p>
+                    <p><strong>Emploi actuel :</strong> {{ parcours.demande_formation.personne.emploi }}</p>
+                    <p><strong>Région :</strong> {{ parcours.demande_formation.personne.region_geographique }}</p>
+                    
+                    <hr>
+                    
+                    <p><strong>Formation :</strong> {{ parcours.demande_formation.formation_souhaitee.nom }}</p>
+                    <p><strong>Motivation :</strong> {{ parcours.demande_formation.get_motivation_principale_display }}</p>
+                    
+                    {% if parcours.demande_formation.score_formabilite %}
+                    <p><strong>Score initial :</strong> 
+                        <span class="badge bg-{% if parcours.demande_formation.score_formabilite >= 70 %}success{% elif parcours.demande_formation.score_formabilite >= 40 %}warning{% else %}danger{% endif %}">
+                            {{ parcours.demande_formation.score_formabilite }}%
+                        </span>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Progression visuelle -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Progression</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div style="width: 120px; height: 120px; margin: 0 auto; position: relative;">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="8"></circle>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#007bff" stroke-width="8" 
+                                        stroke-dasharray="{{ parcours.pourcentage_completion|floatformat:0 }} 314" 
+                                        stroke-dashoffset="0" transform="rotate(-90 60 60)"></circle>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <h4 class="mb-0">{{ parcours.pourcentage_completion }}%</h4>
+                                <small class="text-muted">Complété</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if suivis %}
+                    <small class="text-muted">
+                        Dernière évaluation : {{ suivis.0.date_suivi|date:"d/m/Y" }}
+                        {% if suivis.0.note_progression %}
+                        <br>Note : {{ suivis.0.note_progression }}/10
+                        {% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions de mentoring -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'formation:mentoring_evaluation' parcours.id %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-star"></i> Nouvelle évaluation
+                    </a>
+                    
+                    <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="exportMentoring()">
+                        <i class="fas fa-file-export"></i> Exporter le suivi
+                    </button>
+                    
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+
+            {% if parcours.projet_vie %}
+            <!-- Projet associé -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Projet de Vie</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ parcours.projet_vie.titre_projet }}</h6>
+                    <p class="text-muted small">{{ parcours.projet_vie.description|truncatechars:100 }}</p>
+                    <p><strong>Budget :</strong> {{ parcours.projet_vie.budget_estime|floatformat:0 }} FCFA</p>
+                    
+                    {% if parcours.projet_vie.faisabilite_score %}
+                    <p><strong>Faisabilité :</strong> 
+                        <span class="badge bg-{% if parcours.projet_vie.faisabilite_score >= 70 %}success{% elif parcours.projet_vie.faisabilite_score >= 40 %}warning{% else %}danger{% endif %}">
+                            {{ parcours.projet_vie.faisabilite_score }}%
+                        </span>
+                    </p>
+                    {% endif %}
+                    
+                    <a href="{% url 'formation:admin_projet_detail' parcours.projet_vie.id %}" class="btn btn-outline-info btn-sm w-100">
+                        Voir le projet
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function exportMentoring() {
+    console.log('Export mentoring data');
+    // Implémenter l'export des données de mentoring
+}
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-
+# users/views.py
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -35,7 +35,7 @@ def login_view(request):
         if user is not None and user.is_active:  # Vérifier si l'utilisateur est actif
             login(request, user)
             messages.success(request, "Connexion réussie.")
-            return redirect('profile')
+            return redirect('dashboard_formation_complete')
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
 
@@ -1531,3 +1531,666 @@ def generate_random_password(length=8):
     """Générer un mot de passe aléatoire sécurisé"""
     characters = string.ascii_letters + string.digits + "!@#$%^&*"
     return ''.join(random.choice(characters) for i in range(length))
+
+
+
+
+
+
+
+#######################################
+# users/views.py - Vue complète du dashboard avec formations
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Sum, Q, Avg
+from django.utils import timezone
+from datetime import datetime, timedelta
+from decimal import Decimal
+from users.models import PersonneVulnerable, User
+
+# Imports pour les formations
+try:
+    from formation.models import (
+        Formation, DemandeFormation, ParcoursFormation,
+        ProjetVie, SuiviProgression
+    )
+
+    FORMATIONS_AVAILABLE = True
+except ImportError:
+    FORMATIONS_AVAILABLE = False
+
+
+    # Modèles factices si les formations ne sont pas installées
+    class Formation:
+        objects = type('MockManager', (), {'filter': lambda **kwargs: [], 'count': lambda: 0})()
+
+
+    class DemandeFormation:
+        objects = type('MockManager', (), {'filter': lambda **kwargs: [], 'count': lambda: 0})()
+
+
+    class ParcoursFormation:
+        objects = type('MockManager', (), {'filter': lambda **kwargs: [], 'count': lambda: 0})()
+
+
+    class ProjetVie:
+        objects = type('MockManager', (), {'filter': lambda **kwargs: [], 'count': lambda: 0})()
+
+
+@login_required
+def dashboard_formation_complete(request):
+    """
+    Vue principale du dashboard avec intégration complète des formations
+    """
+    user = request.user
+    context = {
+        'user': user,
+        'current_date': timezone.now().strftime('%d %B %Y'),
+        'formations_available': FORMATIONS_AVAILABLE,
+    }
+
+    # === STATISTIQUES FORMATIONS GLOBALES ===
+    if FORMATIONS_AVAILABLE:
+        try:
+            # Formations actives
+            formations_actives = Formation.objects.filter(est_active=True).count()
+            formations_disponibles = Formation.objects.filter(
+                est_active=True,
+                places_disponibles__gt=0
+            ).count()
+
+            # Demandes en attente globales
+            demandes_en_attente = DemandeFormation.objects.filter(
+                statut__in=['en_attente', 'analysee']
+            ).count()
+
+            # Parcours en cours
+            parcours_en_cours = ParcoursFormation.objects.filter(
+                statut_actuel__in=['pre_inscrit', 'forme', 'projet_valide']
+            ).count()
+
+            context.update({
+                'formations_actives': formations_actives,
+                'formations_disponibles': formations_disponibles,
+                'demandes_en_attente': demandes_en_attente,
+                'parcours_en_cours': parcours_en_cours,
+            })
+        except Exception as e:
+            print(f"Erreur formations globales: {e}")
+            context.update({
+                'formations_actives': 0,
+                'formations_disponibles': 0,
+                'demandes_en_attente': 0,
+                'parcours_en_cours': 0,
+            })
+
+    # === DASHBOARD DONATEUR AVEC FORMATIONS ===
+    if user.is_donator:
+        try:
+            # Dons classiques
+            dons_donnes = getattr(user, 'dons', None)
+            if dons_donnes:
+                dons_donnes = dons_donnes.all()
+                total_donations = dons_donnes.count()
+                total_amount = sum([float(don.montant) for don in dons_donnes]) if dons_donnes else 0
+
+                # Bénéficiaires uniques
+                beneficiaires = set()
+                for don in dons_donnes.filter(est_reparti=True):
+                    if hasattr(don, 'personne_vulnerable') and don.personne_vulnerable.exists():
+                        beneficiaires.update(don.personne_vulnerable.values_list('id', flat=True))
+
+                # Dons récents (30 derniers jours)
+                date_recente = timezone.now() - timedelta(days=30)
+                recent_amount = sum([
+                    float(don.montant) for don in dons_donnes.filter(date_don__gte=date_recente)
+                ]) if dons_donnes.filter(date_don__gte=date_recente).exists() else 0
+
+                new_donations = dons_donnes.filter(date_don__gte=date_recente).count()
+                dons_en_attente = dons_donnes.filter(est_reparti=False).count()
+
+                context.update({
+                    'total_donations': total_donations,
+                    'total_amount': int(total_amount),
+                    'beneficiaires': len(beneficiaires),
+                    'recent_amount': int(recent_amount),
+                    'new_donations': new_donations,
+                    'dons_en_attente': dons_en_attente,
+                })
+            else:
+                context.update({
+                    'total_donations': 0,
+                    'total_amount': 0,
+                    'beneficiaires': 0,
+                    'recent_amount': 0,
+                    'new_donations': 0,
+                    'dons_en_attente': 0,
+                })
+
+        except Exception as e:
+            print(f"Erreur dashboard donateur: {e}")
+            context.update({
+                'total_donations': 0,
+                'total_amount': 0,
+                'beneficiaires': 0,
+                'recent_amount': 0,
+                'new_donations': 0,
+                'dons_en_attente': 0,
+            })
+
+    # === DASHBOARD PERSONNE VULNÉRABLE AVEC FORMATIONS ===
+    elif user.is_vulnerable:
+        try:
+            personne = user.personnevulnerable
+
+            if FORMATIONS_AVAILABLE:
+                # Demandes de formation de cette personne
+                demandes_formation = DemandeFormation.objects.filter(personne=personne)
+                demandes_formation_count = demandes_formation.count()
+
+                # Parcours de formation
+                parcours_actifs = ParcoursFormation.objects.filter(
+                    demande_formation__personne=personne,
+                    statut_actuel__in=['pre_inscrit', 'forme', 'projet_valide']
+                ).count()
+
+                # Projets de vie
+                projets_vie = ProjetVie.objects.filter(personne=personne)
+                projets_vie_count = projets_vie.count()
+                projets_actifs = projets_vie.exclude(statut='abandonne').count()
+
+                # Formations terminées
+                formations_terminees = ParcoursFormation.objects.filter(
+                    demande_formation__personne=personne,
+                    statut_actuel__in=['forme', 'autonome']
+                ).count()
+
+                # Pourcentage de progression formations
+                total_parcours = ParcoursFormation.objects.filter(
+                    demande_formation__personne=personne
+                ).count()
+                formations_completees_pct = (formations_terminees / total_parcours * 100) if total_parcours > 0 else 0
+
+                # Pourcentage projets lancés
+                projets_lances = projets_vie.filter(
+                    statut__in=['en_cours', 'realise']
+                ).count()
+                projets_lances_pct = (projets_lances / projets_vie_count * 100) if projets_vie_count > 0 else 0
+
+                context.update({
+                    'demandes_formation_count': demandes_formation_count,
+                    'parcours_actifs': parcours_actifs,
+                    'projets_vie_count': projets_vie_count,
+                    'projets_actifs': projets_actifs,
+                    'formations_terminees': formations_terminees,
+                    'formations_completees': formations_terminees,
+                    'formations_completees_pct': formations_completees_pct,
+                    'projets_lances': projets_lances,
+                    'projets_lances_pct': projets_lances_pct,
+                })
+            else:
+                context.update({
+                    'demandes_formation_count': 0,
+                    'parcours_actifs': 0,
+                    'projets_vie_count': 0,
+                    'projets_actifs': 0,
+                    'formations_terminees': 0,
+                    'formations_completees': 0,
+                    'formations_completees_pct': 0,
+                    'projets_lances': 0,
+                    'projets_lances_pct': 0,
+                })
+
+            # Calcul des dons reçus (existant)
+            montant_total = Decimal('0.00')
+            nombre_donateurs = set()
+
+            dons_recus = []
+            if hasattr(personne, 'dons'):
+                dons_recus.extend(personne.dons.filter(est_reparti=True))
+
+            for don in dons_recus:
+                try:
+                    if hasattr(don, 'personne_vulnerable') and don.personne_vulnerable.exists():
+                        nb_beneficiaires = don.personne_vulnerable.count()
+                    elif hasattr(don, 'entite_vulnerable') and don.entite_vulnerable:
+                        nb_beneficiaires = don.entite_vulnerable.personnevulnerable_set.filter(
+                            est_vulnerable=True
+                        ).count()
+                    else:
+                        nb_beneficiaires = 1
+
+                    montant_par_personne = don.montant / nb_beneficiaires if nb_beneficiaires > 0 else don.montant
+                    montant_total += montant_par_personne
+                    nombre_donateurs.add(don.donateur.id if hasattr(don, 'donateur') else 0)
+
+                except Exception as e:
+                    print(f"Erreur calcul don {don.id}: {e}")
+                    continue
+
+            # Progression vers objectif
+            objectif = Decimal('200000.00')
+            progression = (montant_total / objectif * 100) if objectif > 0 else Decimal('0.00')
+            progression = min(progression, 100)
+
+            context.update({
+                'personne': personne,
+                'montant_total': float(montant_total),
+                'progression': float(progression),
+                'nombre_donateurs': len(nombre_donateurs),
+                'objectif': float(objectif),
+            })
+
+        except PersonneVulnerable.DoesNotExist:
+            context.update({
+                'personne': None,
+                'montant_total': 0,
+                'progression': 0,
+                'nombre_donateurs': 0,
+                'objectif': 200000,
+                'demandes_formation_count': 0,
+                'parcours_actifs': 0,
+                'projets_vie_count': 0,
+                'projets_actifs': 0,
+                'formations_terminees': 0,
+            })
+
+    # === DASHBOARD RECENSEUR AVEC FORMATIONS ===
+    elif user.is_recenseur:
+        try:
+            personnes_recensees = user.personnes_recensees.all()
+            total_recensements = personnes_recensees.count()
+
+            # Statistiques recensement
+            validees = personnes_recensees.filter(validated_by_admin=True).count()
+            en_attente = personnes_recensees.filter(validated_by_admin=False).count()
+            taux_validation = (validees / total_recensements * 100) if total_recensements > 0 else 0
+
+            # Recensements récents
+            debut_mois = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            new_recensements = personnes_recensees.count()  # Adapter selon votre modèle de date
+
+            context.update({
+                'total_recensements': total_recensements,
+                'validees': validees,
+                'en_attente': en_attente,
+                'taux_validation': round(taux_validation, 1),
+                'new_recensements': new_recensements,
+            })
+
+        except Exception as e:
+            print(f"Erreur dashboard recenseur: {e}")
+            context.update({
+                'total_recensements': 0,
+                'validees': 0,
+                'en_attente': 0,
+                'taux_validation': 0,
+                'new_recensements': 0,
+            })
+
+    # === DASHBOARD ADMINISTRATEUR AVEC FORMATIONS ===
+    elif user.is_superuser or user.is_staff:
+        try:
+            # Statistiques utilisateurs
+            total_users = User.objects.count()
+            total_donateurs = User.objects.filter(is_donator=True).count()
+            total_vulnerables = User.objects.filter(is_vulnerable=True).count()
+            total_recenseurs = User.objects.filter(is_recenseur=True).count()
+
+            # Personnes à valider
+            personnes_a_valider = PersonneVulnerable.objects.filter(
+                validated_by_admin=False,
+                user__isnull=True
+            ).count()
+
+            if FORMATIONS_AVAILABLE:
+                # Statistiques formations admin
+                formations_actives = Formation.objects.filter(est_active=True).count()
+                demandes_en_attente = DemandeFormation.objects.filter(
+                    statut__in=['en_attente', 'analysee']
+                ).count()
+                parcours_en_cours = ParcoursFormation.objects.filter(
+                    statut_actuel__in=['pre_inscrit', 'forme', 'projet_valide']
+                ).count()
+                projets_en_cours = ProjetVie.objects.exclude(statut='abandonne').count()
+
+                # Taux de succès formations
+                total_parcours = ParcoursFormation.objects.count()
+                parcours_reussis = ParcoursFormation.objects.filter(
+                    statut_actuel__in=['forme', 'autonome']
+                ).count()
+                taux_succes = (parcours_reussis / total_parcours * 100) if total_parcours > 0 else 0
+
+                context.update({
+                    'formations_actives': formations_actives,
+                    'demandes_en_attente': demandes_en_attente,
+                    'parcours_en_cours': parcours_en_cours,
+                    'projets_en_cours': projets_en_cours,
+                    'taux_succes_formations': round(taux_succes, 1),
+                })
+
+            context.update({
+                'total_users': total_users,
+                'total_donateurs': total_donateurs,
+                'total_vulnerables': total_vulnerables,
+                'total_recenseurs': total_recenseurs,
+                'personnes_a_valider': personnes_a_valider,
+                'total_platform_dons': 0,  # À calculer selon votre modèle
+                'total_impact': total_vulnerables,
+            })
+
+        except Exception as e:
+            print(f"Erreur dashboard admin: {e}")
+            context.update({
+                'total_users': 0,
+                'total_donateurs': 0,
+                'total_vulnerables': 0,
+                'total_recenseurs': 0,
+                'personnes_a_valider': 0,
+                'formations_actives': 0,
+                'demandes_en_attente': 0,
+                'parcours_en_cours': 0,
+                'total_platform_dons': 0,
+                'total_impact': 0,
+            })
+
+    # === NOTIFICATIONS ===
+    try:
+        notifications_count = 0
+        if hasattr(user, 'notifications'):
+            notifications_count = user.notifications.filter(is_read=False).count()
+        context['notifications_count'] = notifications_count
+    except:
+        context['notifications_count'] = 0
+
+    return render(request, 'users/dashboard_formation.html', context)
+
+
+@login_required
+def api_dashboard_formation_stats(request):
+    """
+    API pour les statistiques du dashboard formations en temps réel
+    """
+    from django.http import JsonResponse
+
+    user = request.user
+    stats = {}
+
+    try:
+        if user.is_donator:
+            dons = getattr(user, 'dons', None)
+            if dons:
+                dons = dons.all()
+                stats = {
+                    'total_donations': dons.count(),
+                    'total_amount': sum([float(don.montant) for don in dons]),
+                    'dons_en_attente': dons.filter(est_reparti=False).count(),
+                }
+            else:
+                stats = {'total_donations': 0, 'total_amount': 0, 'dons_en_attente': 0}
+
+        elif user.is_vulnerable:
+            try:
+                personne = user.personnevulnerable
+
+                # Stats dons
+                montant_total = Decimal('0.00')
+                if hasattr(personne, 'dons'):
+                    for don in personne.dons.filter(est_reparti=True):
+                        nb_beneficiaires = 1
+                        if hasattr(don, 'personne_vulnerable') and don.personne_vulnerable.exists():
+                            nb_beneficiaires = don.personne_vulnerable.count()
+                        montant_total += don.montant / nb_beneficiaires
+
+                progression = (montant_total / Decimal('200000.00') * 100) if montant_total > 0 else 0
+
+                # Stats formations
+                formation_stats = {}
+                if FORMATIONS_AVAILABLE:
+                    demandes = DemandeFormation.objects.filter(personne=personne).count()
+                    projets = ProjetVie.objects.filter(personne=personne).count()
+                    formation_stats = {
+                        'demandes_formation_count': demandes,
+                        'projets_vie_count': projets,
+                    }
+
+                stats = {
+                    'montant_total': float(montant_total),
+                    'progression': float(min(progression, 100)),
+                    **formation_stats
+                }
+            except PersonneVulnerable.DoesNotExist:
+                stats = {'montant_total': 0, 'progression': 0}
+
+        elif user.is_recenseur:
+            personnes = user.personnes_recensees.all()
+            stats = {
+                'total_recensements': personnes.count(),
+                'validees': personnes.filter(validated_by_admin=True).count(),
+                'en_attente': personnes.filter(validated_by_admin=False).count(),
+            }
+
+        elif user.is_superuser or user.is_staff:
+            admin_stats = {
+                'total_users': User.objects.count(),
+                'personnes_a_valider': PersonneVulnerable.objects.filter(
+                    validated_by_admin=False,
+                    user__isnull=True
+                ).count(),
+                'total_vulnerables': User.objects.filter(is_vulnerable=True).count(),
+            }
+
+            if FORMATIONS_AVAILABLE:
+                formation_admin_stats = {
+                    'formations_actives': Formation.objects.filter(est_active=True).count(),
+                    'demandes_en_attente': DemandeFormation.objects.filter(
+                        statut__in=['en_attente', 'analysee']
+                    ).count(),
+                    'parcours_en_cours': ParcoursFormation.objects.filter(
+                        statut_actuel__in=['pre_inscrit', 'forme', 'projet_valide']
+                    ).count(),
+                }
+                admin_stats.update(formation_admin_stats)
+
+            stats = admin_stats
+
+    except Exception as e:
+        print(f"Erreur API stats formations: {e}")
+        stats = {'error': 'Erreur lors de la récupération des statistiques'}
+
+    return JsonResponse(stats)
+
+
+@login_required
+def api_formation_activity(request):
+    """
+    API pour récupérer l'activité récente liée aux formations
+    """
+    from django.http import JsonResponse
+
+    user = request.user
+    activities = []
+
+    try:
+        if user.is_vulnerable and FORMATIONS_AVAILABLE:
+            personne = user.personnevulnerable
+
+            # Demandes de formation récentes
+            recent_demandes = DemandeFormation.objects.filter(
+                personne=personne
+            ).order_by('-date_demande')[:5]
+
+            for demande in recent_demandes:
+                activities.append({
+                    'type': 'demande_formation',
+                    'title': 'Demande de formation',
+                    'description': f'Formation: {demande.formation_souhaitee.nom}',
+                    'time': demande.date_demande.strftime('%d/%m/%Y %H:%M'),
+                    'icon': 'fas fa-graduation-cap',
+                    'color': 'primary',
+                    'status': demande.get_statut_display()
+                })
+
+            # Projets récents
+            recent_projets = ProjetVie.objects.filter(
+                personne=personne
+            ).order_by('-date_creation')[:3]
+
+            for projet in recent_projets:
+                activities.append({
+                    'type': 'projet_vie',
+                    'title': 'Projet de vie',
+                    'description': f'Projet: {projet.titre_projet}',
+                    'time': projet.date_creation.strftime('%d/%m/%Y %H:%M'),
+                    'icon': 'fas fa-lightbulb',
+                    'color': 'success',
+                    'status': projet.get_statut_display()
+                })
+
+        elif user.is_recenseur and FORMATIONS_AVAILABLE:
+            # Orientations vers formations
+            recent_recensements = user.personnes_recensees.order_by('-id')[:5]
+            for personne in recent_recensements:
+                activities.append({
+                    'type': 'orientation',
+                    'title': 'Orientation formation',
+                    'description': f'Personne: {personne.get_full_name()}',
+                    'time': 'Récemment',
+                    'icon': 'fas fa-user-graduate',
+                    'color': 'info',
+                    'status': 'Validée' if personne.validated_by_admin else 'En attente'
+                })
+
+        elif (user.is_superuser or user.is_staff) and FORMATIONS_AVAILABLE:
+            # Activité admin formations
+            recent_demandes = DemandeFormation.objects.filter(
+                statut='en_attente'
+            ).order_by('-date_demande')[:5]
+
+            for demande in recent_demandes:
+                activities.append({
+                    'type': 'admin_demande',
+                    'title': 'Nouvelle demande',
+                    'description': f'{demande.personne.get_full_name()} - {demande.formation_souhaitee.nom}',
+                    'time': demande.date_demande.strftime('%d/%m/%Y %H:%M'),
+                    'icon': 'fas fa-inbox',
+                    'color': 'warning',
+                    'status': 'À traiter'
+                })
+
+    except Exception as e:
+        print(f"Erreur récupération activité formations: {e}")
+
+    return JsonResponse({'activities': activities})
+
+
+# Décorateur pour vérifier l'accès aux formations
+def formations_required(view_func):
+    """Décorateur pour vérifier que les formations sont disponibles"""
+    from functools import wraps
+    from django.contrib import messages
+    from django.shortcuts import redirect
+
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not FORMATIONS_AVAILABLE:
+            messages.warning(request, "Les fonctionnalités de formation ne sont pas disponibles.")
+            return redirect('users:dashboard_formation_complete')
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+
+
+# Vue pour les statistiques formations détaillées
+@login_required
+@formations_required
+def formation_detailed_stats(request):
+    """
+    Vue pour les statistiques détaillées des formations
+    """
+    user = request.user
+    context = {}
+
+    if user.is_vulnerable:
+        try:
+            personne = user.personnevulnerable
+
+            # Progression détaillée
+            demandes = DemandeFormation.objects.filter(personne=personne)
+            parcours = ParcoursFormation.objects.filter(demande_formation__personne=personne)
+            projets = ProjetVie.objects.filter(personne=personne)
+
+            context.update({
+                'demandes_formation': demandes,
+                'parcours_formation': parcours,
+                'projets_vie': projets,
+                'moyenne_score_formabilite': demandes.aggregate(
+                    avg_score=Avg('score_formabilite')
+                )['avg_score'] or 0,
+            })
+
+        except PersonneVulnerable.DoesNotExist:
+            context = {'error': 'Profil non trouvé'}
+
+    elif user.is_recenseur:
+        # Stats pour recenseur - orientations formations
+        personnes_orientees = user.personnes_recensees.filter(
+            validated_by_admin=True
+        )
+
+        context.update({
+            'personnes_orientees': personnes_orientees,
+            'taux_orientation_formation': 0,  # À calculer selon vos besoins
+        })
+
+    elif user.is_superuser or user.is_staff:
+        # Stats administrateur formations
+        context.update({
+            'formations_populaires': Formation.objects.annotate(
+                nb_demandes=Count('demandes_formation')
+            ).order_by('-nb_demandes')[:10],
+            'taux_reussite_global': 0,  # À calculer
+            'revenue_formations': 0,  # À calculer
+        })
+
+    return render(request, 'users/formation_detailed_stats.html', context)
+
+
+# Fonction utilitaire pour les graphiques formations
+def get_formation_monthly_data(user, months=12):
+    """
+    Récupère les données mensuelles liées aux formations pour un utilisateur
+    """
+    if not FORMATIONS_AVAILABLE:
+        return [0] * months
+
+    monthly_data = []
+
+    for i in range(months):
+        month_start = timezone.now().replace(day=1) - timedelta(days=30 * i)
+        month_end = month_start + timedelta(days=30)
+
+        if user.is_vulnerable:
+            try:
+                personne = user.personnevulnerable
+                count = DemandeFormation.objects.filter(
+                    personne=personne,
+                    date_demande__gte=month_start,
+                    date_demande__lt=month_end
+                ).count()
+                monthly_data.append(count)
+            except:
+                monthly_data.append(0)
+
+        elif user.is_superuser or user.is_staff:
+            count = DemandeFormation.objects.filter(
+                date_demande__gte=month_start,
+                date_demande__lt=month_end
+            ).count()
+            monthly_data.append(count)
+
+        else:
+            monthly_data.append(0)
+
+    return list(reversed(monthly_data))

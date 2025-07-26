@@ -1,0 +1,265 @@
+# formation/templates/formation/admin/parcours_detail.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détail du Parcours{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Détail du Parcours</h1>
+                <a href="{% url 'formation:admin_parcours_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations principales -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Parcours de {{ parcours.demande_formation.personne.get_full_name }}</h5>
+                    <span class="badge bg-{% if parcours.statut_actuel == 'autonome' %}success{% elif parcours.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                        {{ parcours.get_statut_actuel_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.date_debut_formation.id_for_label }}" class="form-label">{{ form.date_debut_formation.label }}</label>
+                                    {{ form.date_debut_formation }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.date_fin_formation.id_for_label }}" class="form-label">{{ form.date_fin_formation.label }}</label>
+                                    {{ form.date_fin_formation }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.statut_actuel.id_for_label }}" class="form-label">{{ form.statut_actuel.label }}</label>
+                                    {{ form.statut_actuel }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.pourcentage_completion.id_for_label }}" class="form-label">{{ form.pourcentage_completion.label }}</label>
+                                    {{ form.pourcentage_completion }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.note_formation.id_for_label }}" class="form-label">{{ form.note_formation.label }}</label>
+                                    {{ form.note_formation }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.mentor_assigne.id_for_label }}" class="form-label">{{ form.mentor_assigne.label }}</label>
+                            {{ form.mentor_assigne }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.competences_validees.id_for_label }}" class="form-label">{{ form.competences_validees.label }}</label>
+                            {{ form.competences_validees }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.financement_obtenu.id_for_label }}" class="form-label">{{ form.financement_obtenu.label }}</label>
+                                    {{ form.financement_obtenu }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.type_financement_obtenu.id_for_label }}" class="form-label">{{ form.type_financement_obtenu.label }}</label>
+                                    {{ form.type_financement_obtenu }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.date_certification.id_for_label }}" class="form-label">{{ form.date_certification.label }}</label>
+                            {{ form.date_certification }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Suivis -->
+            {% if suivis %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5>Historique des suivis</h5>
+                        <a href="{% url 'formation:admin_parcours_suivi' parcours.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Ajouter un suivi
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for suivi in suivis %}
+                    <div class="card border-start border-3 border-{% if suivi.type_suivi == 'evaluation' %}success{% elif suivi.type_suivi == 'mentoring' %}info{% else %}primary{% endif %} mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title">{{ suivi.titre }}</h6>
+                                    <small class="text-muted">
+                                        {{ suivi.get_type_suivi_display }} - {{ suivi.date_suivi|date:"d/m/Y à H:i" }}
+                                        par {{ suivi.responsable.username }}
+                                    </small>
+                                </div>
+                                {% if suivi.note_progression %}
+                                <span class="badge bg-primary">{{ suivi.note_progression }}/10</span>
+                                {% endif %}
+                            </div>
+                            <p class="card-text mt-2">{{ suivi.description }}</p>
+                            
+                            {% if suivi.points_forts %}
+                            <p><strong class="text-success">Points forts :</strong> {{ suivi.points_forts }}</p>
+                            {% endif %}
+                            
+                            {% if suivi.points_amelioration %}
+                            <p><strong class="text-warning">À améliorer :</strong> {{ suivi.points_amelioration }}</p>
+                            {% endif %}
+                            
+                            {% if suivi.prochaines_etapes %}
+                            <p><strong class="text-info">Prochaines étapes :</strong> {{ suivi.prochaines_etapes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Informations latérales -->
+        <div class="col-md-4">
+            <!-- Profil participant -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Profil du Participant</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ parcours.demande_formation.personne.get_full_name }}</h6>
+                    <p class="text-muted">{{ parcours.demande_formation.personne.age }} ans</p>
+                    
+                    <hr>
+                    
+                    <p><strong>Formation :</strong> {{ parcours.demande_formation.formation_souhaitee.nom }}</p>
+                    <p><strong>Type :</strong> {{ parcours.demande_formation.formation_souhaitee.get_type_formation_display }}</p>
+                    <p><strong>Demande ID :</strong> {{ parcours.demande_formation.id }}</p>
+                    
+                    <a href="{% url 'formation:admin_demande_detail' parcours.demande_formation.id %}" class="btn btn-outline-primary btn-sm w-100">
+                        Voir la demande
+                    </a>
+                </div>
+            </div>
+
+            <!-- Progression -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Progression</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div style="width: 120px; height: 120px; margin: 0 auto;">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="8"></circle>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#007bff" stroke-width="8" 
+                                        stroke-dasharray="{{ parcours.pourcentage_completion|floatformat:0 }} 314" 
+                                        stroke-dashoffset="0" transform="rotate(-90 60 60)"></circle>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <h4 class="mb-0">{{ parcours.pourcentage_completion }}%</h4>
+                                <small class="text-muted">Complété</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted">
+                        {% if parcours.pourcentage_completion == 100 %}
+                            Formation terminée avec succès !
+                        {% elif parcours.pourcentage_completion >= 75 %}
+                            Presque terminé
+                        {% elif parcours.pourcentage_completion >= 50 %}
+                            À mi-parcours
+                        {% elif parcours.pourcentage_completion >= 25 %}
+                            Bon début
+                        {% else %}
+                            Début de formation
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if parcours.projet_vie %}
+            <!-- Projet associé -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Projet de Vie</h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ parcours.projet_vie.titre_projet }}</h6>
+                    <p class="text-muted">{{ parcours.projet_vie.secteur_activite }}</p>
+                    <p><strong>Budget :</strong> {{ parcours.projet_vie.budget_estime|floatformat:0 }} FCFA</p>
+                    <p><strong>Statut :</strong> {{ parcours.projet_vie.get_statut_display }}</p>
+                    
+                    {% if parcours.projet_vie.faisabilite_score %}
+                    <p><strong>Score faisabilité :</strong> {{ parcours.projet_vie.faisabilite_score }}%</p>
+                    {% endif %}
+                    
+                    <a href="{% url 'formation:admin_projet_detail' parcours.projet_vie.id %}" class="btn btn-outline-info btn-sm w-100">
+                        Voir le projet
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'formation:admin_parcours_suivi' parcours.id %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-plus"></i> Ajouter un suivi
+                    </a>
+                    
+                    <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="exportParcours()">
+                        <i class="fas fa-file-export"></i> Exporter
+                    </button>
+                    
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportParcours() {
+    // Implémenter l'export du parcours
+    console.log('Export parcours');
+}
+</script>
+{% endblock %}

@@ -44,6 +44,20 @@ urlpatterns = [
     path('valider_personne/<int:personne_id>/', views.valider_personne, name='valider_personne'),
     path('rejeter_personne/<int:personne_id>/', views.rejeter_personne, name='rejeter_personne'),
 
+    # === NOUVEAU DASHBOARD AVEC FORMATIONS ===
+    # URL principale du dashboard complet
+    path('dashboard/', views.dashboard_formation_complete, name='dashboard_formation_complete'),
+
+    # APIs pour le dashboard
+    path('api/dashboard-formation-stats/', views.api_dashboard_formation_stats, name='api_dashboard_formation_stats'),
+    path('api/formation-activity/', views.api_formation_activity, name='api_formation_activity'),
+
+    # Statistiques détaillées formations (optionnel)
+    path('formation-stats/', views.formation_detailed_stats, name='formation_detailed_stats'),
+
+    # Si vous voulez garder l'ancien dashboard comme fallback
+    # path('dashboard-old/', views.dashboard_view, name='dashboard_old'),  # Votre ancien dashboard
+
 
 
 ]

@@ -1,0 +1,861 @@
+{#template/formation/admin/analyses_ia_dashboard.html#}
+{% extends 'formation/base_formation.html' %}
+{% load static %}
+
+{% block title %}Dashboard Analyses IA{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-separator">/</span>
+<span class="breadcrumb-current">Dashboard Analyses IA</span>
+{% endblock %}
+
+{% block formation_content %}
+<div class="analyses-dashboard-container">
+    <!-- Header du dashboard -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h2 class="dashboard-title">
+                <i class="fas fa-brain"></i>
+                Dashboard des Analyses IA
+            </h2>
+            <p class="dashboard-subtitle">
+                Suivi et analyse des évaluations automatiques de formabilité
+            </p>
+        </div>
+        
+        <div class="header-actions">
+            <a href="{% url 'formation:export_rapport' 'analyses_ia' %}" 
+               class="btn btn-secondary">
+                <i class="fas fa-download"></i> Exporter CSV
+            </a>
+            <a href="{% url 'formation:rapports_formation' %}" 
+               class="btn btn-primary">
+                <i class="fas fa-chart-bar"></i> Rapports complets
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques principales -->
+    <div class="stats-grid">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_analyses }}</div>
+                <div class="stat-label">Analyses réalisées</div>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-score">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ score_moyen|floatformat:1 }}</div>
+                <div class="stat-label">Score moyen</div>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-excellent">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ repartition.excellent }}</div>
+                <div class="stat-label">Scores excellents</div>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-faible">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ repartition.faible }}</div>
+                <div class="stat-label">Scores faibles</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et analyses -->
+    <div class="charts-section">
+        <div class="row">
+            <!-- Répartition des scores -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4>
+                            <i class="fas fa-chart-pie"></i>
+                            Répartition des Scores
+                        </h4>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="repartitionChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot excellent"></span>
+                            <span>Excellent (85-100): {{ repartition.excellent }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot bon"></span>
+                            <span>Bon (70-84): {{ repartition.bon }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot moyen"></span>
+                            <span>Moyen (50-69): {{ repartition.moyen }}</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot faible"></span>
+                            <span>Faible (0-49): {{ repartition.faible }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Évolution des scores -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4>
+                            <i class="fas fa-chart-line"></i>
+                            Évolution des Scores Moyens
+                        </h4>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formations top scores -->
+    {% if formations_top %}
+    <div class="top-formations-section">
+        <h3 class="section-title">
+            <i class="fas fa-trophy"></i>
+            Formations avec les Meilleurs Scores IA
+        </h3>
+        
+        <div class="formations-top-grid">
+            {% for formation in formations_top %}
+            <div class="formation-top-card">
+                <div class="formation-rank">
+                    {% if forloop.counter == 1 %}
+                        <i class="fas fa-trophy gold"></i>
+                    {% elif forloop.counter == 2 %}
+                        <i class="fas fa-medal silver"></i>
+                    {% elif forloop.counter == 3 %}
+                        <i class="fas fa-award bronze"></i>
+                    {% else %}
+                        <span class="rank-number">{{ forloop.counter }}</span>
+                    {% endif %}
+                </div>
+                <div class="formation-info">
+                    <h5>{{ formation.nom }}</h5>
+                    <p>{{ formation.get_type_formation_display }}</p>
+                </div>
+                <div class="formation-score">
+                    <span class="score-value">{{ formation.score_moyen|floatformat:1 }}</span>
+                    <span class="score-label">Score moyen</span>
+                    <small class="analyses-count">{{ formation.nb_analyses }} analyse(s)</small>
+                </div>
+                <div class="formation-actions">
+                    <a href="{% url 'formation:rapport_formation_detail' formation.id %}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-chart-bar"></i> Rapport
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Analyses récentes -->
+    {% if analyses_recentes %}
+    <div class="recent-analyses-section">
+        <h3 class="section-title">
+            <i class="fas fa-clock"></i>
+            Analyses Récentes
+        </h3>
+        
+        <div class="analyses-table-container">
+            <div class="table-responsive">
+                <table class="table analyses-table">
+                    <thead>
+                        <tr>
+                            <th>Candidat</th>
+                            <th>Formation</th>
+                            <th>Score IA</th>
+                            <th>Date d'analyse</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analyse in analyses_recentes %}
+                        <tr>
+                            <td>
+                                <div class="candidate-info">
+                                    <strong>{{ analyse.personne.get_full_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ analyse.personne.age }} ans</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="formation-info-table">
+                                    <strong>{{ analyse.formation_souhaitee.nom }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ analyse.formation_souhaitee.get_type_formation_display }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="score-cell">
+                                    <span class="score-badge score-{{ analyse.score_formabilite|floatformat:0|slugify }}">
+                                        {{ analyse.score_formabilite|floatformat:0 }}/100
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    {{ analyse.date_analyse|date:"d/m/Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ analyse.date_analyse|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ analyse.statut }}">
+                                    {{ analyse.get_statut_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'formation:analyse_ia_detail' analyse.id %}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="Voir l'analyse détaillée">
+                                        <i class="fas fa-brain"></i>
+                                    </a>
+                                    <a href="{% url 'formation:admin_demande_detail' analyse.id %}" 
+                                       class="btn btn-sm btn-outline-secondary"
+                                       title="Voir la demande">
+                                        <i class="fas fa-file-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Insights et recommandations -->
+    <div class="insights-section">
+        <h3 class="section-title">
+            <i class="fas fa-lightbulb"></i>
+            Insights et Recommandations
+        </h3>
+        
+        <div class="insights-grid">
+            <div class="insight-card">
+                <div class="insight-icon success">
+                    <i class="fas fa-thumbs-up"></i>
+                </div>
+                <div class="insight-content">
+                    <h5>Taux de succès élevé</h5>
+                    <p>
+                        {% widthratio repartition.excellent total_analyses 100 as taux_excellent %}
+                        {{ taux_excellent }}% des candidats obtiennent un score excellent (85+).
+                        L'IA identifie efficacement les candidats prometteurs.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="insight-card">
+                <div class="insight-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="insight-content">
+                    <h5>Attention aux scores faibles</h5>
+                    <p>
+                        {{ repartition.faible }} candidat(s) ont obtenu un score inférieur à 50.
+                        Ces profils nécessitent un accompagnement spécialisé.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="insight-card">
+                <div class="insight-icon info">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="insight-content">
+                    <h5>Score moyen stable</h5>
+                    <p>
+                        Le score moyen de {{ score_moyen|floatformat:1 }}/100 indique une bonne 
+                        sélection des candidats et une pertinence des critères d'évaluation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.analyses-dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-subtitle {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: white;
+    color: #8b5cf6;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    border-color: #8b5cf6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-total .stat-icon { background: #8b5cf6; }
+.stat-score .stat-icon { background: #06b6d4; }
+.stat-excellent .stat-icon { background: #10b981; }
+.stat-faible .stat-icon { background: #ef4444; }
+
+.stat-number {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.section-title {
+    font-size: 1.6rem;
+    color: #1f2937;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 12px;
+}
+
+.charts-section {
+    margin-bottom: 40px;
+}
+
+.chart-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    height: 100%;
+}
+
+.chart-header {
+    margin-bottom: 20px;
+}
+
+.chart-header h4 {
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+}
+
+.chart-container {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-legend {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot.excellent { background: #10b981; }
+.legend-dot.bon { background: #3b82f6; }
+.legend-dot.moyen { background: #f59e0b; }
+.legend-dot.faible { background: #ef4444; }
+
+.formations-top-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.formation-top-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s;
+}
+
+.formation-top-card:hover {
+    border-color: #8b5cf6;
+    transform: translateY(-2px);
+}
+
+.formation-rank {
+    font-size: 1.5rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.gold { color: #fbbf24; }
+.silver { color: #9ca3af; }
+.bronze { color: #92400e; }
+
+.rank-number {
+    font-weight: bold;
+    color: #6b7280;
+}
+
+.formation-info {
+    flex: 1;
+}
+
+.formation-info h5 {
+    color: #1f2937;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.formation-info p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.formation-score {
+    text-align: center;
+    min-width: 120px;
+}
+
+.score-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #8b5cf6;
+}
+
+.score-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.analyses-count {
+    display: block;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-top: 3px;
+}
+
+.analyses-table-container {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.analyses-table {
+    width: 100%;
+    margin: 0;
+}
+
+.analyses-table th {
+    background: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    padding: 15px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 0.9rem;
+}
+
+.analyses-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.candidate-info strong, .formation-info-table strong {
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.score-badge {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+}
+
+.score-badge[class*="85"], .score-badge[class*="86"], .score-badge[class*="87"], 
+.score-badge[class*="88"], .score-badge[class*="89"], .score-badge[class*="9"] { 
+    background: #10b981; 
+}
+
+.score-badge[class*="7"], .score-badge[class*="8"]:not([class*="85"]):not([class*="86"]):not([class*="87"]):not([class*="88"]):not([class*="89"]) { 
+    background: #3b82f6; 
+}
+
+.score-badge[class*="5"], .score-badge[class*="6"] { 
+    background: #f59e0b; 
+}
+
+.score-badge[class*="0"], .score-badge[class*="1"], .score-badge[class*="2"], 
+.score-badge[class*="3"], .score-badge[class*="4"] { 
+    background: #ef4444; 
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-acceptee { background: #d1fae5; color: #065f46; }
+.status-refusee { background: #fee2e2; color: #991b1b; }
+.status-en_attente { background: #fef3c7; color: #92400e; }
+.status-analysee { background: #dbeafe; color: #1e40af; }
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-outline-primary {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.btn-outline-secondary {
+    border-color: #6b7280;
+    color: #6b7280;
+}
+
+.btn-outline-primary:hover {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6b7280;
+    color: white;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.insight-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    display: flex;
+    gap: 20px;
+    transition: all 0.3s;
+}
+
+.insight-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.insight-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.insight-icon.success { background: #10b981; }
+.insight-icon.warning { background: #f59e0b; }
+.insight-icon.info { background: #3b82f6; }
+
+.insight-content h5 {
+    color: #1f2937;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.insight-content p {
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .header-actions {
+        justify-content: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .formation-top-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique de répartition des scores
+    const repartitionCtx = document.getElementById('repartitionChart').getContext('2d');
+    new Chart(repartitionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Excellent (85-100)', 'Bon (70-84)', 'Moyen (50-69)', 'Faible (0-49)'],
+            datasets: [{
+                data: [
+                    {{ repartition.excellent }},
+                    {{ repartition.bon }},
+                    {{ repartition.moyen }},
+                    {{ repartition.faible }}
+                ],
+                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Graphique d'évolution des scores
+    const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+    new Chart(evolutionCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for item in evolution_scores %}
+                '{{ item.mois|date:"m/Y" }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Score moyen',
+                data: [
+                    {% for item in evolution_scores %}
+                    {{ item.score_moyen|floatformat:1 }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '/100';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Animation des statistiques
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const finalValue = parseFloat(stat.textContent);
+        if (!isNaN(finalValue)) {
+            let currentValue = 0;
+            const increment = finalValue / 30;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    currentValue = finalValue;
+                    clearInterval(timer);
+                }
+                
+                if (finalValue % 1 === 0) {
+                    stat.textContent = Math.round(currentValue);
+                } else {
+                    stat.textContent = currentValue.toFixed(1);
+                }
+            }, 50);
+        }
+    });
+});
+</script>
+{% endblock %}

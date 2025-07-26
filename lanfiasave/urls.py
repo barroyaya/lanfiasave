@@ -35,4 +35,5 @@ urlpatterns = [
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'),
          name='password_change_done'),
     # Autres routes si nécessaire
+    path('formation/', include('formation.urls')),  # Nouvelle ligne
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

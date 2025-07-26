@@ -44,7 +44,7 @@ def valider_dons(modeladmin, request, queryset):
                             personne.montant_recu += montant_par_personne
 
                             # Vérifier si la personne dépasse le seuil
-                            if personne.montant_recu >= Decimal('200000.00'):
+                            if personne.montant_recu >= Decimal('300.00'):
                                 personne.est_vulnerable = False
                                 message = f"Félicitations ! Vous avez atteint votre objectif de financement."
                             else:
@@ -84,11 +84,11 @@ def valider_dons(modeladmin, request, queryset):
                                 personne.montant_recu += montant_par_personne
 
                                 # Vérifier si la personne dépasse le seuil
-                                if personne.montant_recu >= Decimal('200000.00'):
+                                if personne.montant_recu >= Decimal('300.00'):
                                     personne.est_vulnerable = False
                                     message = f"Félicitations ! Vous avez atteint votre objectif de financement."
                                 else:
-                                    reste = Decimal('200000.00') - personne.montant_recu
+                                    reste = Decimal('300.00') - personne.montant_recu
                                     message = f"Il vous reste {reste:.2f}€ pour atteindre votre objectif."
 
                                 personne.save()

@@ -1,0 +1,1125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rapports de Formation{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        
+        /* Fond blanc sombre */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-dark: #2d3436;
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 250px;
+        height: 250px;
+        background: var(--primary-gradient);
+        top: 5%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 180px;
+        height: 180px;
+        background: var(--secondary-gradient);
+        bottom: 15%;
+        left: 5%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 120px;
+        height: 120px;
+        background: var(--success-gradient);
+        top: 45%;
+        right: 20%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .modern-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+        box-shadow: 0 4px 20px var(--card-shadow);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header-modern {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--card-border);
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, #f1f2f6 100%);
+    }
+
+    .card-header-modern h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header-modern i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    .card-footer-modern {
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--card-border);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: slideUp 0.6s ease-out;
+        animation-fill-mode: both;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--card-shadow);
+    }
+
+    .stat-card:nth-child(1) { 
+        animation-delay: 0.1s;
+    }
+    .stat-card:nth-child(2) { 
+        animation-delay: 0.2s;
+    }
+    .stat-card:nth-child(3) { 
+        animation-delay: 0.3s;
+    }
+    .stat-card:nth-child(4) { 
+        animation-delay: 0.4s;
+    }
+
+    .stat-card:nth-child(1)::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--success-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .stat-card:nth-child(2)::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--info-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .stat-card:nth-child(3)::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .stat-card:nth-child(4)::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--warning-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        height: 8px;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        opacity: 1;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        border: none;
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--card-border);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .table-modern {
+        width: 100%;
+        background: var(--bg-secondary);
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 0;
+        border: 1px solid var(--card-border);
+    }
+
+    .table-modern th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-primary);
+        font-weight: 700;
+        padding: 1rem;
+        border: none;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid var(--card-border);
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    .table-modern tr:hover {
+        background: #f8f9fa;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        background: var(--bg-secondary);
+        border-radius: 15px;
+        padding: 1rem;
+        border: 1px solid var(--card-border);
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .performance-indicators {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 2rem;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .performance-item {
+        position: relative;
+        padding: 1rem;
+        border-right: 1px solid var(--card-border);
+    }
+
+    .performance-item:last-child {
+        border-right: none;
+    }
+
+    .performance-number {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .performance-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.2;
+    }
+
+    .export-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .export-btn {
+        padding: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--text-primary);
+        display: block;
+        font-weight: 600;
+        box-shadow: 0 4px 15px var(--card-shadow);
+    }
+
+    .export-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        color: var(--text-primary);
+    }
+
+    .export-btn:nth-child(1):hover {
+        background: linear-gradient(135deg, rgba(168, 230, 207, 0.1) 0%, rgba(86, 204, 157, 0.1) 100%);
+        border-color: var(--success-color);
+    }
+
+    .export-btn:nth-child(2):hover {
+        background: linear-gradient(135deg, rgba(116, 185, 255, 0.1) 0%, rgba(9, 132, 227, 0.1) 100%);
+        border-color: var(--info-color);
+    }
+
+    .export-btn:nth-child(3):hover {
+        background: linear-gradient(135deg, rgba(255, 217, 61, 0.1) 0%, rgba(255, 149, 0, 0.1) 100%);
+        border-color: var(--warning-color);
+    }
+
+    .export-btn:nth-child(4):hover {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 82, 0.1) 100%);
+        border-color: var(--danger-color);
+    }
+
+    .export-btn i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .export-btn:nth-child(1) i {
+        background: var(--success-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .export-btn:nth-child(2) i {
+        background: var(--info-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .export-btn:nth-child(3) i {
+        background: var(--warning-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .export-btn:nth-child(4) i {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .export-btn strong {
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .export-btn small {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .trend-up {
+        color: var(--success-color);
+    }
+
+    .trend-down {
+        color: var(--danger-color);
+    }
+
+    .trend-neutral {
+        color: var(--text-muted);
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes countUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .count-animation {
+        animation: countUp 0.6s ease-out;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .header-actions {
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .performance-indicators {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .performance-item {
+            border-right: none;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .performance-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .export-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media print {
+        .btn-modern, .card-footer-modern, .header-actions {
+            display: none !important;
+        }
+        
+        .modern-card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            background: white !important;
+        }
+        
+        .page-title, .stat-number, .performance-number {
+            color: #333 !important;
+            -webkit-text-fill-color: #333 !important;
+        }
+        
+        body {
+            background: white !important;
+            color: #333 !important;
+        }
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--secondary-gradient);
+        border-radius: 2px;
+    }
+
+    .loading-placeholder {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        height: 20px;
+        margin: 0.5rem 0;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+
+<div class="container-fluid">
+    <!-- En-tête de page -->
+    <div class="page-header">
+        <h1 class="page-title">Rapports de Formation</h1>
+        <div class="header-actions">
+            <button class="btn-modern btn-outline-modern" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                Imprimer
+            </button>
+            <button class="btn-modern btn-primary-modern" onclick="exportRapport()">
+                <i class="fas fa-download"></i>
+                Exporter PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-graduation-cap stat-icon" style="background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            <div class="stat-number count-animation" data-target="{{ total_formations }}">0</div>
+            <div class="stat-label">Formations actives</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-file-alt stat-icon" style="background: var(--info-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            <div class="stat-number count-animation" data-target="{{ total_demandes }}">0</div>
+            <div class="stat-label">Demandes totales</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-check-circle stat-icon" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            <div class="stat-number count-animation" data-target="{{ taux_acceptation|floatformat:1 }}">0</div>
+            <div class="stat-label">Taux d'acceptation (%)</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-users stat-icon" style="background: var(--warning-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            <div class="stat-number count-animation" data-target="{% widthratio total_demandes 4 1 %}">0</div>
+            <div class="stat-label">Participants actifs</div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <h2 class="section-title">Analyses Visuelles</h2>
+    <div class="charts-grid">
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="fas fa-chart-pie"></i> Formations par Type</h5>
+            </div>
+            <div class="card-body-modern">
+                <div class="chart-container">
+                    <canvas id="formationsParTypeChart"></canvas>
+                </div>
+            </div>
+            <div class="card-footer-modern">
+                <i class="fas fa-info-circle"></i> Répartition des formations par secteur d'activité
+            </div>
+        </div>
+
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="fas fa-chart-line"></i> Évolution des Demandes</h5>
+            </div>
+            <div class="card-body-modern">
+                <div class="chart-container">
+                    <canvas id="evolutionMensuelleChart"></canvas>
+                </div>
+            </div>
+            <div class="card-footer-modern">
+                <i class="fas fa-calendar-alt"></i> Nombre de demandes par mois (12 derniers mois)
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableaux détaillés -->
+    <h2 class="section-title">Données Détaillées</h2>
+    <div class="charts-grid">
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="fas fa-trophy"></i> Top Formations Populaires</h5>
+            </div>
+            <div class="card-body-modern">
+                {% if formations_par_type %}
+                    <div style="overflow-x: auto;">
+                        <table class="table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Type de Formation</th>
+                                    <th style="text-align: center;">Nombre</th>
+                                    <th style="text-align: center;">Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for formation in formations_par_type %}
+                                <tr class="fade-in" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+                                    <td><strong>{{ formation.type_formation|title }}</strong></td>
+                                    <td style="text-align: center;">
+                                        <span style="color: var(--success-color); font-weight: 600;">{{ formation.count }}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span style="color: var(--info-color); font-weight: 600;">{% widthratio formation.count total_formations 100 %}%</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+                        <p>Aucune donnée disponible.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h5><i class="fas fa-trending-up"></i> Évolution Récente</h5>
+            </div>
+            <div class="card-body-modern">
+                {% if evolution_mensuelle %}
+                    <div style="overflow-x: auto;">
+                        <table class="table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Mois</th>
+                                    <th style="text-align: center;">Demandes</th>
+                                    <th style="text-align: center;">Tendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mois in evolution_mensuelle %}
+                                <tr class="fade-in" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+                                    <td><strong>{{ mois.mois|date:"M Y" }}</strong></td>
+                                    <td style="text-align: center;">
+                                        <span style="color: var(--success-color); font-weight: 600;">{{ mois.count }}</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {% if forloop.first %}
+                                            <span class="trend-neutral">-</span>
+                                        {% else %}
+                                            {% with prev=evolution_mensuelle|slice:":1"|first %}
+                                            {% if mois.count > prev.count %}
+                                                <span class="trend-indicator trend-up">
+                                                    <i class="fas fa-arrow-up"></i> +{{ mois.count|add:prev.count|add:"-"|add:prev.count }}
+                                                </span>
+                                            {% elif mois.count < prev.count %}
+                                                <span class="trend-indicator trend-down">
+                                                    <i class="fas fa-arrow-down"></i> {{ mois.count|add:prev.count|add:"-"|add:prev.count }}
+                                                </span>
+                                            {% else %}
+                                                <span class="trend-indicator trend-neutral">
+                                                    <i class="fas fa-minus"></i> =
+                                                </span>
+                                            {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+                        <p>Aucune donnée disponible.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicateurs de performance -->
+    <h2 class="section-title">Indicateurs de Performance</h2>
+    <div class="modern-card">
+        <div class="card-body-modern">
+            <div class="performance-indicators">
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="{{ total_formations }}">0</div>
+                    <div class="performance-label">Formations<br>disponibles</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="{{ total_demandes }}">0</div>
+                    <div class="performance-label">Demandes<br>reçues</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="{{ taux_acceptation|floatformat:0 }}">0</div>
+                    <div class="performance-label">Taux<br>d'acceptation (%)</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="75">0</div>
+                    <div class="performance-label">Taux<br>de réussite (%)</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="85">0</div>
+                    <div class="performance-label">Satisfaction<br>participants (%)</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-number count-animation" data-target="90">0</div>
+                    <div class="performance-label">Insertion<br>post-formation (%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions d'export -->
+    <h2 class="section-title">Exports Disponibles</h2>
+    <div class="modern-card">
+        <div class="card-body-modern">
+            <div class="export-grid">
+                <a href="{% url 'formation:export_demandes_csv' %}" class="export-btn">
+                    <i class="fas fa-download"></i>
+                    <strong>Export Demandes</strong>
+                    <small>Fichier CSV détaillé</small>
+                </a>
+                <a href="{% url 'formation:export_formations_csv' %}" class="export-btn">
+                    <i class="fas fa-graduation-cap"></i>
+                    <strong>Export Formations</strong>
+                    <small>Catalogue complet</small>
+                </a>
+                <a href="{% url 'formation:export_parcours_csv' %}" class="export-btn">
+                    <i class="fas fa-route"></i>
+                    <strong>Export Parcours</strong>
+                    <small>Suivi des progressions</small>
+                </a>
+                <button class="export-btn" onclick="exportRapportComplet()">
+                    <i class="fas fa-file-pdf"></i>
+                    <strong>Rapport Complet</strong>
+                    <small>Document PDF</small>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des compteurs
+    function animateCounter(element) {
+        const target = parseFloat(element.getAttribute('data-target'));
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            // Formatage pour les décimaux
+            if (target % 1 !== 0) {
+                element.textContent = current.toFixed(1);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, 20);
+    }
+
+    // Lancer l'animation des compteurs avec délai
+    setTimeout(() => {
+        const counters = document.querySelectorAll('.count-animation');
+        counters.forEach((counter, index) => {
+            setTimeout(() => {
+                animateCounter(counter);
+            }, index * 200);
+        });
+    }, 500);
+
+    // Configuration des graphiques avec style moderne
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#636e72',
+                    usePointStyle: true,
+                    padding: 20,
+                    font: {
+                        size: 12,
+                        weight: '600'
+                    }
+                }
+            }
+        }
+    };
+
+    // Données pour le graphique des formations par type
+    const formationsData = {
+        labels: [
+            {% for formation in formations_par_type %}
+            '{{ formation.type_formation|title }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for formation in formations_par_type %}
+                {{ formation.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                'rgba(255, 107, 107, 0.8)',
+                'rgba(78, 205, 196, 0.8)', 
+                'rgba(168, 230, 207, 0.8)',
+                'rgba(255, 217, 61, 0.8)',
+                'rgba(116, 185, 255, 0.8)',
+                'rgba(162, 155, 254, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(201, 203, 207, 0.8)'
+            ],
+            borderWidth: 0,
+            hoverOffset: 10
+        }]
+    };
+
+    // Données pour l'évolution mensuelle
+    const evolutionData = {
+        labels: [
+            {% for mois in evolution_mensuelle %}
+            '{{ mois.mois|date:"M Y" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Demandes',
+            data: [
+                {% for mois in evolution_mensuelle %}
+                {{ mois.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: 'rgba(78, 205, 196, 1)',
+            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: 'rgba(78, 205, 196, 1)',
+            pointBorderColor: 'rgba(255, 255, 255, 1)',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    };
+
+    // Initialisation des graphiques
+    const ctx1 = document.getElementById('formationsParTypeChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'doughnut',
+        data: formationsData,
+        options: {
+            ...chartOptions,
+            plugins: {
+                ...chartOptions.plugins,
+                legend: {
+                    ...chartOptions.plugins.legend,
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    const ctx2 = document.getElementById('evolutionMensuelleChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'line',
+        data: evolutionData,
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#636e72',
+                        font: {
+                            weight: '600'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#636e72',
+                        font: {
+                            weight: '600'
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Animation d'entrée des éléments
+    const cards = document.querySelectorAll('.modern-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.1) + 's';
+    });
+
+    const fadeElements = document.querySelectorAll('.fade-in');
+    fadeElements.forEach((element, index) => {
+        element.style.animationDelay = (index * 0.05) + 's';
+    });
+});
+
+function exportRapport() {
+    // Optimiser l'affichage pour l'impression
+    document.body.classList.add('printing');
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing');
+    }, 100);
+}
+
+function exportRapportComplet() {
+    // Simulation d'export PDF complet
+    const exportBtn = event.target;
+    const originalText = exportBtn.innerHTML;
+    
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+    exportBtn.disabled = true;
+    
+    setTimeout(() => {
+        exportBtn.innerHTML = '<i class="fas fa-check"></i> Terminé !';
+        setTimeout(() => {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+            // Ici vous pouvez implémenter la vraie génération PDF
+            alert('Fonctionnalité de génération PDF en cours de développement');
+        }, 2000);
+    }, 3000);
+}
+
+// Effet de parallax léger pour les formes décoratives
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const shapes = document.querySelectorAll('.decoration-shape');
+    shapes.forEach((shape, index) => {
+        const rate = scrolled * (0.2 + index * 0.1);
+        shape.style.transform = `translateY(${rate}px)`;
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,674 @@
+<!-- formation/templates/formation/base_formation.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="formation-container">
+    <!-- Header avec navigation du module -->
+    <div class="module-header">
+        <div class="module-nav">
+            <h1 class="module-title">
+                <i class="fas fa-graduation-cap"></i>
+                Module Formation
+            </h1>
+            <nav class="module-breadcrumb">
+                <a href="{% url 'formation:formations_list' %}" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Formations
+                </a>
+                {% block breadcrumb %}{% endblock %}
+            </nav>
+        </div>
+        
+        {% if user.is_authenticated and has_vulnerable_profile %}
+        <div class="quick-actions">
+            <a href="{% url 'formation:mes_demandes' %}" class="btn-action">
+                <i class="fas fa-file-alt"></i> Mes Demandes
+            </a>
+            <a href="{% url 'formation:mon_parcours' %}" class="btn-action">
+                <i class="fas fa-route"></i> Mon Parcours
+            </a>
+            <a href="{% url 'formation:mes_projets' %}" class="btn-action">
+                <i class="fas fa-lightbulb"></i> Mes Projets
+            </a>
+            <!-- NOUVEAU : Lien vers les analyses IA -->
+            <a href="{% url 'formation:mes_analyses_ia' %}" class="btn-action btn-ia">
+                <i class="fas fa-brain"></i> Mes Analyses IA
+            </a>
+        </div>
+        {% endif %}
+        
+        {% if user.is_superuser or user.is_staff %}
+        <div class="admin-actions">
+            <a href="{% url 'formation:admin_dashboard' %}" class="btn-admin">
+                <i class="fas fa-tachometer-alt"></i> Dashboard Admin
+            </a>
+            <!-- NOUVEAU : Lien vers le dashboard des analyses IA -->
+            <a href="{% url 'formation:analyses_ia_dashboard' %}" class="btn-admin btn-ia">
+                <i class="fas fa-brain"></i> Analyses IA
+            </a>
+            <a href="{% url 'formation:rapports_formation' %}" class="btn-admin">
+                <i class="fas fa-chart-bar"></i> Rapports
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {% if message.tags == 'error' %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal -->
+    <main class="module-content">
+        {% block formation_content %}{% endblock %}
+    </main>
+</div>
+
+<style>
+/* Styles pour le module formation */
+.formation-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.module-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.module-nav {
+    flex: 1;
+}
+
+.module-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.module-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.9;
+}
+
+.breadcrumb-item {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.breadcrumb-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.breadcrumb-separator {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 5px;
+}
+
+.breadcrumb-current {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.quick-actions, .admin-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-action, .btn-admin {
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-action:hover, .btn-admin:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* Style spécial pour les boutons IA */
+.btn-ia {
+    background: rgba(139, 92, 246, 0.3) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    position: relative;
+}
+
+.btn-ia::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-ia:hover::before {
+    left: 100%;
+}
+
+.btn-ia:hover {
+    background: #8b5cf6 !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Messages */
+.messages-container {
+    margin-bottom: 20px;
+}
+
+.alert {
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.module-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Cards pour les formations */
+.formations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.formation-card {
+    background: white;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.formation-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.formation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.formation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.formation-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.formation-type {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.formation-description {
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.formation-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.detail-item i {
+    color: #667eea;
+    width: 16px;
+}
+
+.formation-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.places-info {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.places-count {
+    font-weight: 600;
+    color: #10b981;
+}
+
+.btn-formation {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-formation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-formation:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Styles pour les sections d'analyse IA */
+.analyse-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.analyse-section:hover {
+    border-color: #8b5cf6;
+    background: #f3f4f6;
+}
+
+.score-badge {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.score-display {
+    text-align: center;
+}
+
+.score-circle {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #8b5cf6;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+}
+
+.score-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #8b5cf6;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.analyse-preview {
+    background: white;
+    border-left: 4px solid #8b5cf6;
+    padding: 15px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    font-style: italic;
+    color: #4b5563;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicateur de nouvelles analyses */
+.new-analysis-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Notification pour nouvelles analyses */
+.notification-banner {
+    background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+    border: 2px solid #8b5cf6;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-icon {
+    font-size: 1.5rem;
+    color: #8b5cf6;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: #5b21b6;
+    margin-bottom: 5px;
+}
+
+.notification-text {
+    color: #6b21a8;
+    margin: 0;
+}
+
+.notification-link {
+    background: #8b5cf6;
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.notification-link:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .module-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .module-title {
+        font-size: 2rem;
+        justify-content: center;
+    }
+    
+    .quick-actions, .admin-actions {
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-action, .btn-admin {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .formations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .formation-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .analyse-section {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .notification-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .formation-container {
+        padding: 10px;
+    }
+    
+    .module-header {
+        padding: 20px;
+    }
+    
+    .module-content {
+        padding: 20px;
+    }
+    
+    .btn-action, .btn-admin {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation d'entrée pour les éléments */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée pour le contenu
+    const moduleContent = document.querySelector('.module-content');
+    if (moduleContent) {
+        moduleContent.classList.add('fade-in');
+    }
+    
+    // Gestion des alertes avec auto-dismiss
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        // Auto-dismiss après 5 secondes pour les messages de succès
+        if (alert.classList.contains('alert-success')) {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        }
+    });
+    
+    // Animation pour les boutons IA
+    const iaButtons = document.querySelectorAll('.btn-ia');
+    iaButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px) scale(1.05)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-2px) scale(1)';
+        });
+    });
+    
+    // Effet de pulsation pour les nouveaux indicateurs
+    const indicators = document.querySelectorAll('.new-analysis-indicator');
+    indicators.forEach(indicator => {
+        let pulseCount = 0;
+        const pulseInterval = setInterval(() => {
+            pulseCount++;
+            if (pulseCount > 6) { // Arrêter après 6 pulsations
+                clearInterval(pulseInterval);
+                indicator.style.animation = 'none';
+            }
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}

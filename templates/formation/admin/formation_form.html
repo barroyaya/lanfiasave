@@ -1,0 +1,1053 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+        --accent-green: #28a745;
+        --accent-orange: #fd7e14;
+        --accent-purple: #6f42c1;
+        --accent-teal: #20c997;
+        --accent-indigo: #6610f2;
+        --glass-bg: rgba(255, 255, 255, 0.25);
+        --border-glass: rgba(255, 255, 255, 0.3);
+        --text-dark: #343a40;
+        --text-muted: #6c757d;
+        --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.15);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+        min-height: 100vh;
+        color: var(--text-dark);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        position: relative;
+    }
+
+    /* Effet de motif subtil en arrière-plan */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(40, 167, 69, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 75% 75%, rgba(253, 126, 20, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(111, 66, 193, 0.03) 0%, transparent 50%);
+        animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(2deg); }
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        padding: 2rem 1rem;
+        max-width: 1200px;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, var(--accent-green), var(--accent-teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+        font-weight: 300;
+    }
+
+    .modern-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: slideUp 0.8s ease-out;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+        background: rgba(255, 255, 255, 0.35);
+    }
+
+    .card-header-modern {
+        padding: 2rem 2rem 1rem 2rem;
+        border-bottom: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header-modern h4 {
+        margin: 0;
+        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .form-section:nth-child(1) { border-left-color: var(--accent-green); }
+    .form-section:nth-child(2) { border-left-color: var(--accent-orange); }
+    .form-section:nth-child(3) { border-left-color: var(--accent-teal); }
+    .form-section:nth-child(4) { border-left-color: var(--accent-purple); }
+    .form-section:nth-child(5) { border-left-color: var(--accent-indigo); }
+
+    .form-section:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateX(5px);
+    }
+
+    .form-section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-section:nth-child(1) .form-section-title { color: var(--accent-green); }
+    .form-section:nth-child(2) .form-section-title { color: var(--accent-orange); }
+    .form-section:nth-child(3) .form-section-title { color: var(--accent-teal); }
+    .form-section:nth-child(4) .form-section-title { color: var(--accent-purple); }
+    .form-section:nth-child(5) .form-section-title { color: var(--accent-indigo); }
+
+    .form-group-modern {
+        margin-bottom: 2rem;
+    }
+
+    .form-label-modern {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .form-control-modern {
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        padding: 0.875rem 1.25rem;
+        color: var(--text-dark);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        resize: vertical;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control-modern::placeholder {
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--accent-green);
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-2px);
+    }
+
+    .form-select-modern {
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        padding: 0.875rem 1.25rem;
+        color: var(--text-dark);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        cursor: pointer;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-select-modern:focus {
+        outline: none;
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-2px);
+    }
+
+    .form-select-modern option {
+        background: white;
+        color: var(--text-dark);
+        padding: 0.5rem;
+    }
+
+    .form-textarea-modern {
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        color: var(--text-dark);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-textarea-modern::placeholder {
+        color: var(--text-muted);
+        font-style: italic;
+    }
+
+    .form-textarea-modern:focus {
+        outline: none;
+        border-color: var(--accent-teal);
+        box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-2px);
+    }
+
+    .form-check-modern {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .form-check-modern:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.02);
+    }
+
+    .form-check-input-modern {
+        width: 24px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .form-check-input-modern:checked {
+        background: linear-gradient(45deg, var(--accent-green), var(--accent-teal));
+        border-color: var(--accent-green);
+    }
+
+    .form-check-input-modern:checked::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .form-check-label-modern {
+        color: var(--text-dark);
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: shake 0.5s ease-in-out;
+        background: rgba(220, 53, 69, 0.1);
+        padding: 0.5rem;
+        border-radius: 6px;
+        border-left: 3px solid #dc3545;
+    }
+
+    .btn-modern {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-primary-modern {
+        background: linear-gradient(45deg, var(--accent-green), var(--accent-teal));
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        color: white;
+        background: linear-gradient(45deg, #34ce57, #23d160);
+    }
+
+    .btn-secondary-modern {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary-modern:hover {
+        background: linear-gradient(45deg, #5a6268, #3d4043);
+        transform: translateY(-2px);
+        color: white;
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group-modern {
+        position: relative;
+    }
+
+    .input-addon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        pointer-events: none;
+        font-weight: 600;
+    }
+
+    .form-help {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-style: italic;
+    }
+
+    .progress-modern {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .progress-bar-modern {
+        height: 100%;
+        background: linear-gradient(45deg, var(--accent-green), var(--accent-orange), var(--accent-purple));
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 3px;
+        position: relative;
+    }
+
+    .progress-bar-modern::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.2));
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem 0.5rem;
+        }
+        
+        .card-header-modern,
+        .card-body-modern {
+            padding: 1.5rem 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn-modern {
+            width: 100%;
+            min-width: auto;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .form-section {
+            padding: 1rem;
+        }
+    }
+
+    /* Indicateurs de validité */
+    .form-control-modern:valid,
+    .form-select-modern:valid,
+    .form-textarea-modern:valid {
+        border-color: var(--accent-green);
+        background: rgba(40, 167, 69, 0.05);
+    }
+
+    .form-control-modern:invalid:not(:placeholder-shown),
+    .form-select-modern:invalid:not(:placeholder-shown),
+    .form-textarea-modern:invalid:not(:placeholder-shown) {
+        border-color: #dc3545;
+        background: rgba(220, 53, 69, 0.05);
+    }
+
+    /* Animation pour les champs au focus */
+    .form-group-modern:focus-within .form-label-modern {
+        color: var(--accent-green);
+        transform: translateX(5px);
+    }
+
+    /* Style pour les champs numériques */
+    input[type="number"].form-control-modern {
+        text-align: right;
+        font-weight: 600;
+        color: var(--accent-purple);
+    }
+
+    /* Badge pour les champs obligatoires */
+    .required-badge {
+        background: linear-gradient(45deg, #dc3545, #fd7e14);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 0.5rem;
+    }
+</style>
+
+<div class="container">
+    <!-- En-tête de page -->
+    <div class="page-header">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">
+            {% if formation %}
+                Modifiez les informations de la formation
+            {% else %}
+                Créez une nouvelle formation pour enrichir votre catalogue
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h4>
+                        <i class="fas fa-{% if formation %}edit{% else %}plus{% endif %}" style="color: var(--accent-green);"></i>
+                        {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body-modern">
+                    <!-- Barre de progression -->
+                    <div class="progress-modern">
+                        <div class="progress-bar-modern" id="progressBar"></div>
+                    </div>
+
+                    <form method="post" id="formationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Section : Informations générales -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-info-circle"></i>
+                                Informations générales
+                            </h5>
+                            
+                            <div class="row" style="margin-bottom: 1.5rem;">
+                                <div class="col-md-8" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.nom.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.nom.label }}
+                                            <span class="required-badge">obligatoire</span>
+                                        </label>
+                                        <input type="text" name="{{ form.nom.name }}" id="{{ form.nom.id_for_label }}" 
+                                               class="form-control-modern" value="{{ form.nom.value|default:'' }}" 
+                                               placeholder="Nom de la formation" required>
+                                        {% if form.nom.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.nom.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">
+                                            <i class="fas fa-lightbulb" style="color: var(--accent-orange);"></i>
+                                            Choisissez un nom clair et descriptif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.type_formation.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.type_formation.label }}
+                                            <span class="required-badge">obligatoire</span>
+                                        </label>
+                                        <select name="{{ form.type_formation.name }}" id="{{ form.type_formation.id_for_label }}" 
+                                                class="form-select-modern" required>
+                                            {% for choice in form.type_formation.field.choices %}
+                                                <option value="{{ choice.0 }}" {% if choice.0 == form.type_formation.value %}selected{% endif %}>
+                                                    {{ choice.1 }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if form.type_formation.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.type_formation.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group-modern">
+                                <label for="{{ form.description.id_for_label }}" class="form-label-modern required-field">
+                                    {{ form.description.label }}
+                                    <span class="required-badge">obligatoire</span>
+                                </label>
+                                <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                                          class="form-textarea-modern" placeholder="Description détaillée de la formation..." required>{{ form.description.value|default:'' }}</textarea>
+                                {% if form.description.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.description.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-help">
+                                    <i class="fas fa-info" style="color: var(--accent-teal);"></i>
+                                    Décrivez les objectifs, le contenu et les modalités de la formation
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section : Paramètres de formation -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-cog"></i>
+                                Paramètres de formation
+                            </h5>
+                            
+                            <div class="row" style="margin-bottom: 1.5rem;">
+                                <div class="col-md-3" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.duree_semaines.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.duree_semaines.label }}
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="{{ form.duree_semaines.name }}" id="{{ form.duree_semaines.id_for_label }}" 
+                                                   class="form-control-modern" value="{{ form.duree_semaines.value|default:'' }}" 
+                                                   min="1" max="104" placeholder="12" required>
+                                            <span class="input-addon">semaines</span>
+                                        </div>
+                                        {% if form.duree_semaines.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.duree_semaines.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.niveau_requis.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.niveau_requis.label }}
+                                        </label>
+                                        <select name="{{ form.niveau_requis.name }}" id="{{ form.niveau_requis.id_for_label }}" 
+                                                class="form-select-modern" required>
+                                            {% for choice in form.niveau_requis.field.choices %}
+                                                <option value="{{ choice.0 }}" {% if choice.0 == form.niveau_requis.value %}selected{% endif %}>
+                                                    {{ choice.1 }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if form.niveau_requis.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.niveau_requis.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.age_min.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.age_min.label }}
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="{{ form.age_min.name }}" id="{{ form.age_min.id_for_label }}" 
+                                                   class="form-control-modern" value="{{ form.age_min.value|default:'' }}" 
+                                                   min="16" max="65" placeholder="18" required>
+                                            <span class="input-addon">ans</span>
+                                        </div>
+                                        {% if form.age_min.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.age_min.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.age_max.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.age_max.label }}
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="{{ form.age_max.name }}" id="{{ form.age_max.id_for_label }}" 
+                                                   class="form-control-modern" value="{{ form.age_max.value|default:'' }}" 
+                                                   min="18" max="65" placeholder="55" required>
+                                            <span class="input-addon">ans</span>
+                                        </div>
+                                        {% if form.age_max.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.age_max.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section : Coût et places -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-euro-sign"></i>
+                                Coût et disponibilité
+                            </h5>
+                            
+                            <div class="row" style="margin-bottom: 1.5rem;">
+                                <div class="col-md-6" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.cout_formation.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.cout_formation.label }}
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="{{ form.cout_formation.name }}" id="{{ form.cout_formation.id_for_label }}" 
+                                                   class="form-control-modern" value="{{ form.cout_formation.value|default:'' }}" 
+                                                   min="0" step="1000" placeholder="100000" required>
+                                            <span class="input-addon">FCFA</span>
+                                        </div>
+                                        {% if form.cout_formation.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.cout_formation.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">
+                                            <i class="fas fa-calculator" style="color: var(--accent-purple);"></i>
+                                            Coût total de la formation par participant
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" style="padding-bottom: 1rem;">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.places_disponibles.id_for_label }}" class="form-label-modern required-field">
+                                            {{ form.places_disponibles.label }}
+                                        </label>
+                                        <div class="input-group-modern">
+                                            <input type="number" name="{{ form.places_disponibles.name }}" id="{{ form.places_disponibles.id_for_label }}" 
+                                                   class="form-control-modern" value="{{ form.places_disponibles.value|default:'' }}" 
+                                                   min="1" max="200" placeholder="25" required>
+                                            <span class="input-addon">places</span>
+                                        </div>
+                                        {% if form.places_disponibles.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                {{ form.places_disponibles.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">
+                                            <i class="fas fa-users" style="color: var(--accent-indigo);"></i>
+                                            Nombre maximum de participants
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section : Détails pédagogiques -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-graduation-cap"></i>
+                                Détails pédagogiques
+                            </h5>
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.competences_acquises.id_for_label }}" class="form-label-modern">
+                                    {{ form.competences_acquises.label }}
+                                </label>
+                                <textarea name="{{ form.competences_acquises.name }}" id="{{ form.competences_acquises.id_for_label }}" 
+                                          class="form-textarea-modern" placeholder="Liste des compétences que les participants acquerront...">{{ form.competences_acquises.value|default:'' }}</textarea>
+                                {% if form.competences_acquises.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.competences_acquises.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-help">
+                                    <i class="fas fa-list-check" style="color: var(--accent-green);"></i>
+                                    Listez les compétences et savoir-faire acquis à l'issue de la formation
+                                </div>
+                            </div>
+
+                            <div class="form-group-modern">
+                                <label for="{{ form.prerequis_materiels.id_for_label }}" class="form-label-modern">
+                                    {{ form.prerequis_materiels.label }}
+                                </label>
+                                <textarea name="{{ form.prerequis_materiels.name }}" id="{{ form.prerequis_materiels.id_for_label }}" 
+                                          class="form-textarea-modern" placeholder="Équipements, outils ou matériels nécessaires...">{{ form.prerequis_materiels.value|default:'' }}</textarea>
+                                {% if form.prerequis_materiels.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.prerequis_materiels.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-help">
+                                    <i class="fas fa-tools" style="color: var(--accent-orange);"></i>
+                                    Matériels, équipements ou outils requis pour suivre la formation
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section : Statut -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="fas fa-toggle-on"></i>
+                                Statut de la formation
+                            </h5>
+                            
+                            <div class="form-check-modern">
+                                <input type="checkbox" name="{{ form.est_active.name }}" id="{{ form.est_active.id_for_label }}" 
+                                       class="form-check-input-modern" {% if form.est_active.value %}checked{% endif %}>
+                                <label class="form-check-label-modern" for="{{ form.est_active.id_for_label }}">
+                                    {{ form.est_active.label }}
+                                </label>
+                                {% if form.est_active.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ form.est_active.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-help">
+                                <i class="fas fa-info-circle" style="color: var(--accent-indigo);"></i>
+                                Les formations inactives ne sont pas visibles par les candidats
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="form-actions">
+                            <a href="{% url 'formation:admin_formations_manage' %}" class="btn-modern btn-secondary-modern">
+                                <i class="fas fa-arrow-left"></i>
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn-modern btn-primary-modern" id="submitBtn">
+                                <i class="fas fa-{% if formation %}save{% else %}plus{% endif %}"></i>
+                                {% if formation %}Mettre à jour{% else %}Créer la formation{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formationForm');
+    const progressBar = document.getElementById('progressBar');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Validation en temps réel et barre de progression
+    function updateProgress() {
+        const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+        let completedFields = 0;
+        
+        requiredFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                completedFields++;
+                field.classList.remove('invalid');
+                field.classList.add('valid');
+            } else {
+                field.classList.remove('valid');
+                field.classList.add('invalid');
+            }
+        });
+        
+        const progress = (completedFields / requiredFields.length) * 100;
+        progressBar.style.width = progress + '%';
+        
+        // Activer/désactiver le bouton de soumission
+        if (progress === 100) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+        }
+    }
+    
+    // Écouter les changements sur tous les champs
+    const allFields = form.querySelectorAll('input, select, textarea');
+    allFields.forEach(field => {
+        field.addEventListener('input', updateProgress);
+        field.addEventListener('change', updateProgress);
+        
+        // Animation au focus
+        field.addEventListener('focus', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        field.addEventListener('blur', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Validation des âges
+    const ageMin = document.getElementById('id_age_min');
+    const ageMax = document.getElementById('id_age_max');
+    
+    function validateAges() {
+        if (ageMin.value && ageMax.value) {
+            if (parseInt(ageMin.value) >= parseInt(ageMax.value)) {
+                ageMax.setCustomValidity('L\'âge maximum doit être supérieur à l\'âge minimum');
+                ageMax.style.borderColor = '#dc3545';
+            } else {
+                ageMax.setCustomValidity('');
+                ageMax.style.borderColor = 'var(--accent-green)';
+            }
+        }
+    }
+    
+    if (ageMin && ageMax) {
+        ageMin.addEventListener('input', validateAges);
+        ageMax.addEventListener('input', validateAges);
+    }
+    
+    // Animation de soumission
+    form.addEventListener('submit', function(e) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+        submitBtn.disabled = true;
+        
+        // Ajouter une classe pour l'animation
+        form.style.opacity = '0.8';
+        form.style.pointerEvents = 'none';
+    });
+    
+    // Initialiser la barre de progression
+    updateProgress();
+    
+    // Animation d'entrée des sections
+    const sections = document.querySelectorAll('.form-section');
+    sections.forEach((section, index) => {
+        section.style.animationDelay = (index * 0.1) + 's';
+        section.classList.add('fade-in');
+    });
+    
+    // Sauvegarde automatique locale (brouillon)
+    let autoSaveTimeout;
+    allFields.forEach(field => {
+        field.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Sauvegarder en localStorage
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                localStorage.setItem('formation_draft', JSON.stringify(data));
+                
+                // Afficher un indicateur de sauvegarde
+                showSaveIndicator();
+            }, 2000);
+        });
+    });
+    
+    // Charger le brouillon si disponible
+    const draft = localStorage.getItem('formation_draft');
+    if (draft && !document.querySelector('input[name="nom"]').value) {
+        if (confirm('Un brouillon a été trouvé. Voulez-vous le charger ?')) {
+            const data = JSON.parse(draft);
+            Object.keys(data).forEach(key => {
+                const field = form.querySelector(`[name="${key}"]`);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = data[key] === 'on';
+                    } else {
+                        field.value = data[key];
+                    }
+                }
+            });
+            updateProgress();
+        }
+    }
+    
+    function showSaveIndicator() {
+        // Créer un indicateur de sauvegarde temporaire
+        const indicator = document.createElement('div');
+        indicator.textContent = '✓ Brouillon sauvegardé';
+        indicator.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-green);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideDown 0.3s ease-out;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        `;
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            indicator.style.animation = 'slideUp 0.3s ease-out';
+            setTimeout(() => indicator.remove(), 300);
+        }, 2000);
+    }
+});
+
+// Effacer le brouillon après soumission réussie
+window.addEventListener('beforeunload', function() {
+    if (document.getElementById('formationForm').style.opacity === '0.8') {
+        localStorage.removeItem('formation_draft');
+    }
+});
+</script>
+
+{% endblock %}

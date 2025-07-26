@@ -1,0 +1,304 @@
+# formation/templates/formation/parcours_detail.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Parcours de Formation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Mon Parcours de Formation</h1>
+                <a href="{% url 'formation:mon_parcours' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à mes parcours
+                </a>
+            </div>
+
+            <div class="row">
+                <!-- Informations principales du parcours -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>{{ parcours.demande_formation.formation_souhaitee.nom }}</h5>
+                            <span class="badge bg-{% if parcours.statut_actuel == 'autonome' %}success{% elif parcours.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                                {{ parcours.get_statut_actuel_display }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6>Formation</h6>
+                                    <p>{{ parcours.demande_formation.formation_souhaitee.nom }}</p>
+                                    <p class="text-muted">{{ parcours.demande_formation.formation_souhaitee.get_type_formation_display }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Progression</h6>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ parcours.pourcentage_completion }}%">
+                                            {{ parcours.pourcentage_completion }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                {% if parcours.date_debut_formation %}
+                                <div class="col-md-4">
+                                    <h6>Date de début</h6>
+                                    <p><i class="fas fa-calendar text-primary"></i> {{ parcours.date_debut_formation|date:"d/m/Y" }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if parcours.date_fin_formation %}
+                                <div class="col-md-4">
+                                    <h6>Date de fin</h6>
+                                    <p><i class="fas fa-calendar text-success"></i> {{ parcours.date_fin_formation|date:"d/m/Y" }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if parcours.note_formation %}
+                                <div class="col-md-4">
+                                    <h6>Note obtenue</h6>
+                                    <p><i class="fas fa-star text-warning"></i> {{ parcours.note_formation }}/20</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if parcours.competences_validees %}
+                            <div class="mb-4">
+                                <h6>Compétences validées</h6>
+                                <p>{{ parcours.competences_validees }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if parcours.mentor_assigne %}
+                            <div class="mb-4">
+                                <h6>Mentor assigné</h6>
+                                <p><i class="fas fa-user-tie text-info"></i> {{ parcours.mentor_assigne.username }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if parcours.projet_vie %}
+                            <div class="mb-4">
+                                <h6>Projet de vie associé</h6>
+                                <div class="card border-info">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ parcours.projet_vie.titre_projet }}</h6>
+                                        <p class="card-text">{{ parcours.projet_vie.description|truncatechars:150 }}</p>
+                                        <a href="{% url 'formation:projet_detail' parcours.projet_vie.id %}" class="btn btn-sm btn-outline-info">
+                                            Voir le projet
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if parcours.financement_obtenu > 0 %}
+                            <div class="mb-4">
+                                <h6>Financement obtenu</h6>
+                                <p><i class="fas fa-dollar-sign text-success"></i> {{ parcours.financement_obtenu|floatformat:0 }} FCFA</p>
+                                <p class="text-muted">Type : {{ parcours.get_type_financement_obtenu_display }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Historique des suivis -->
+                    {% if suivis %}
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Historique des suivis</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for suivi in suivis %}
+                                <div class="timeline-item mb-4">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <div class="badge bg-{% if suivi.type_suivi == 'evaluation' %}success{% elif suivi.type_suivi == 'mentoring' %}info{% else %}primary{% endif %} rounded-pill" style="width: 15px; height: 15px;"></div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="card border-start border-3 border-{% if suivi.type_suivi == 'evaluation' %}success{% elif suivi.type_suivi == 'mentoring' %}info{% else %}primary{% endif %}">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <h6 class="card-title mb-1">{{ suivi.titre }}</h6>
+                                                            <small class="text-muted">
+                                                                {{ suivi.get_type_suivi_display }} - {{ suivi.date_suivi|date:"d/m/Y à H:i" }}
+                                                                par {{ suivi.responsable.username }}
+                                                            </small>
+                                                        </div>
+                                                        {% if suivi.note_progression %}
+                                                        <span class="badge bg-primary">{{ suivi.note_progression }}/10</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <p class="card-text mt-2">{{ suivi.description }}</p>
+                                                    
+                                                    {% if suivi.points_forts %}
+                                                    <div class="mt-2">
+                                                        <strong class="text-success">Points forts :</strong>
+                                                        <p class="small">{{ suivi.points_forts }}</p>
+                                                    </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if suivi.points_amelioration %}
+                                                    <div class="mt-2">
+                                                        <strong class="text-warning">Points à améliorer :</strong>
+                                                        <p class="small">{{ suivi.points_amelioration }}</p>
+                                                    </div>
+                                                    {% endif %}
+                                                    
+                                                    {% if suivi.prochaines_etapes %}
+                                                    <div class="mt-2">
+                                                        <strong class="text-info">Prochaines étapes :</strong>
+                                                        <p class="small">{{ suivi.prochaines_etapes }}</p>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informations latérales -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Statut actuel</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-{% if parcours.statut_actuel == 'autonome' %}check-circle text-success{% elif parcours.statut_actuel == 'en_cours' %}play-circle text-primary{% else %}clock text-warning{% endif %} fa-3x"></i>
+                            </div>
+                            <h6>{{ parcours.get_statut_actuel_display }}</h6>
+                            
+                            {% if parcours.statut_actuel == 'pre_inscrit' %}
+                            <p class="text-muted small">Vous êtes pré-inscrit à cette formation. Le début est prévu prochainement.</p>
+                            {% elif parcours.statut_actuel == 'forme' %}
+                            <p class="text-success small">Félicitations ! Vous avez terminé votre formation avec succès.</p>
+                            {% elif parcours.statut_actuel == 'autonome' %}
+                            <p class="text-success small">Vous êtes maintenant autonome ! Bravo pour votre parcours.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Progression détaillée -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Ma progression</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <div class="position-relative d-inline-block">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="8"></circle>
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="#007bff" stroke-width="8" 
+                                                stroke-dasharray="{{ parcours.pourcentage_completion|floatformat:0|add:",0" }} 314" 
+                                                stroke-dashoffset="0" transform="rotate(-90 60 60)"></circle>
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <h4 class="mb-0">{{ parcours.pourcentage_completion }}%</h4>
+                                        <small class="text-muted">Complété</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-steps">
+                                <div class="step {% if parcours.pourcentage_completion >= 0 %}completed{% endif %}">
+                                    <i class="fas fa-play-circle"></i> Début formation
+                                </div>
+                                <div class="step {% if parcours.pourcentage_completion >= 25 %}completed{% endif %}">
+                                    <i class="fas fa-book"></i> Apprentissage
+                                </div>
+                                <div class="step {% if parcours.pourcentage_completion >= 50 %}completed{% endif %}">
+                                    <i class="fas fa-tools"></i> Pratique
+                                </div>
+                                <div class="step {% if parcours.pourcentage_completion >= 75 %}completed{% endif %}">
+                                    <i class="fas fa-certificate"></i> Évaluation
+                                </div>
+                                <div class="step {% if parcours.pourcentage_completion >= 100 %}completed{% endif %}">
+                                    <i class="fas fa-graduation-cap"></i> Certification
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations formation -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Informations formation</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Durée :</strong> {{ parcours.demande_formation.formation_souhaitee.duree_semaines }} semaines</p>
+                            <p><strong>Type :</strong> {{ parcours.demande_formation.formation_souhaitee.get_type_formation_display }}</p>
+                            {% if parcours.get_duree_formation_jours %}
+                            <p><strong>Durée effective :</strong> {{ parcours.get_duree_formation_jours }} jours</p>
+                            {% endif %}
+                            {% if parcours.date_certification %}
+                            <p><strong>Certification :</strong> {{ parcours.date_certification|date:"d/m/Y" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="window.print()">
+                                <i class="fas fa-print"></i> Imprimer mon parcours
+                            </button>
+                            
+                            {% if not parcours.projet_vie %}
+                            <a href="{% url 'formation:projet_vie_create' %}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-lightbulb"></i> Créer un projet
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 30px;
+    bottom: -30px;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.step {
+    padding: 8px 0;
+    color: #6c757d;
+    transition: color 0.3s;
+}
+
+.step.completed {
+    color: #28a745;
+}
+
+.step i {
+    margin-right: 8px;
+    width: 16px;
+}
+</style>
+{% endblock %}

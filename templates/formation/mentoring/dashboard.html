@@ -1,0 +1,223 @@
+# formation/templates/formation/mentoring/dashboard.html
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Mentoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">Dashboard Mentoring</h1>
+        </div>
+    </div>
+
+    <!-- Statistiques de mentoring -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ stats.total_mentores }}</h4>
+                            <p class="mb-0">Total mentorés</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ stats.en_cours }}</h4>
+                            <p class="mb-0">En cours</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-play-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ stats.termines }}</h4>
+                            <p class="mb-0">Terminés</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ stats.moyenne_progression|floatformat:1 }}%</h4>
+                            <p class="mb-0">Progression moyenne</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Mes mentorés -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Mes Mentorés</h5>
+                </div>
+                <div class="card-body">
+                    {% if mes_parcours %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>Formation</th>
+                                        <th>Statut</th>
+                                        <th>Progression</th>
+                                        <th>Date début</th>
+                                        <th>Dernière évaluation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for parcours in mes_parcours %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ parcours.demande_formation.personne.get_full_name }}</strong><br>
+                                            <small class="text-muted">{{ parcours.demande_formation.personne.age }} ans</small>
+                                        </td>
+                                        <td>
+                                            {{ parcours.demande_formation.formation_souhaitee.nom }}<br>
+                                            <small class="text-muted">{{ parcours.demande_formation.formation_souhaitee.get_type_formation_display }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if parcours.statut_actuel == 'autonome' %}success{% elif parcours.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                                                {{ parcours.get_statut_actuel_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="width: 120px; height: 20px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ parcours.pourcentage_completion }}%">
+                                                    {{ parcours.pourcentage_completion }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if parcours.date_debut_formation %}
+                                                {{ parcours.date_debut_formation|date:"d/m/Y" }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% with dernier_suivi=parcours.suivis.first %}
+                                                {% if dernier_suivi %}
+                                                    {{ dernier_suivi.date_suivi|date:"d/m/Y" }}<br>
+                                                    <small class="text-muted">{{ dernier_suivi.get_type_suivi_display }}</small>
+                                                {% else %}
+                                                    <span class="text-muted">Aucune</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'formation:mentoring_parcours_detail' parcours.id %}" class="btn btn-sm btn-outline-primary" title="Voir détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'formation:mentoring_evaluation' parcours.id %}" class="btn btn-sm btn-outline-success" title="Évaluer">
+                                                    <i class="fas fa-star"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+                            <h4>Aucun mentoré assigné</h4>
+                            <p class="text-muted">Vous n'avez pas encore de participants assignés pour le mentoring.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-calendar-check fa-2x text-primary mb-3"></i>
+                                    <h6>Évaluations à faire</h6>
+                                    <p class="text-muted">Participants nécessitant une évaluation</p>
+                                    <span class="badge bg-warning">{{ mes_parcours|length }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x text-info mb-3"></i>
+                                    <h6>Suivis récents</h6>
+                                    <p class="text-muted">Derniers suivis effectués</p>
+                                    <span class="badge bg-info">Cette semaine</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-trophy fa-2x text-success mb-3"></i>
+                                    <h6>Succès</h6>
+                                    <p class="text-muted">Participants ayant terminé</p>
+                                    <span class="badge bg-success">{{ stats.termines }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-chart-line fa-2x text-warning mb-3"></i>
+                                    <h6>Performance</h6>
+                                    <p class="text-muted">Taux de réussite</p>
+                                    <span class="badge bg-warning">{% widthratio stats.termines stats.total_mentores 100 %}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

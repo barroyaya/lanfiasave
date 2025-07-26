@@ -1,0 +1,763 @@
+{% extends 'formation/base_formation.html' %}
+{% load static %}
+
+{% block title %}Confirmer Analyse en Lot{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-separator">/</span>
+<a href="{% url 'formation:admin_dashboard' %}" class="breadcrumb-item">Admin</a>
+<span class="breadcrumb-separator">/</span>
+<span class="breadcrumb-current">Confirmer analyse lot</span>
+{% endblock %}
+
+{% block formation_content %}
+<div class="confirmation-container">
+    <!-- Header d'avertissement -->
+    <div class="warning-header">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="warning-content">
+            <h2 class="warning-title">
+                ⚠️ ATTENTION - Action Irréversible
+            </h2>
+            <p class="warning-subtitle">
+                Vous êtes sur le point d'analyser TOUTES les demandes en attente
+            </p>
+        </div>
+    </div>
+
+    <!-- Informations sur l'action -->
+    <div class="action-info">
+        <div class="info-card">
+            <div class="info-header">
+                <h3>
+                    <i class="fas fa-brain"></i>
+                    Analyse IA en Lot
+                </h3>
+            </div>
+            
+            <div class="info-body">
+                <div class="info-stats">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">{{ demandes_count }}</div>
+                            <div class="stat-label">Demandes à analyser</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">~{{ demandes_count|mul:10 }}s</div>
+                            <div class="stat-label">Temps estimé</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">Mistral</div>
+                            <div class="stat-label">Modèle IA</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="process-description">
+                    <h4>Ce qui va se passer :</h4>
+                    <ul class="process-steps">
+                        <li>
+                            <i class="fas fa-search text-primary"></i>
+                            <span>Récupération de toutes les demandes en attente sans analyse IA</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-brain text-info"></i>
+                            <span>Analyse automatique par l'IA de chaque demande (profil, motivation, projet)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-line text-success"></i>
+                            <span>Attribution d'un score de formabilité (0-100) pour chaque candidat</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-warning"></i>
+                            <span>Acceptation automatique des demandes avec score ≥ 70/100</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-save text-secondary"></i>
+                            <span>Sauvegarde des analyses et recommandations dans la base de données</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conditions et avertissements -->
+    <div class="conditions-section">
+        <div class="conditions-card">
+            <h4>
+                <i class="fas fa-shield-alt"></i>
+                Prérequis et Conditions
+            </h4>
+            
+            <div class="conditions-list">
+                <div class="condition-item success" id="condition-ia">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Connexion IA opérationnelle</span>
+                    <button type="button" class="btn-test" onclick="testIaConnection()">
+                        <i class="fas fa-sync"></i> Tester
+                    </button>
+                </div>
+                
+                <div class="condition-item success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Serveur Django opérationnel</span>
+                </div>
+                
+                <div class="condition-item {% if demandes_count > 0 %}success{% else %}warning{% endif %}">
+                    <i class="fas fa-{% if demandes_count > 0 %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    <span>{{ demandes_count }} demande(s) en attente</span>
+                </div>
+                
+                <div class="condition-item warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Cette action ne peut pas être annulée</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire de confirmation -->
+    {% if demandes_count > 0 %}
+    <div class="confirmation-form-section">
+        <form method="post" id="confirmationForm" onsubmit="return validateForm()">
+            {% csrf_token %}
+            <input type="hidden" name="confirmation" value="CONFIRME">
+            
+            <div class="confirmation-checks">
+                <div class="check-item">
+                    <input type="checkbox" id="check1" required>
+                    <label for="check1">
+                        J'ai vérifié que la connexion IA fonctionne correctement
+                    </label>
+                </div>
+                
+                <div class="check-item">
+                    <input type="checkbox" id="check2" required>
+                    <label for="check2">
+                        Je comprends que cette action va analyser {{ demandes_count }} demande(s)
+                    </label>
+                </div>
+                
+                <div class="check-item">
+                    <input type="checkbox" id="check3" required>
+                    <label for="check3">
+                        Je comprends que l'analyse ne peut pas être annulée une fois lancée
+                    </label>
+                </div>
+                
+                <div class="check-item">
+                    <input type="checkbox" id="check4" required>
+                    <label for="check4">
+                        J'accepte de superviser le processus jusqu'à sa completion
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'formation:admin_dashboard' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+                
+                <button type="submit" class="btn btn-danger btn-lg" id="submitBtn" disabled>
+                    <i class="fas fa-rocket"></i> 
+                    LANCER L'ANALYSE DE {{ demandes_count }} DEMANDE(S)
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <!-- Pas de demandes à analyser -->
+    <div class="no-demandes-section">
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Toutes les analyses sont à jour !</h3>
+            <p>
+                Il n'y a actuellement aucune demande en attente d'analyse IA.
+                <br>
+                Toutes les demandes ont déjà été traitées.
+            </p>
+            <div class="empty-actions">
+                <a href="{% url 'formation:admin_dashboard' %}" class="btn btn-primary">
+                    <i class="fas fa-tachometer-alt"></i> Retour au Dashboard
+                </a>
+                <a href="{% url 'formation:admin_demandes_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list"></i> Voir toutes les demandes
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Informations supplémentaires -->
+    <div class="additional-info">
+        <div class="info-row">
+            <div class="info-box">
+                <h5>
+                    <i class="fas fa-question-circle"></i>
+                    Que faire en cas de problème ?
+                </h5>
+                <ul>
+                    <li>Vérifiez que Ollama est démarré</li>
+                    <li>Testez la connexion IA avant de continuer</li>
+                    <li>Surveillez les logs serveur pendant l'analyse</li>
+                    <li>En cas d'échec, relancez l'analyse sur les demandes échouées</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h5>
+                    <i class="fas fa-lightbulb"></i>
+                    Alternatives recommandées
+                </h5>
+                <ul>
+                    <li>
+                        <a href="{% url 'formation:admin_lancer_analyses_lot' %}">
+                            Analyse par sélection manuelle
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'formation:admin_configuration_ia' %}">
+                            Activer l'analyse automatique
+                        </a>
+                    </li>
+                    <li>Analyser les demandes une par une si nécessaire</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.confirmation-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.warning-header {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 3px solid #dc2626;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+}
+
+.warning-icon {
+    font-size: 3rem;
+    color: #dc2626;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.warning-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.warning-subtitle {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.action-info {
+    margin-bottom: 30px;
+}
+
+.info-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.info-header {
+    background: #f9fafb;
+    padding: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.info-header h3 {
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+}
+
+.info-body {
+    padding: 25px;
+}
+
+.info-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-item {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #8b5cf6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    line-height: 1;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.process-description h4 {
+    color: #1f2937;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.process-steps {
+    list-style: none;
+    padding: 0;
+}
+
+.process-steps li {
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.process-steps i {
+    width: 20px;
+}
+
+.conditions-section {
+    margin-bottom: 30px;
+}
+
+.conditions-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+.conditions-card h4 {
+    color: #1f2937;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.conditions-list {
+    display: grid;
+    gap: 15px;
+}
+
+.condition-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.condition-item.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+}
+
+.condition-item.warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+}
+
+.btn-test {
+    margin-left: auto;
+    padding: 4px 12px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-test:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+}
+
+.confirmation-form-section {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.confirmation-checks {
+    margin-bottom: 30px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f9fafb;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s;
+}
+
+.check-item:has(input:checked) {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+
+.check-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.check-item label {
+    flex: 1;
+    cursor: pointer;
+    font-weight: 500;
+    color: #374151;
+    margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-danger:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-outline-secondary {
+    border-color: #6b7280;
+    color: #6b7280;
+    background: transparent;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.no-demandes-section {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 40px;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #10b981;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #1f2937;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.additional-info {
+    margin-top: 40px;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.info-box {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+.info-box h5 {
+    color: #1f2937;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-box li {
+    padding: 5px 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.info-box a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.info-box a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .warning-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .info-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .info-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .empty-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+// Gestion de la validation du formulaire
+function validateForm() {
+    const checkboxes = document.querySelectorAll('#confirmationForm input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    if (!allChecked) {
+        alert('Veuillez cocher toutes les cases de confirmation avant de continuer.');
+        return false;
+    }
+    
+    const finalConfirm = confirm(
+        `⚠️ DERNIÈRE CONFIRMATION ⚠️\n\n` +
+        `Vous allez lancer l'analyse IA sur {{ demandes_count }} demande(s).\n\n` +
+        `Cette action est IRRÉVERSIBLE.\n\n` +
+        `Êtes-vous absolument certain de vouloir continuer ?`
+    );
+    
+    if (finalConfirm) {
+        // Désactiver le bouton et afficher un message de progression
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ANALYSE EN COURS...';
+        
+        return true;
+    }
+    
+    return false;
+}
+
+// Activer/désactiver le bouton selon les checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('#confirmationForm input[type="checkbox"]');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function updateSubmitButton() {
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        submitBtn.disabled = !allChecked;
+        
+        if (allChecked) {
+            submitBtn.style.background = '#dc2626';
+            submitBtn.style.animation = 'pulse 2s infinite';
+        } else {
+            submitBtn.style.background = '#9ca3af';
+            submitBtn.style.animation = 'none';
+        }
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSubmitButton);
+    });
+    
+    updateSubmitButton();
+});
+
+// Test de connexion IA
+async function testIaConnection() {
+    const conditionItem = document.getElementById('condition-ia');
+    const originalHtml = conditionItem.innerHTML;
+    
+    // État de chargement
+    conditionItem.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Test en cours...</span>
+        <button type="button" class="btn-test" disabled>
+            <i class="fas fa-sync fa-spin"></i> Test...
+        </button>
+    `;
+    conditionItem.className = 'condition-item warning';
+    
+    try {
+        const response = await fetch('/formation/admin/test-ia-connection/');
+        const data = await response.json();
+        
+        if (data.success) {
+            conditionItem.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>Connexion IA opérationnelle - ${data.model}</span>
+                <button type="button" class="btn-test" onclick="testIaConnection()">
+                    <i class="fas fa-check"></i> OK
+                </button>
+            `;
+            conditionItem.className = 'condition-item success';
+        } else {
+            conditionItem.innerHTML = `
+                <i class="fas fa-times-circle"></i>
+                <span>Erreur IA: ${data.error}</span>
+                <button type="button" class="btn-test" onclick="testIaConnection()">
+                    <i class="fas fa-redo"></i> Retry
+                </button>
+            `;
+            conditionItem.className = 'condition-item warning';
+        }
+    } catch (error) {
+        conditionItem.innerHTML = `
+            <i class="fas fa-times-circle"></i>
+            <span>Erreur de connexion</span>
+            <button type="button" class="btn-test" onclick="testIaConnection()">
+                <i class="fas fa-redo"></i> Retry
+            </button>
+        `;
+        conditionItem.className = 'condition-item warning';
+    }
+}
+
+// Test automatique au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    // Tester la connexion IA automatiquement
+    setTimeout(testIaConnection, 1000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,734 @@
+<!-- formation/templates/formation/formation_detail.html -->
+{% extends 'formation/base_formation.html' %}
+
+{% block title %}{{ formation.nom }} - Formation - LanfiaSave{% endblock %}
+
+{% block breadcrumb %}
+<span class="breadcrumb-separator">/</span>
+<span class="breadcrumb-current">{{ formation.nom }}</span>
+{% endblock %}
+
+{% block formation_content %}
+<div class="formation-detail-container">
+    <!-- Header de la formation -->
+    <div class="formation-detail-header">
+        <div class="formation-main-info">
+            <div class="formation-type-badge">
+                {{ formation.get_type_formation_display }}
+            </div>
+            <h1 class="formation-title">{{ formation.nom }}</h1>
+            <div class="formation-meta">
+                <span class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    {{ formation.duree_semaines }} semaine(s)
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-users"></i>
+                    {{ formation.age_min }}-{{ formation.age_max }} ans
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    {{ formation.get_niveau_requis_display }}
+                </span>
+                {% if formation.cout_formation > 0 %}
+                <span class="meta-item price">
+                    <i class="fas fa-euro-sign"></i>
+                    {{ formation.cout_formation }} FCFA
+                </span>
+                {% else %}
+                <span class="meta-item free">
+                    <i class="fas fa-gift"></i>
+                    Gratuit
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="formation-action-card">
+            <div class="availability-info">
+                <div class="places-indicator">
+                    <div class="places-circle {{ places_restantes|yesno:'available,limited,full' }}">
+                        {{ places_restantes }}
+                    </div>
+                    <div class="places-text">
+                        <strong>{{ places_restantes }}</strong> place(s)<br>
+                        <small>sur {{ formation.places_disponibles }}</small>
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated and user.is_vulnerable %}
+                {% if demande_existante %}
+                    <div class="demande-status">
+                        <div class="status-badge status-{{ demande_existante.statut }}">
+                            <i class="fas fa-info-circle"></i>
+                            {% if demande_existante.statut == 'en_attente' %}
+                                Demande en cours d'analyse
+                            {% elif demande_existante.statut == 'analysee' %}
+                                Demande analysée
+                            {% elif demande_existante.statut == 'acceptee' %}
+                                Demande acceptée
+                            {% elif demande_existante.statut == 'refusee' %}
+                                Demande refusée
+                            {% elif demande_existante.statut == 'en_cours' %}
+                                Formation en cours
+                            {% elif demande_existante.statut == 'terminee' %}
+                                Formation terminée
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'formation:demande_detail' demande_existante.id %}" 
+                           class="btn-secondary">
+                            <i class="fas fa-eye"></i> Voir ma demande
+                        </a>
+                    </div>
+                {% else %}
+                    {% if places_restantes > 0 %}
+                        <a href="{% url 'formation:demande_formation' formation.id %}" 
+                           class="btn-primary btn-large">
+                            <i class="fas fa-paper-plane"></i>
+                            Faire une demande
+                        </a>
+                    {% else %}
+                        <button class="btn-disabled btn-large" disabled>
+                            <i class="fas fa-ban"></i>
+                            Complet
+                        </button>
+                    {% endif %}
+                {% endif %}
+            {% elif user.is_authenticated %}
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    Cette formation est réservée aux personnes vulnérables validées.
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary btn-large">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Connectez-vous pour postuler
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="formation-content">
+        <div class="content-grid">
+            <!-- Description principale -->
+            <div class="main-content">
+                <section class="content-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Description de la formation
+                    </h2>
+                    <div class="section-content">
+                        <p class="formation-description">{{ formation.description|linebreaks }}</p>
+                    </div>
+                </section>
+
+                <section class="content-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-trophy"></i>
+                        Compétences acquises
+                    </h2>
+                    <div class="section-content">
+                        <div class="competences-list">
+                            {% for competence in formation.competences_acquises|linebreaks %}
+                                {% if competence.strip %}
+                                <div class="competence-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    {{ competence|safe }}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                {% if formation.prerequis_materiels %}
+                <section class="content-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-tools"></i>
+                        Prérequis matériels
+                    </h2>
+                    <div class="section-content">
+                        <div class="prerequis-content">
+                            {{ formation.prerequis_materiels|linebreaks }}
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar avec informations -->
+            <div class="sidebar-content">
+                <!-- Informations détaillées -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-list-ul"></i>
+                        Informations détaillées
+                    </h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Type de formation</span>
+                            <span class="info-value">{{ formation.get_type_formation_display }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Durée</span>
+                            <span class="info-value">{{ formation.duree_semaines }} semaines</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Niveau requis</span>
+                            <span class="info-value">{{ formation.get_niveau_requis_display }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Âge requis</span>
+                            <span class="info-value">{{ formation.age_min }} - {{ formation.age_max }} ans</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Places disponibles</span>
+                            <span class="info-value">{{ formation.places_disponibles }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Coût</span>
+                            <span class="info-value">
+                                {% if formation.cout_formation > 0 %}
+                                    {{ formation.cout_formation }} FCFA
+                                {% else %}
+                                    <span class="free-badge">Gratuit</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processus de candidature -->
+                <div class="info-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-route"></i>
+                        Processus de candidature
+                    </h3>
+                    <div class="process-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Soumission de demande</h4>
+                                <p>Remplissez le formulaire de candidature avec vos motivations et projets.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Analyse automatique</h4>
+                                <p>Notre IA analyse votre profil et évalue votre formabilité.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Validation humaine</h4>
+                                <p>Un expert examine votre dossier et prend la décision finale.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Formation et suivi</h4>
+                                <p>Début de la formation avec accompagnement personnalisé.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-compass"></i>
+                        Navigation
+                    </h3>
+                    <div class="nav-links">
+                        <a href="{% url 'formation:formations_list' %}" class="nav-link">
+                            <i class="fas fa-arrow-left"></i>
+                            Retour aux formations
+                        </a>
+                        {% if user.is_vulnerable %}
+                        <a href="{% url 'formation:mes_demandes' %}" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            Mes demandes
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles pour le détail de formation */
+.formation-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.formation-detail-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: start;
+}
+
+.formation-type-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.formation-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.formation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    margin-bottom: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.meta-item i {
+    color: #667eea;
+    width: 18px;
+}
+
+.meta-item.price {
+    color: #059669;
+    font-weight: 600;
+}
+
+.meta-item.free {
+    color: #0891b2;
+    font-weight: 600;
+}
+
+.formation-action-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    min-width: 280px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.availability-info {
+    margin-bottom: 25px;
+}
+
+.places-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.places-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.places-circle.available {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.places-circle.limited {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.places-circle.full {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.places-text {
+    text-align: left;
+    line-height: 1.3;
+}
+
+.demande-status {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.status-badge {
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.status-badge.status-en_attente {
+    background: rgba(249, 115, 22, 0.1);
+    color: #ea580c;
+}
+
+.status-badge.status-analysee {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+.status-badge.status-acceptee {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.status-badge.status-refusee {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.status-badge.status-en_cours {
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+}
+
+.status-badge.status-terminee {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.btn-primary, .btn-secondary, .btn-disabled {
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-large {
+    padding: 18px 30px;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+.btn-disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.info-message {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+}
+
+.content-section {
+    background: white;
+    border-radius: 16px;
+    border: 2px solid #f1f5f9;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+.formation-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #475569;
+}
+
+.competences-list {
+    display: grid;
+    gap: 15px;
+}
+
+.competence-item {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.competence-item i {
+    color: #10b981;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.prerequis-content {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #475569;
+}
+
+.info-card, .navigation-card {
+    background: white;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-title i {
+    color: #667eea;
+}
+
+.info-list {
+    display: grid;
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #64748b;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #1e293b;
+    text-align: right;
+}
+
+.free-badge {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.process-steps {
+    display: grid;
+    gap: 20px;
+}
+
+.step {
+    display: flex;
+    gap: 15px;
+    align-items: start;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.step-content p {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.nav-links {
+    display: grid;
+    gap: 12px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #475569;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.nav-link:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .sidebar-content {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .formation-detail-header {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .formation-action-card {
+        min-width: auto;
+    }
+    
+    .formation-title {
+        font-size: 2.2rem;
+    }
+    
+    .formation-meta {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .places-indicator {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .places-text {
+        text-align: center;
+    }
+}
+</style>
+
+<script>
+// Animation de scroll pour les sections
+document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.content-section');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+    
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'all 0.6s ease';
+        observer.observe(section);
+    });
+});
+</script>
+{% endblock %}

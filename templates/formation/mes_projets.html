@@ -1,0 +1,1008 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Projets de Vie{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --pink-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        
+        /* Fond blanc sombre */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-accent: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+        --purple-color: #6c5ce7;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 250px;
+        height: 250px;
+        background: var(--primary-gradient);
+        top: 5%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 180px;
+        height: 180px;
+        background: var(--secondary-gradient);
+        bottom: 15%;
+        left: 5%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .shape-3 {
+        width: 120px;
+        height: 120px;
+        background: var(--purple-gradient);
+        top: 45%;
+        right: 20%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cartes de projets */
+    .projet-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px var(--card-shadow);
+        height: 100%;
+        position: relative;
+        animation: slideUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .projet-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--secondary-gradient);
+        transition: height 0.3s ease;
+    }
+
+    .projet-card:hover::before {
+        height: 8px;
+    }
+
+    .projet-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+        border-color: rgba(78, 205, 196, 0.3);
+    }
+
+    .projet-card:nth-child(1) { animation-delay: 0.1s; }
+    .projet-card:nth-child(2) { animation-delay: 0.2s; }
+    .projet-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .projet-card .card-header {
+        background: var(--card-accent);
+        border-bottom: 1px solid var(--card-border);
+        padding: 1.5rem;
+    }
+
+    .projet-card .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .projet-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .projet-card .card-footer {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-top: 1px solid var(--card-border);
+        padding: 1rem 1.5rem;
+    }
+
+    /* Badges modernes */
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+        display: inline-block;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-success-modern {
+        background: var(--success-gradient);
+    }
+
+    .badge-info-modern {
+        background: var(--info-gradient);
+    }
+
+    .badge-primary-modern {
+        background: var(--secondary-gradient);
+    }
+
+    .badge-danger-modern {
+        background: var(--primary-gradient);
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+    }
+
+    /* Barre de progression moderne */
+    .progress-modern {
+        height: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar-modern {
+        height: 100%;
+        border-radius: 15px;
+        transition: width 1.5s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar-success {
+        background: var(--success-gradient);
+        box-shadow: 0 2px 8px rgba(86, 204, 157, 0.3);
+    }
+
+    .progress-bar-warning {
+        background: var(--warning-gradient);
+        box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+    }
+
+    .progress-bar-danger {
+        background: var(--primary-gradient);
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    }
+
+    .progress-bar-modern::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    /* Informations du projet */
+    .projet-info {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--info-color);
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+    }
+
+    .projet-info:hover {
+        transform: translateX(3px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .projet-info strong {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .budget-amount {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* Boutons modernes */
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-secondary);
+        border: 2px solid var(--card-border);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--info-gradient);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .btn-outline-modern:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Cartes de statistiques */
+    .stats-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px var(--card-shadow);
+        margin-top: 2rem;
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .stats-card .card-header {
+        background: var(--card-accent);
+        border-bottom: 1px solid var(--card-border);
+        padding: 1.5rem;
+    }
+
+    .stats-card .card-body {
+        padding: 2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .stat-item h4 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-item .text-primary { 
+        background: var(--secondary-gradient); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+    .stat-item .text-info { 
+        background: var(--info-gradient); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+    .stat-item .text-success { 
+        background: var(--success-gradient); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+    .stat-item .text-warning { 
+        background: var(--warning-gradient); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+    .stat-item .text-purple { 
+        background: var(--purple-gradient); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+
+    /* Répartition par statut */
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 10px;
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+    }
+
+    .status-item:hover {
+        transform: translateX(3px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-badge {
+        background: var(--secondary-gradient);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 20px var(--card-shadow);
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .empty-state i {
+        background: var(--secondary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .info-card {
+        background: var(--card-bg);
+        border: 2px solid var(--info-color);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 4px 20px rgba(116, 185, 255, 0.1);
+    }
+
+    .info-card h5 {
+        color: var(--info-color);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .info-card ul {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* Progress label */
+    .progress-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .progress-info {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .projet-card .card-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Bootstrap classes */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-12, .col-md-2, .col-md-3, .col-md-4, .col-md-6, .col-md-8, .col-lg-4 {
+        padding: 0 0.75rem;
+    }
+
+    .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-md-2 {
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+    }
+
+    .col-md-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .col-md-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+
+    .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    @media (max-width: 991px) {
+        .col-lg-4 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .col-md-2, .col-md-3, .col-md-4, .col-md-6, .col-md-8, .col-lg-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .mb-2 {
+        margin-bottom: 0.5rem;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .ms-2 {
+        margin-left: 0.5rem;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-start {
+        text-align: left;
+    }
+
+    .h-100 {
+        height: 100%;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    .py-5 {
+        padding: 3rem 0;
+    }
+
+    .fa-4x {
+        font-size: 4em;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .border-primary {
+        border-color: var(--info-color) !important;
+    }
+
+    .card-text {
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+<div class="decoration-shape shape-3"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Mes Projets de Vie</h1>
+                <a href="{% url 'formation:projet_vie_create' %}" class="btn-modern btn-primary-modern">
+                    <i class="fas fa-plus"></i> Nouveau projet
+                </a>
+            </div>
+
+            {% if projets %}
+                <div class="row">
+                    {% for projet in projets %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="projet-card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">{{ projet.titre_projet }}</h5>
+                                <small class="text-muted">{{ projet.secteur_activite }}</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <span class="badge-modern {% if projet.statut == 'realise' %}badge-success-modern{% elif projet.statut == 'finance' %}badge-info-modern{% elif projet.statut == 'en_cours' %}badge-primary-modern{% elif projet.statut == 'abandonne' %}badge-danger-modern{% else %}badge-secondary-modern{% endif %}">
+                                        {{ projet.get_statut_display }}
+                                    </span>
+                                </div>
+                                
+                                <p class="card-text">{{ projet.description|truncatechars:100 }}</p>
+                                
+                                <div class="projet-info">
+                                    <strong>Budget estimé :</strong><br>
+                                    <span class="budget-amount">{{ projet.budget_estime|floatformat:0 }} FCFA</span>
+                                </div>
+
+                                <div class="projet-info">
+                                    <strong>Financement :</strong><br>
+                                    <small class="text-muted">{{ projet.get_type_financement_display }}</small>
+                                </div>
+
+                                {% if projet.faisabilite_score %}
+                                <div class="mb-3">
+                                    <label class="progress-label">Score de faisabilité</label>
+                                    <div class="progress-modern">
+                                        <div class="progress-bar-modern progress-bar-{% if projet.faisabilite_score >= 70 %}success{% elif projet.faisabilite_score >= 40 %}warning{% else %}danger{% endif %}" 
+                                             style="width: {{ projet.faisabilite_score }}%">
+                                        </div>
+                                    </div>
+                                    <div class="progress-info">
+                                        {{ projet.faisabilite_score }}% - 
+                                        {% if projet.faisabilite_score >= 70 %}
+                                            Très prometteur
+                                        {% elif projet.faisabilite_score >= 40 %}
+                                            Faisable
+                                        {% else %}
+                                            À améliorer
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-hourglass-half"></i> Analyse en cours...
+                                    </small>
+                                </div>
+                                {% endif %}
+
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Créé le {{ projet.date_creation|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'formation:projet_detail' projet.id %}" class="btn-modern btn-primary-modern btn-sm-modern">
+                                    <i class="fas fa-eye"></i> Voir détails
+                                </a>
+                                
+                                {% if projet.statut == 'idee' or projet.statut == 'planification' %}
+                                <button class="btn-modern btn-outline-modern btn-sm-modern" title="Modifier" disabled>
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Statistiques rapides -->
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="stats-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar"></i> Résumé de mes projets</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <h4 class="text-primary">{{ stats.total }}</h4>
+                                        <small class="text-muted">Total</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-info">{{ stats.finances }}</h4>
+                                        <small class="text-muted">Financés</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-success">{{ stats.realises }}</h4>
+                                        <small class="text-muted">Réalisés</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-warning">{{ stats.budget_total|floatformat:0 }}</h4>
+                                        <small class="text-muted">Budget total (FCFA)</small>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-purple">
+                                            {% if stats.score_moyen > 0 %}
+                                                {{ stats.score_moyen|floatformat:1 }}%
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </h4>
+                                        <small class="text-muted">Score moyen</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Répartition par statut -->
+                    {% if repartition_statuts %}
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-pie-chart"></i> Répartition par statut</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for statut, count in repartition_statuts.items %}
+                                <div class="status-item">
+                                    <span class="small">{{ statut }}</span>
+                                    <span class="status-badge">{{ count }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <!-- État vide -->
+                <div class="empty-state">
+                    <div class="mb-4">
+                        <i class="fas fa-lightbulb fa-4x"></i>
+                    </div>
+                    <h4>Aucun projet de vie</h4>
+                    <p class="text-muted mb-4">
+                        Vous n'avez pas encore créé de projet de vie. Un projet de vie vous aide à structurer vos ambitions entrepreneuriales et à obtenir un financement.
+                    </p>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="info-card">
+                                <h5>
+                                    <i class="fas fa-info-circle"></i> Qu'est-ce qu'un projet de vie ?
+                                </h5>
+                                <p>
+                                    Un projet de vie est votre plan entrepreneurial personnel. Il décrit :
+                                </p>
+                                <ul class="text-start">
+                                    <li>Votre idée d'entreprise ou d'activité</li>
+                                    <li>Le secteur dans lequel vous souhaitez évoluer</li>
+                                    <li>Le budget nécessaire à la réalisation</li>
+                                    <li>Le type de financement souhaité</li>
+                                </ul>
+                                <p>
+                                    Notre système d'intelligence artificielle analysera automatiquement la faisabilité de votre projet et vous donnera des recommandations personnalisées.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'formation:projet_vie_create' %}" class="btn-modern btn-primary-modern btn-lg">
+                            <i class="fas fa-plus"></i> Créer mon premier projet
+                        </a>
+                        <a href="{% url 'formation:formations_list' %}" class="btn-modern btn-outline-modern btn-lg ms-2">
+                            <i class="fas fa-graduation-cap"></i> Voir les formations
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Animation d'entrée pour les cartes
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.projet-card, .stats-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Animation des barres de progression
+    const progressBars = document.querySelectorAll('.progress-bar-modern');
+    progressBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 1000 + index * 300);
+    });
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.2 + index * 0.1);
+            shape.style.transform = `translateY(${rate}px)`;
+        });
+    });
+
+    // Animation des badges au survol
+    const badges = document.querySelectorAll('.badge-modern');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1) rotate(2deg)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+
+    // Effet de ripple sur les boutons
+    const buttons = document.querySelectorAll('.btn-modern:not(:disabled)');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Ajout de l'animation ripple en CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Tooltip pour les boutons désactivés
+document.addEventListener('DOMContentLoaded', function() {
+    const disabledButtons = document.querySelectorAll('button[disabled]');
+    disabledButtons.forEach(button => {
+        button.setAttribute('data-bs-toggle', 'tooltip');
+        button.setAttribute('data-bs-placement', 'top');
+        button.setAttribute('title', 'Fonctionnalité à venir');
+    });
+    
+    // Initialiser les tooltips Bootstrap si disponible
+    if (typeof bootstrap !== 'undefined') {
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip);
+        });
+    }
+});
+</script>
+{% endblock %}

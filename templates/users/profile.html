@@ -1,3 +1,4 @@
+{#template/users/profile.html#}
 {% extends 'base.html' %}
 
 {% block title %}Profil - LanfiaSave{% endblock %}
@@ -62,7 +63,7 @@
                         <i class="fas fa-hands-holding-heart"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-value">{{ montant_total }}€</span>
+                        <span class="stat-value">{{ montant_total }}F</span>
                         <span class="stat-label">Total reçu</span>
                     </div>
                 </div>
@@ -244,7 +245,7 @@
                                             <span>{{ don_recu.don.donateur.username }}</span>
                                         </div>
                                     </td>
-                                    <td class="amount">{{ don_recu.montant_recu|floatformat:2 }}€</td>
+                                    <td class="amount">{{ don_recu.montant_recu|floatformat:2 }}F</td>
                                     <td class="message">{{ don_recu.don.description|default:"Aucun message" }}</td>
                                     <td>
                                         <span class="status-badge status-success">
@@ -264,7 +265,7 @@
                         </div>
                         <div class="summary-content">
                             <h4>Résumé</h4>
-                            <p>Total des dons reçus: <strong>{{ montant_total|floatformat:2 }}€</strong></p>
+                            <p>Total des dons reçus: <strong>{{ montant_total|floatformat:2 }}F</strong></p>
                             <p>Nombre de donateurs: <strong>{{ dons_recus|length }}</strong></p>
                         </div>
                     </div>

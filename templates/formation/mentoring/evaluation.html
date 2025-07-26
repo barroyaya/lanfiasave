@@ -1,0 +1,165 @@
+{# formation/templates/formation/mentoring/evaluation.html#}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Évaluation Mentoring{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Évaluation de Mentoring</h4>
+                    <small class="text-muted">
+                        {{ parcours.demande_formation.personne.get_full_name }} 
+                        - {{ parcours.demande_formation.formation_souhaitee.nom }}
+                    </small>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.titre.id_for_label }}" class="form-label">{{ form.titre.label }}</label>
+                                    {{ form.titre }}
+                                    {% if form.titre.errors %}
+                                        <div class="text-danger small">{{ form.titre.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.note_progression.id_for_label }}" class="form-label">{{ form.note_progression.label }}</label>
+                                    {{ form.note_progression }}
+                                    {% if form.note_progression.errors %}
+                                        <div class="text-danger small">{{ form.note_progression.errors }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Sur une échelle de 0 à 10</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.type_suivi.id_for_label }}" class="form-label">{{ form.type_suivi.label }}</label>
+                            {{ form.type_suivi }}
+                            {% if form.type_suivi.errors %}
+                                <div class="text-danger small">{{ form.type_suivi.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Décrivez les activités, les observations et les discussions de cette session.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.points_forts.id_for_label }}" class="form-label">{{ form.points_forts.label }}</label>
+                            {{ form.points_forts }}
+                            {% if form.points_forts.errors %}
+                                <div class="text-danger small">{{ form.points_forts.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Quels sont les points forts observés chez le participant ?</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.points_amelioration.id_for_label }}" class="form-label">{{ form.points_amelioration.label }}</label>
+                            {{ form.points_amelioration }}
+                            {% if form.points_amelioration.errors %}
+                                <div class="text-danger small">{{ form.points_amelioration.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Quels aspects nécessitent une amélioration ?</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.prochaines_etapes.id_for_label }}" class="form-label">{{ form.prochaines_etapes.label }}</label>
+                            {{ form.prochaines_etapes }}
+                            {% if form.prochaines_etapes.errors %}
+                                <div class="text-danger small">{{ form.prochaines_etapes.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Quelles sont les prochaines étapes recommandées ?</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'formation:mentoring_parcours_detail' parcours.id %}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Enregistrer l'évaluation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Progression actuelle -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Progression Actuelle</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Statut</h6>
+                            <span class="badge bg-{% if parcours.statut_actuel == 'autonome' %}success{% elif parcours.statut_actuel == 'en_cours' %}primary{% else %}secondary{% endif %}">
+                                {{ parcours.get_statut_actuel_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Progression</h6>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ parcours.pourcentage_completion }}%">
+                                    {{ parcours.pourcentage_completion }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if parcours.note_formation %}
+                    <div class="mt-3">
+                        <h6>Note actuelle</h6>
+                        <span class="badge bg-{% if parcours.note_formation >= 16 %}success{% elif parcours.note_formation >= 10 %}warning{% else %}danger{% endif %} fs-6">
+                            {{ parcours.note_formation }}/20
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-remplir le titre basé sur le type de suivi
+document.getElementById('{{ form.type_suivi.id_for_label }}').addEventListener('change', function() {
+    const typeSelected = this.value;
+    const titreField = document.getElementById('{{ form.titre.id_for_label }}');
+    
+    if (titreField.value === '') {
+        const today = new Date().toLocaleDateString('fr-FR');
+        let suggestion = '';
+        
+        switch(typeSelected) {
+            case 'mentoring':
+                suggestion = `Session de mentoring - ${today}`;
+                break;
+            case 'evaluation':
+                suggestion = `Évaluation - ${today}`;
+                break;
+            case 'formation':
+                suggestion = `Suivi formation - ${today}`;
+                break;
+            case 'projet':
+                suggestion = `Suivi projet - ${today}`;
+                break;
+            default:
+                suggestion = `Suivi - ${today}`;
+        }
+        
+        titreField.value = suggestion;
+    }
+});
+</script>
+{% endblock %}
