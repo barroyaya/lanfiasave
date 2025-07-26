@@ -246,7 +246,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z)xlo_#r7lblxct2w(ile6(xo)iv=8#i3(9ayr9-x(&h3l8dsq')
-
+# Supprimer les warnings TensorFlow/CUDA
+os.environ.setdefault('CUDA_VISIBLE_DEVICES', '-1')
+os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
@@ -258,6 +260,7 @@ if IS_RENDER:
     ALLOWED_HOSTS = [
         'lanfiasave.onrender.com',
         '.onrender.com',  # Permet tous les sous-domaines Render
+        '*',  # Autorise tous les hôtes en production
     ]
 else:
     ALLOWED_HOSTS = [
@@ -265,6 +268,7 @@ else:
         '192.168.1.102',
         'localhost',
         'lanfiasave.onrender.com',
+        '*',  # Autorise tous les hôtes en développement
     ]
 
 # Application definition
@@ -321,6 +325,7 @@ else:
         "http://192.168.100.27:8000",
         "http://127.0.0.1:8000",
         "http://localhost:52589",
+
     ]
     CORS_ORIGIN_WHITELIST = [
         'http://192.168.100.27:8000',
