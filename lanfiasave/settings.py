@@ -64,7 +64,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://192.168.100.27:8000",
     "http://127.0.0.1:8000",
-    "http://localhost:52589"
+    "http://localhost:52589",
+    "https://lanfiasave.onrender.com",
 
     # Port de développement React
 ]
@@ -107,7 +108,12 @@ REST_FRAMEWORK = {
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_ALLOW_CREDENTIALS = True
 # settings.py
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.102', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1',
+                 '192.168.1.102',
+                 'localhost',
+                 'lanfiasave.onrender.com',]
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 LOGIN_URL = '/users/login/'
