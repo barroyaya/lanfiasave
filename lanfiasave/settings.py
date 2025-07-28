@@ -226,7 +226,6 @@
 #     'django.contrib.auth.backends.ModelBackend',
 # ]
 
-
 """
 Django settings for lanfiasave project.
 
@@ -246,30 +245,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z)xlo_#r7lblxct2w(ile6(xo)iv=8#i3(9ayr9-x(&h3l8dsq')
+
 # Supprimer les warnings TensorFlow/CUDA
 os.environ.setdefault('CUDA_VISIBLE_DEVICES', '-1')
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# Détection de l'environnement de production
-IS_RENDER = os.environ.get('RENDER')
+# 🔧 DÉTECTION AMÉLIORÉE de l'environnement Render
+IS_RENDER = (
+        os.environ.get('RENDER') or  # Variable que vous pouvez définir
+        os.environ.get('RENDER_SERVICE_ID') or  # Variable auto de Render
+        os.environ.get('RENDER_INSTANCE_ID') or  # Variable auto de Render
+        'onrender.com' in os.environ.get('HOST', '') or  # Détection par hostname
+        'render' in os.environ.get('RAILWAY_ENVIRONMENT_NAME', '').lower()  # Au cas où
+)
+
+print(f"🔍 Environnement détecté: {'RENDER' if IS_RENDER else 'LOCAL'}")
 
 # Configuration des hôtes autorisés
-if IS_RENDER:
-    ALLOWED_HOSTS = [
-        'lanfiasave.onrender.com',
-        '.onrender.com',  # Permet tous les sous-domaines Render
-        '*',  # Autorise tous les hôtes en production
-    ]
-else:
-    ALLOWED_HOSTS = [
-        '127.0.0.1',
-        '192.168.1.102',
-        'localhost',
-        'lanfiasave.onrender.com',
-        '*',  # Autorise tous les hôtes en développement
-    ]
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    '192.168.1.102',
+    'localhost',
+    'lanfiasave.onrender.com',
+    '.onrender.com',  # Permet tous les sous-domaines Render
+    '*',  # Temporaire pour débugger - RETIREZ en production finale
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -315,7 +318,7 @@ if IS_RENDER:
     # Configuration sécurisée pour la production
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False  # Changé à False temporairement
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -325,7 +328,6 @@ else:
         "http://192.168.100.27:8000",
         "http://127.0.0.1:8000",
         "http://localhost:52589",
-
     ]
     CORS_ORIGIN_WHITELIST = [
         'http://192.168.100.27:8000',
@@ -378,6 +380,7 @@ ROOT_URLCONF = 'lanfiasave.urls'
 AUTH_USER_MODEL = 'users.User'
 
 from corsheaders.defaults import default_headers
+
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'authorization',
 ]
@@ -400,24 +403,45 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'lanfiasave.wsgi.application'
 
-# Database
-if IS_RENDER:
-    # Configuration PostgreSQL pour Render
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
-        )
-    }
-else:
-    # Configuration SQLite pour le développement
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+# 🗄️ DATABASE - Configuration robuste avec fallback
+print("🗄️  Configuration de la base de données...")
+
+# Configuration par défaut (SQLite)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,
         }
     }
+}
+
+# Tentative de configuration PostgreSQL sur Render
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if IS_RENDER and DATABASE_URL and DATABASE_URL.strip():
+    try:
+        import dj_database_url
+
+        postgres_config = dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600
+        )
+
+        # Vérification que la configuration est valide
+        if postgres_config.get('ENGINE') and postgres_config.get('NAME'):
+            DATABASES['default'] = postgres_config
+            print("✅ PostgreSQL configuré pour Render")
+        else:
+            print("⚠️  Configuration PostgreSQL invalide, utilisation de SQLite")
+    except Exception as e:
+        print(f"❌ Erreur PostgreSQL: {e}")
+        print("📝 Fallback vers SQLite")
+else:
+    if IS_RENDER:
+        print("📝 Render détecté mais pas de DATABASE_URL, utilisation de SQLite")
+    else:
+        print("📝 Environnement local, utilisation de SQLite")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -446,13 +470,20 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+
+# Gestion robuste des répertoires statiques
+STATICFILES_DIRS = []
+static_dir = BASE_DIR / 'static'
+if static_dir.exists():
+    STATICFILES_DIRS = [static_dir]
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Configuration WhiteNoise pour la compression des fichiers statiques
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration WhiteNoise - Version simple pour éviter les erreurs
+if IS_RENDER:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -465,8 +496,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 # Sécurité : Types de fichiers autorisés
 ALLOWED_UPLOAD_EXTENSIONS = [
     '.jpg', '.jpeg', '.png', '.gif',  # Images
-    '.pdf', '.doc', '.docx',          # Documents
-    '.txt'                            # Texte
+    '.pdf', '.doc', '.docx',  # Documents
+    '.txt'  # Texte
 ]
 
 # Default primary key field type
@@ -477,23 +508,25 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Logging pour la production
-if IS_RENDER:
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
         },
-        'root': {
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django': {
             'handlers': ['console'],
+            'level': 'INFO' if IS_RENDER else 'WARNING',
+            'propagate': False,
         },
-        'loggers': {
-            'django': {
-                'handlers': ['console'],
-                'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-                'propagate': False,
-            },
-        },
-    }
+    },
+}
+
+print(
+    f"✅ Configuration terminée - Debug: {DEBUG}, DB: {'PostgreSQL' if 'postgres' in str(DATABASES['default']['ENGINE']) else 'SQLite'}")
