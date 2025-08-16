@@ -251,7 +251,7 @@ os.environ.setdefault('CUDA_VISIBLE_DEVICES', '-1')
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = True
 
 # 🔧 DÉTECTION AMÉLIORÉE de l'environnement Render
 IS_RENDER = (
@@ -471,13 +471,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 
-# Gestion robuste des répertoires statiques
-STATICFILES_DIRS = []
-static_dir = BASE_DIR / 'static'
-if static_dir.exists():
-    STATICFILES_DIRS = [static_dir]
+# ✅ Configuration corrigée pour les fichiers statiques
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # Dossier principal static
+]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# ✅ Ajout des finders pour bien localiser les fichiers
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 # Configuration WhiteNoise - Version simple pour éviter les erreurs
 if IS_RENDER:

@@ -114,7 +114,7 @@
         border: 1px solid var(--card-border);
         border-radius: 20px;
         overflow: hidden;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         transition: all 0.3s ease;
         animation: slideUp 0.8s ease-out;
         box-shadow: 0 4px 20px var(--card-shadow);
@@ -670,6 +670,251 @@
     .text-purple {
         color: #6c5ce7 !important;
     }
+    
+    
+    /* Assurer que toutes les cartes ont la même hauteur */
+    .formation-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px var(--card-shadow);
+        height: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 480px; /* Hauteur minimale fixe */
+    }
+
+    .formation-card .card-header {
+        background: var(--card-accent);
+        border-bottom: 1px solid var(--card-border);
+        padding: 1.5rem;
+        flex-shrink: 0;
+        min-height: 90px; /* Hauteur fixe pour l'en-tête */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .formation-card .card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .formation-card .card-footer {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-top: 1px solid var(--card-border);
+        padding: 1rem 1.5rem;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+
+    /* Description limitée à une ligne */
+    .formation-description {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        height: 1.5em; /* Hauteur fixe pour une ligne */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+    }
+
+    /* Titre de la formation - limité à 2 lignes maximum */
+    .formation-card .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        height: 2.4em; /* Hauteur pour 2 lignes */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.2;
+    }
+
+    /* Stats des formations - hauteur fixe */
+    .formation-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        height: 80px; /* Hauteur fixe */
+    }
+
+    .stat-item {
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    /* Section informations - hauteur fixe */
+    .formation-info {
+        margin-bottom: 1rem;
+        height: 72px; /* Hauteur fixe pour 3 lignes d'info */
+        overflow: hidden;
+    }
+
+    .formation-info small {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-muted);
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Compétences acquises - limitées */
+    .competences-preview {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    /* Zone d'alerte - hauteur minimale */
+    .alert-zone {
+        min-height: 45px; /* Hauteur minimale pour les alertes */
+        margin-bottom: 1rem;
+    }
+
+    .alert-modern {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+        .formation-card {
+            min-height: 450px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .formation-card {
+            min-height: 420px;
+        }
+        
+        .formation-card .card-header {
+            min-height: 80px;
+        }
+        
+        .formation-info {
+            height: 60px;
+        }
+    }
+    
+    /* Grille globale : 3 blocs sur une ligne */
+.filters-inline{
+  display:grid;
+  grid-template-columns: minmax(420px,1fr) minmax(320px,0.8fr) auto;
+  gap: 24px;
+  align-items: end;
+}
+
+/* Chaque champ sous forme: [label] [control] sur une seule ligne */
+.filter-inline {
+  display: grid;
+  grid-template-columns: auto 1fr; /* label prend juste sa largeur */
+  align-items: center;
+  column-gap: 8px; /* réduit l’écart */
+  min-width: 0;
+}
+
+
+/* Label identique à "RECHERCHER" (capitals & tracking) */
+.inline-label{
+  margin:0;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color: var(--text-primary);
+}
+
+/* Champ occupe tout l'espace restant */
+.inline-control{ width:100%; }
+
+/* Actions (boutons) */
+.filter-actions{ display:grid; grid-template-columns: 180px 1fr; align-items:center; }
+.filter-actions .buttons{ display:flex; gap:12px; justify-content:flex-start; }
+
+/* Harmoniser la hauteur des champs et boutons */
+.filters-inline .form-control-modern,
+.filters-inline .form-select-modern,
+.filters-inline .btn-modern{
+  height:46px;
+  padding-top:.6rem; padding-bottom:.6rem; line-height:1.2;
+}
+
+/* Responsive : 2 colonnes puis 1 colonne */
+@media (max-width: 992px){
+  .filters-inline{ grid-template-columns: 1fr 1fr; }
+  .filter-actions{ grid-column: 1 / -1; }
+}
+@media (max-width: 576px){
+  .filters-inline{ grid-template-columns: 1fr; }
+  .filter-inline, .filter-actions{ grid-template-columns: 1fr; }
+}
+
+    /* Donne plus d'air en bas du contenu de la modal */
+.modal-body {
+  padding-bottom: 2rem !important; /* ou 2.5rem si besoin */
+}
+
+/* Optionnel : même chose pour le footer */
+.modal-footer {
+  padding: 1.5rem 2rem;  /* haut/bas gauche/droite */
+}
+
+/* + d'air en bas dans toutes les cartes et modals */
+.card-body-modern{ padding-bottom: 2.25rem !important; }
+.formation-card .card-body{ padding-bottom: 2rem !important; }
+.modal-body{ padding: 1.25rem 2rem 2.5rem !important; } /* bas augmenté */
+
+/* Footer de modal confortable */
+.modal-footer{ padding: 1.25rem 2rem 1.5rem; }
+
+/* Évite que la bordure ronde coupe des éléments internes du modal */
+.modal-content{ overflow: visible; }  /* garde le rayon, laisse respirer l'intérieur */
+
+/* Au cas où un dernier élément colle le bas, on annule sa marge négative */
+.card-body-modern > :last-child,
+.modal-body > :last-child{ margin-bottom: 0 !important; }
+
+/* En-tête de modal */
+.modal-header {
+  border-radius: 20px 20px 0 0;
+  border-bottom: 1px solid var(--card-border);
+  padding: 1rem 2rem !important;   /* augmente la hauteur de l’en-tête */
+  min-height: 64px;                /* force une hauteur confortable */
+  display: flex;
+  align-items: center;             /* centre verticalement le texte */
+}
+.modal-header .modal-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-light);        /* reste blanc sur ton gradient */
+}
+
 </style>
 
 <!-- Éléments décoratifs -->
@@ -705,34 +950,39 @@
                     <h5><i class="fas fa-filter"></i> Filtres de Recherche</h5>
                 </div>
                 <div class="card-body-modern">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label-modern">Rechercher</label>
-                            <input type="text" name="search" class="form-control-modern" value="{{ search }}" placeholder="Nom de formation, description...">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-modern">Type de formation</label>
-                            <select name="type" class="form-select-modern">
-                                <option value="">Tous les types</option>
-                                {% for type_value, type_label in types_formation %}
-                                <option value="{{ type_value }}" {% if type_filter == type_value %}selected{% endif %}>
-                                    {{ type_label }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-modern">&nbsp;</label>
-                            <div>
-                                <button type="submit" class="btn-modern btn-primary-modern">
-                                    <i class="fas fa-search"></i> Rechercher
-                                </button>
-                                <a href="{% url 'formation:formations_list' %}" class="btn-modern btn-outline-modern">
-                                    <i class="fas fa-times"></i> Reset
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+                    <form method="get" class="filters-inline">
+  <!-- Rechercher -->
+  <div class="filter-inline">
+    <label class="inline-label form-label-modern">Rechercher</label>
+    <input type="text" name="search" class="form-control-modern inline-control"
+           value="{{ search }}" placeholder="Nom de formation, description...">
+  </div>
+
+  <!-- Type de formation (même rendu que Rechercher) -->
+  <div class="filter-inline">
+    <label class="inline-label form-label-modern">Type de formation</label>
+    <select name="type" class="form-select-modern inline-control">
+      <option value="">Tous les types</option>
+      {% for type_value, type_label in types_formation %}
+      <option value="{{ type_value }}" {% if type_filter == type_value %}selected{% endif %}>{{ type_label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Actions -->
+  <div class="filter-actions">
+    <label class="inline-label form-label-modern" aria-hidden="true" style="visibility:hidden;">Actions</label>
+    <div class="buttons">
+      <button type="submit" class="btn-modern btn-primary-modern">
+        <i class="fas fa-search"></i> Rechercher
+      </button>
+      <a href="{% url 'formation:formations_list' %}" class="btn-modern btn-outline-modern">
+        <i class="fas fa-times"></i> Reset
+      </a>
+    </div>
+  </div>
+</form>
+
                 </div>
             </div>
 
@@ -740,80 +990,90 @@
             {% if formations %}
                 <div class="row">
                     {% for formation in formations %}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="formation-card" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">{{ formation.nom }}</h5>
-                                <small class="text-muted">
-                                    <i class="fas fa-tag"></i> {{ formation.get_type_formation_display }}
-                                </small>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">{{ formation.description|truncatechars:120 }}</p>
-                                
-                                <div class="formation-stats mb-3">
-                                    <div class="stat-item">
-                                        <i class="stat-icon fas fa-clock text-primary"></i>
-                                        <br><small><strong>{{ formation.duree_semaines }}</strong><br>semaines</small>
-                                    </div>
-                                    <div class="stat-item">
-                                        <i class="stat-icon fas fa-users text-info"></i>
-                                        <br><small><strong>{{ formation.places_restantes }}</strong><br>places</small>
-                                    </div>
-                                    <div class="stat-item">
-                                        <i class="stat-icon fas fa-graduation-cap text-success"></i>
-                                        <br><small><strong>{{ formation.get_niveau_requis_display|truncatechars:8 }}</strong></small>
-                                    </div>
-                                </div>
+                    <!-- Structure HTML mise à jour pour la carte de formation -->
+<div class="col-md-6 col-lg-4 mb-4">
+    <div class="formation-card" style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms;">
+        <div class="card-header">
+            <h5 class="card-title mb-0">{{ formation.nom }}</h5>
+            <small class="text-muted">
+                <i class="fas fa-tag"></i> {{ formation.get_type_formation_display }}
+            </small>
+        </div>
+        <div class="card-body">
+            <!-- Description limitée à une ligne -->
+            <p class="formation-description" title="{{ formation.description }}">
+                {{ formation.description }}
+            </p>
+            
+            <div class="formation-stats mb-3">
+                <div class="stat-item">
+                    <i class="stat-icon fas fa-clock text-primary"></i>
+                    <small><strong>{{ formation.duree_semaines }}</strong><br>semaines</small>
+                </div>
+                <div class="stat-item">
+                    <i class="stat-icon fas fa-users text-info"></i>
+                    <small><strong>{{ formation.places_restantes }}</strong><br>places</small>
+                </div>
+                <div class="stat-item">
+                    <i class="stat-icon fas fa-graduation-cap text-success"></i>
+                    <small><strong>{{ formation.get_niveau_requis_display|truncatechars:8 }}</strong></small>
+                </div>
+            </div>
 
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar"></i> Âge : {{ formation.age_min }}-{{ formation.age_max }} ans<br>
-                                        {% if formation.cout_formation > 0 %}
-                                        <i class="fas fa-money-bill-wave"></i> Coût : {{ formation.cout_formation|floatformat:0 }} FCFA<br>
-                                        {% else %}
-                                        <i class="fas fa-free-code-camp text-success"></i> Formation gratuite<br>
-                                        {% endif %}
-                                        <i class="fas fa-map-marker-alt"></i> {{ formation.competences_acquises|truncatechars:50 }}
-                                    </small>
-                                </div>
+            <div class="formation-info">
+                <small class="text-muted">
+                    <i class="fas fa-calendar"></i> Âge : {{ formation.age_min }}-{{ formation.age_max }} ans
+                </small>
+                <small class="text-muted">
+                    {% if formation.cout_formation > 0 %}
+                    <i class="fas fa-money-bill-wave"></i> Coût : {{ formation.cout_formation|floatformat:0 }} FCFA
+                    {% else %}
+                    <i class="fas fa-free-code-camp text-success"></i> Formation gratuite
+                    {% endif %}
+                </small>
+                <small class="text-muted competences-preview" title="{{ formation.competences_acquises }}">
+                    <i class="fas fa-map-marker-alt"></i> {{ formation.competences_acquises }}
+                </small>
+            </div>
 
-                                <!-- Indicateur de disponibilité -->
-                                {% if formation.places_restantes == 0 %}
-                                <div class="alert-modern alert-warning-modern">
-                                    <i class="fas fa-exclamation-triangle"></i> Formation complète
-                                </div>
-                                {% elif formation.places_restantes <= 3 %}
-                                <div class="alert-modern alert-info-modern">
-                                    <i class="fas fa-info-circle"></i> Dernières places disponibles !
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-grid gap-2">
-                                    <a href="{% url 'formation:formation_detail' formation.id %}" class="btn-modern btn-outline-modern btn-sm-modern">
-                                        <i class="fas fa-eye"></i> Voir détails
-                                    </a>
-                                    
-                                    {% if user.is_authenticated and has_vulnerable_profile %}
-                                        {% if formation.places_restantes > 0 %}
-                                        <a href="{% url 'formation:demande_formation' formation.id %}" class="btn-modern btn-success-modern btn-sm-modern">
-                                            <i class="fas fa-paper-plane"></i> Candidater
-                                        </a>
-                                        {% else %}
-                                        <button class="btn-modern btn-secondary-modern btn-sm-modern" disabled>
-                                            <i class="fas fa-ban"></i> Complet
-                                        </button>
-                                        {% endif %}
-                                    {% elif not user.is_authenticated %}
-                                    <a href="{% url 'login' %}" class="btn-modern btn-outline-success-modern btn-sm-modern">
-                                        <i class="fas fa-sign-in-alt"></i> Se connecter pour candidater
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Zone d'alerte avec hauteur minimale -->
+            <div class="alert-zone">
+                {% if formation.places_restantes == 0 %}
+                <div class="alert-modern alert-warning-modern">
+                    <i class="fas fa-exclamation-triangle"></i> Formation complète
+                </div>
+                {% elif formation.places_restantes <= 3 %}
+                <div class="alert-modern alert-info-modern">
+                    <i class="fas fa-info-circle"></i> Dernières places disponibles !
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-grid gap-2">
+                <a href="{% url 'formation:formation_detail' formation.id %}" class="btn-modern btn-outline-modern btn-sm-modern">
+                    <i class="fas fa-eye"></i> Voir détails
+                </a>
+                
+                {% if user.is_authenticated and has_vulnerable_profile %}
+                    {% if formation.places_restantes > 0 %}
+                    <a href="{% url 'formation:demande_formation' formation.id %}" class="btn-modern btn-success-modern btn-sm-modern">
+                        <i class="fas fa-paper-plane"></i> Candidater
+                    </a>
+                    {% else %}
+                    <button class="btn-modern btn-secondary-modern btn-sm-modern" disabled>
+                        <i class="fas fa-ban"></i> Complet
+                    </button>
+                    {% endif %}
+                {% elif not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-modern btn-outline-success-modern btn-sm-modern">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter pour candidater
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
                     {% endfor %}
                 </div>
 

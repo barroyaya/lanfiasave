@@ -1,16 +1,581 @@
-# formation/templates/formation/demande_detail.html
 {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Ma Demande de Formation{% endblock %}
 
 {% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        --secondary-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --success-gradient: linear-gradient(135deg, #a8e6cf 0%, #56cc9d 100%);
+        --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
+        --info-gradient: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        --purple-gradient: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --danger-gradient: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        
+        /* Fond et couleurs */
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-accent: linear-gradient(135deg, #fff3e0 0%, #f3e5f5 100%);
+        
+        /* Couleurs de cartes */
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --card-accent: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        
+        /* Texte */
+        --text-primary: #2d3436;
+        --text-secondary: #636e72;
+        --text-muted: #b2bec3;
+        --text-light: #ffffff;
+        
+        /* Couleurs spécifiques */
+        --success-color: #56cc9d;
+        --warning-color: #ff9500;
+        --danger-color: #ee5a52;
+        --info-color: #0984e3;
+    }
+
+    body {
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+    }
+
+    /* Éléments décoratifs */
+    .decoration-shape {
+        position: fixed;
+        border-radius: 50%;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .shape-1 {
+        width: 200px;
+        height: 200px;
+        background: var(--secondary-gradient);
+        top: 10%;
+        right: 5%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 150px;
+        height: 150px;
+        background: var(--purple-gradient);
+        bottom: 20%;
+        left: 10%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        padding: 2rem 1rem;
+        max-width: 1200px;
+    }
+
+    /* En-tête */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    /* Cartes modernes */
+    .modern-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        animation: slideUp 0.8s ease-out;
+        box-shadow: 0 4px 20px var(--card-shadow);
+        backdrop-filter: blur(10px);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    }
+
+    .modern-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--card-accent);
+        position: relative;
+    }
+
+    .modern-card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--secondary-gradient);
+    }
+
+    .modern-card-header h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modern-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Boutons modernes */
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .btn-primary-modern {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .btn-outline-modern {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--card-border);
+    }
+
+    .btn-outline-modern:hover {
+        background: var(--info-gradient);
+        color: white;
+        transform: translateY(-2px);
+        border-color: transparent;
+    }
+
+    .btn-sm-modern {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    /* Badges modernes */
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+        display: inline-block;
+    }
+
+    .badge-success-modern {
+        background: var(--success-gradient);
+    }
+
+    .badge-warning-modern {
+        background: var(--warning-gradient);
+    }
+
+    .badge-danger-modern {
+        background: var(--danger-gradient);
+    }
+
+    .badge-info-modern {
+        background: var(--info-gradient);
+    }
+
+    .badge-secondary-modern {
+        background: linear-gradient(45deg, #636e72, #2d3436);
+    }
+
+    .badge-lg {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    /* Sections d'information */
+    .info-section {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(248, 249, 250, 0.5) 0%, rgba(255, 255, 255, 0.5) 100%);
+        border-radius: 12px;
+        border-left: 4px solid var(--secondary-gradient);
+    }
+
+    .info-section h6 {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-section p {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        line-height: 1.6;
+    }
+
+    .info-section .info-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .info-meta i {
+        color: var(--info-color);
+    }
+
+    /* Barre de progression moderne */
+    .progress-modern {
+        height: 25px;
+        background: rgba(248, 249, 250, 0.8);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-modern {
+        height: 100%;
+        border-radius: 20px;
+        position: relative;
+        transition: width 0.8s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-bar-success {
+        background: var(--success-gradient);
+    }
+
+    .progress-bar-warning {
+        background: var(--warning-gradient);
+    }
+
+    .progress-bar-danger {
+        background: var(--danger-gradient);
+    }
+
+    /* Zone de statut */
+    .status-zone {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        border-radius: 15px;
+        margin-bottom: 1rem;
+    }
+
+    .status-icon {
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+
+    .status-icon.success { color: var(--success-color); }
+    .status-icon.warning { color: var(--warning-color); }
+    .status-icon.danger { color: var(--danger-color); }
+    .status-icon.secondary { color: var(--text-muted); }
+
+    .status-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Alertes modernes */
+    .alert-modern {
+        padding: 1rem 1.25rem;
+        border-radius: 15px;
+        border: none;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert-modern::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+    }
+
+    .alert-info-modern {
+        background: linear-gradient(135deg, rgba(116, 185, 255, 0.15) 0%, rgba(9, 132, 227, 0.15) 100%);
+        color: var(--text-primary);
+    }
+
+    .alert-info-modern::before {
+        background: var(--info-gradient);
+    }
+
+    .alert-success-modern {
+        background: linear-gradient(135deg, rgba(86, 204, 157, 0.15) 0%, rgba(168, 230, 207, 0.15) 100%);
+        color: var(--text-primary);
+    }
+
+    .alert-success-modern::before {
+        background: var(--success-gradient);
+    }
+
+    /* Liste d'étapes */
+    .steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .steps-list li {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        gap: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .steps-list li:last-child {
+        border-bottom: none;
+    }
+
+    .step-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .step-icon.completed {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .step-icon.pending {
+        background: var(--text-muted);
+        color: white;
+    }
+
+    .step-text {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .step-text.completed {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .modern-card-body {
+            padding: 1rem;
+        }
+        
+        .info-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Classes utilitaires */
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    .fs-6 {
+        font-size: 0.875rem;
+    }
+
+    /* Grid system */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.75rem;
+    }
+
+    .col-md-8, .col-md-4, .col-md-10 {
+        padding: 0 0.75rem;
+    }
+
+    .col-md-10 {
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+    }
+
+    .col-md-8 {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+
+    @media (max-width: 767px) {
+        .col-md-8, .col-md-4, .col-md-10 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- Éléments décoratifs -->
+<div class="decoration-shape shape-1"></div>
+<div class="decoration-shape shape-2"></div>
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3">Ma Demande de Formation</h1>
-                <a href="{% url 'formation:mes_demandes' %}" class="btn btn-outline-secondary">
+            <div class="page-header">
+                <h1 class="page-title">Ma Demande de Formation</h1>
+                <a href="{% url 'formation:mes_demandes' %}" class="btn-modern btn-outline-modern">
                     <i class="fas fa-arrow-left"></i> Retour à mes demandes
                 </a>
             </div>
@@ -18,109 +583,132 @@
             <div class="row">
                 <!-- Informations principales -->
                 <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>{{ demande.formation_souhaitee.nom }}</h5>
-                            <span class="badge bg-{% if demande.statut == 'acceptee' %}success{% elif demande.statut == 'refusee' %}danger{% elif demande.statut == 'en_attente' %}warning{% else %}secondary{% endif %}">
-                                {{ demande.get_statut_display }}
-                            </span>
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5>
+                                {{ demande.formation_souhaitee.nom }}
+                                <span class="badge-modern {% if demande.statut == 'acceptee' %}badge-success-modern{% elif demande.statut == 'refusee' %}badge-danger-modern{% elif demande.statut == 'en_attente' %}badge-warning-modern{% else %}badge-secondary-modern{% endif %}">
+                                    {{ demande.get_statut_display }}
+                                </span>
+                            </h5>
                         </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong>Type de formation :</strong> {{ demande.formation_souhaitee.get_type_formation_display }}<br>
-                                <strong>Durée :</strong> {{ demande.formation_souhaitee.duree_semaines }} semaines<br>
-                                <strong>Date de demande :</strong> {{ demande.date_demande|date:"d/m/Y à H:i" }}
+                        <div class="modern-card-body">
+                            <div class="info-section">
+                                <div class="info-meta">
+                                    <span><i class="fas fa-tag"></i> {{ demande.formation_souhaitee.get_type_formation_display }}</span>
+                                    <span><i class="fas fa-clock"></i> {{ demande.formation_souhaitee.duree_semaines }} semaines</span>
+                                    <span><i class="fas fa-calendar"></i> {{ demande.date_demande|date:"d/m/Y à H:i" }}</span>
+                                </div>
                             </div>
 
-                            <h6>Ma motivation</h6>
-                            <p>{{ demande.get_motivation_principale_display }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-heart"></i> Ma motivation</h6>
+                                <p>{{ demande.get_motivation_principale_display }}</p>
+                            </div>
 
                             {% if demande.experience_anterieure %}
-                            <h6>Mon expérience</h6>
-                            <p>{{ demande.experience_anterieure }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-briefcase"></i> Mon expérience</h6>
+                                <p>{{ demande.experience_anterieure }}</p>
+                            </div>
                             {% endif %}
 
                             {% if demande.competences_actuelles %}
-                            <h6>Mes compétences actuelles</h6>
-                            <p>{{ demande.competences_actuelles }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-tools"></i> Mes compétences actuelles</h6>
+                                <p>{{ demande.competences_actuelles }}</p>
+                            </div>
                             {% endif %}
 
-                            <h6>Ma disponibilité</h6>
-                            <p>{{ demande.disponibilite_horaire }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-schedule"></i> Ma disponibilité</h6>
+                                <p>{{ demande.disponibilite_horaire }}</p>
+                            </div>
 
                             {% if demande.contraintes_personnelles %}
-                            <h6>Mes contraintes</h6>
-                            <p>{{ demande.contraintes_personnelles }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-exclamation-triangle"></i> Mes contraintes</h6>
+                                <p>{{ demande.contraintes_personnelles }}</p>
+                            </div>
                             {% endif %}
 
                             {% if demande.a_idee_projet %}
-                            <h6>Mon projet post-formation</h6>
-                            <p>{{ demande.description_projet }}</p>
-                            {% if demande.souhaite_financement %}
-                            <p><strong>Financement souhaité :</strong> {{ demande.montant_financement|floatformat:0 }} FCFA</p>
-                            {% endif %}
+                            <div class="info-section">
+                                <h6><i class="fas fa-lightbulb"></i> Mon projet post-formation</h6>
+                                <p>{{ demande.description_projet }}</p>
+                                {% if demande.souhaite_financement %}
+                                <p><strong><i class="fas fa-money-bill-wave"></i> Financement souhaité :</strong> {{ demande.montant_financement|floatformat:0 }} FCFA</p>
+                                {% endif %}
+                            </div>
                             {% endif %}
                         </div>
                     </div>
 
                     <!-- Résultat de l'analyse -->
                     {% if demande.analyse_llm %}
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5>Résultat de l'évaluation</h5>
-                            {% if demande.score_formabilite %}
-                            <span class="badge bg-{% if demande.score_formabilite >= 70 %}success{% elif demande.score_formabilite >= 40 %}warning{% else %}danger{% endif %} fs-6">
-                                Score : {{ demande.score_formabilite }}%
-                            </span>
-                            {% endif %}
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5>
+                                <span><i class="fas fa-robot"></i> Résultat de l'évaluation</span>
+                                {% if demande.score_formabilite %}
+                                <span class="badge-modern badge-lg {% if demande.score_formabilite >= 70 %}badge-success-modern{% elif demande.score_formabilite >= 40 %}badge-warning-modern{% else %}badge-danger-modern{% endif %}">
+                                    Score : {{ demande.score_formabilite }}%
+                                </span>
+                                {% endif %}
+                            </h5>
                         </div>
-                        <div class="card-body">
+                        <div class="modern-card-body">
                             {% if demande.score_formabilite %}
                             <div class="mb-3">
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-{% if demande.score_formabilite >= 70 %}success{% elif demande.score_formabilite >= 40 %}warning{% else %}danger{% endif %}" 
-                                         role="progressbar" 
+                                <div class="progress-modern">
+                                    <div class="progress-bar-modern {% if demande.score_formabilite >= 70 %}progress-bar-success{% elif demande.score_formabilite >= 40 %}progress-bar-warning{% else %}progress-bar-danger{% endif %}" 
                                          style="width: {{ demande.score_formabilite }}%">
                                         {{ demande.score_formabilite }}%
                                     </div>
                                 </div>
                                 <small class="text-muted">
                                     {% if demande.score_formabilite >= 70 %}
-                                        Excellent profil pour cette formation
+                                        <i class="fas fa-star text-success"></i> Excellent profil pour cette formation
                                     {% elif demande.score_formabilite >= 40 %}
-                                        Profil acceptable avec quelques points d'attention
+                                        <i class="fas fa-info-circle text-warning"></i> Profil acceptable avec quelques points d'attention
                                     {% else %}
-                                        Profil nécessitant des améliorations
+                                        <i class="fas fa-exclamation-triangle text-danger"></i> Profil nécessitant des améliorations
                                     {% endif %}
                                 </small>
                             </div>
                             {% endif %}
 
-                            <h6>Évaluation détaillée</h6>
-                            <p>{{ demande.analyse_llm }}</p>
+                            <div class="info-section">
+                                <h6><i class="fas fa-chart-line"></i> Évaluation détaillée</h6>
+                                <p>{{ demande.analyse_llm }}</p>
+                            </div>
                             
                             {% if demande.recommandations_llm %}
-                            <h6>Recommandations</h6>
-                            <div class="alert alert-info">
+                            <div class="alert-modern alert-info-modern">
+                                <h6 style="margin-bottom: 0.5rem;"><i class="fas fa-lightbulb"></i> Recommandations</h6>
                                 {{ demande.recommandations_llm }}
                             </div>
                             {% endif %}
 
-                            <small class="text-muted">Évaluation effectuée le {{ demande.date_analyse|date:"d/m/Y à H:i" }}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> Évaluation effectuée le {{ demande.date_analyse|date:"d/m/Y à H:i" }}
+                            </small>
                         </div>
                     </div>
                     {% endif %}
 
                     <!-- Décision et commentaires -->
                     {% if demande.commentaire_decision %}
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5>Décision de l'administration</h5>
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5><i class="fas fa-gavel"></i> Décision de l'administration</h5>
                         </div>
-                        <div class="card-body">
-                            <p>{{ demande.commentaire_decision }}</p>
+                        <div class="modern-card-body">
+                            <div class="info-section">
+                                <p>{{ demande.commentaire_decision }}</p>
+                            </div>
                             <small class="text-muted">
-                                Décision prise le {{ demande.date_decision|date:"d/m/Y à H:i" }}
+                                <i class="fas fa-calendar-check"></i> Décision prise le {{ demande.date_decision|date:"d/m/Y à H:i" }}
                                 {% if demande.responsable_decision %}
                                     par {{ demande.responsable_decision.username }}
                                 {% endif %}
@@ -132,63 +720,91 @@
 
                 <!-- Informations latérales -->
                 <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Statut de ma demande</h5>
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5><i class="fas fa-chart-pie"></i> Statut de ma demande</h5>
                         </div>
-                        <div class="card-body">
-                            <div class="text-center mb-3">
-                                <i class="fas fa-{% if demande.statut == 'acceptee' %}check-circle text-success{% elif demande.statut == 'refusee' %}times-circle text-danger{% elif demande.statut == 'en_attente' %}clock text-warning{% else %}question-circle text-secondary{% endif %} fa-3x"></i>
+                        <div class="modern-card-body">
+                            <div class="status-zone">
+                                <div class="status-icon {% if demande.statut == 'acceptee' %}success{% elif demande.statut == 'refusee' %}danger{% elif demande.statut == 'en_attente' %}warning{% else %}secondary{% endif %}">
+                                    <i class="fas fa-{% if demande.statut == 'acceptee' %}check-circle{% elif demande.statut == 'refusee' %}times-circle{% elif demande.statut == 'en_attente' %}clock{% else %}question-circle{% endif %} fa-3x"></i>
+                                </div>
+                                <div class="status-title">{{ demande.get_statut_display }}</div>
+                                
+                                {% if demande.statut == 'en_attente' %}
+                                <p class="text-muted small">Votre demande est en cours d'analyse. Vous recevrez une réponse sous peu.</p>
+                                {% elif demande.statut == 'analysee' %}
+                                <p class="text-muted small">Votre demande a été analysée et est en attente de décision finale.</p>
+                                {% elif demande.statut == 'acceptee' %}
+                                <p class="text-success small">Félicitations ! Votre demande a été acceptée.</p>
+                                {% elif demande.statut == 'refusee' %}
+                                <p class="text-danger small">Votre demande n'a pas pu être acceptée cette fois.</p>
+                                {% endif %}
                             </div>
-                            <h6 class="text-center">{{ demande.get_statut_display }}</h6>
-                            
-                            {% if demande.statut == 'en_attente' %}
-                            <p class="text-muted small text-center">Votre demande est en cours d'analyse. Vous recevrez une réponse sous peu.</p>
-                            {% elif demande.statut == 'analysee' %}
-                            <p class="text-muted small text-center">Votre demande a été analysée et est en attente de décision finale.</p>
-                            {% elif demande.statut == 'acceptee' %}
-                            <p class="text-success small text-center">Félicitations ! Votre demande a été acceptée.</p>
-                            {% elif demande.statut == 'refusee' %}
-                            <p class="text-danger small text-center">Votre demande n'a pas pu être acceptée cette fois.</p>
-                            {% endif %}
                         </div>
                     </div>
 
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5>Formation demandée</h5>
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5><i class="fas fa-graduation-cap"></i> Formation demandée</h5>
                         </div>
-                        <div class="card-body">
-                            <h6>{{ demande.formation_souhaitee.nom }}</h6>
-                            <p class="text-muted">{{ demande.formation_souhaitee.get_type_formation_display }}</p>
-                            <p><strong>Durée :</strong> {{ demande.formation_souhaitee.duree_semaines }} semaines</p>
-                            <p><strong>Niveau requis :</strong> {{ demande.formation_souhaitee.get_niveau_requis_display }}</p>
-                            <p><strong>Âge :</strong> {{ demande.formation_souhaitee.age_min }}-{{ demande.formation_souhaitee.age_max }} ans</p>
-                            {% if demande.formation_souhaitee.cout_formation > 0 %}
-                            <p><strong>Coût :</strong> {{ demande.formation_souhaitee.cout_formation|floatformat:0 }} FCFA</p>
-                            {% endif %}
+                        <div class="modern-card-body">
+                            <div class="info-section">
+                                <h6>{{ demande.formation_souhaitee.nom }}</h6>
+                                <div class="info-meta">
+                                    <span><i class="fas fa-tag"></i> {{ demande.formation_souhaitee.get_type_formation_display }}</span>
+                                    <span><i class="fas fa-clock"></i> {{ demande.formation_souhaitee.duree_semaines }} semaines</span>
+                                    <span><i class="fas fa-level-up-alt"></i> {{ demande.formation_souhaitee.get_niveau_requis_display }}</span>
+                                    <span><i class="fas fa-users"></i> {{ demande.formation_souhaitee.age_min }}-{{ demande.formation_souhaitee.age_max }} ans</span>
+                                    {% if demande.formation_souhaitee.cout_formation > 0 %}
+                                    <span><i class="fas fa-money-bill"></i> {{ demande.formation_souhaitee.cout_formation|floatformat:0 }} FCFA</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                             
-                            <a href="{% url 'formation:formation_detail' demande.formation_souhaitee.id %}" class="btn btn-outline-primary btn-sm w-100">
-                                Voir la formation
+                            <a href="{% url 'formation:formation_detail' demande.formation_souhaitee.id %}" class="btn-modern btn-outline-modern btn-sm-modern w-100">
+                                <i class="fas fa-eye"></i> Voir la formation
                             </a>
                         </div>
                     </div>
 
                     {% if demande.statut == 'acceptee' %}
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5>Prochaines étapes</h5>
+                    <div class="modern-card">
+                        <div class="modern-card-header">
+                            <h5><i class="fas fa-route"></i> Prochaines étapes</h5>
                         </div>
-                        <div class="card-body">
-                            <p class="text-success">Votre demande a été acceptée !</p>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success"></i> Demande acceptée</li>
-                                <li><i class="fas fa-clock text-muted"></i> Création du parcours de formation</li>
-                                <li><i class="fas fa-clock text-muted"></i> Attribution d'un mentor</li>
-                                <li><i class="fas fa-clock text-muted"></i> Début de la formation</li>
+                        <div class="modern-card-body">
+                            <div class="alert-modern alert-success-modern mb-3">
+                                <i class="fas fa-check-circle"></i> Votre demande a été acceptée !
+                            </div>
+                            <ul class="steps-list">
+                                <li>
+                                    <div class="step-icon completed">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <span class="step-text completed">Demande acceptée</span>
+                                </li>
+                                <li>
+                                    <div class="step-icon pending">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <span class="step-text">Création du parcours de formation</span>
+                                </li>
+                                <li>
+                                    <div class="step-icon pending">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <span class="step-text">Attribution d'un mentor</span>
+                                </li>
+                                <li>
+                                    <div class="step-icon pending">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <span class="step-text">Début de la formation</span>
+                                </li>
                             </ul>
-                            <a href="{% url 'formation:mon_parcours' %}" class="btn btn-primary btn-sm w-100">
-                                Voir mon parcours
+                            <a href="{% url 'formation:mon_parcours' %}" class="btn-modern btn-primary-modern btn-sm-modern w-100 mt-4">
+                                <i class="fas fa-route"></i> Voir mon parcours
                             </a>
                         </div>
                     </div>
@@ -198,4 +814,92 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée des cartes
+    const cards = document.querySelectorAll('.modern-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = (index * 0.2) + 's';
+    });
+
+    // Animation de la barre de progression
+    const progressBar = document.querySelector('.progress-bar-modern');
+    if (progressBar) {
+        const width = progressBar.style.width;
+        progressBar.style.width = '0%';
+        setTimeout(() => {
+            progressBar.style.width = width;
+        }, 1000);
+    }
+
+    // Effet de parallax léger pour les formes décoratives
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll('.decoration-shape');
+        shapes.forEach((shape, index) => {
+            const rate = scrolled * (0.2 + index * 0.1);
+            shape.style.transform = `translateY(${rate}px)`;
+        });
+    });
+
+    // Animation des badges au survol
+    const badges = document.querySelectorAll('.badge-modern');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05) rotate(1deg)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    });
+
+    // Effet de ripple sur les boutons
+    const buttons = document.querySelectorAll('.btn-modern');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Ajout de l'animation ripple en CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
 {% endblock %}

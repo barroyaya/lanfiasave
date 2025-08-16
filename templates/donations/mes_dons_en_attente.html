@@ -1153,6 +1153,63 @@
     ::-webkit-scrollbar-thumb:hover {
         background: #9ca3af;
     }
+    
+    
+    /* --- ESPACE ENTRE PASTILLES ET TEXTE (timeline) --- */
+.progress-timeline .timeline{
+  padding-left: 60px !important;   /* + large colonne à gauche */
+}
+
+.progress-timeline .timeline::before{
+  left: 30px !important;            /* aligne la ligne verticale */
+}
+
+.progress-timeline .timeline-marker{
+  left: 22px !important;            /* décale la pastille loin du texte */
+  top: 2px;                         /* centre mieux par rapport au titre */
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+  box-shadow: 0 0 0 3px #f3f4f6;    /* halo comme avant */
+}
+
+.progress-timeline .timeline-content{
+  padding-left: 6px;                /* petit souffle côté texte */
+}
+
+/* --- Timeline : espace fiable entre pastilles et texte --- */
+.progress-timeline .timeline{
+  padding-left: 0 !important;          /* on ne réserve plus l'espace ici */
+  position: relative;
+}
+
+.progress-timeline .timeline::before{
+  left: 28px !important;                /* position de la ligne verticale */
+}
+
+/* Chaque étape réserve l'espace pour la pastille + marge */
+.progress-timeline .timeline-item{
+  position: relative;
+  padding-left: 72px !important;        /* <- crée l'espace avant le texte */
+}
+
+/* Pastille alignée sur la ligne, hors zone de texte */
+.progress-timeline .timeline-marker{
+  left: 28px !important;                /* même x que la ligne */
+  top: 4px;                             /* centre verticalement avec le titre */
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+  box-shadow: 0 0 0 3px #f3f4f6;
+  z-index: 1;                           /* au-dessus de la ligne, sous le texte */
+}
+
+/* (Optionnel) petit souffle supplémentaire côté texte */
+.progress-timeline .timeline-content{
+  padding-left: 2px;
+}
+
+    
 </style>
 
 <script>
@@ -1557,27 +1614,3 @@
 
 {% endblock %}
 
-{#{% extends 'base.html' %}#}
-{##}
-{#{% block title %}Mes Dons en Attente - LanfiaSave{% endblock %}#}
-{##}
-{#{% block content %}#}
-{#    <h1>Mes Dons en Attente de Validation</h1>#}
-{##}
-{#    {% if dons_en_attente %}#}
-{#        <ul>#}
-{#            {% for don in dons_en_attente %}#}
-{#                <li>#}
-{#                    <strong>Montant : </strong>{{ don.montant }} €#}
-{#                    <strong>Entité : </strong>{{ don.entite_vulnerable }}#}
-{#                    <strong>Provenance : </strong>{{ don.provenance }}#}
-{#                    <strong>Description : </strong>{{ don.description }}#}
-{#                    <br>#}
-{#                    <strong>Status : </strong>En attente de validation#}
-{#                </li>#}
-{#            {% endfor %}#}
-{#        </ul>#}
-{#    {% else %}#}
-{#        <p>Aucun don en attente pour le moment.</p>#}
-{#    {% endif %}#}
-{#{% endblock %}#}

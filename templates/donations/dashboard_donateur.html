@@ -719,723 +719,411 @@
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
 <script>
-// Variables globales pour les filtres
-let currentFilters = {
-    status: 'all',
-    category: 'all',
-    region: 'all'
-};
-
-// Fonction pour toggle le dropdown des filtres
-function toggleFilters() {
-    const dropdown = document.getElementById('filterDropdown');
-    const arrow = document.getElementById('filter-arrow');
-    
-    dropdown.classList.toggle('active');
-    
-    if (dropdown.classList.contains('active')) {
-        arrow.style.transform = 'rotate(180deg)';
-    } else {
-        arrow.style.transform = 'rotate(0deg)';
-    }
+// Couleur unique et stable pour chaque libellé (catégories)
+function colorFromString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;      // 0–359
+  return `hsl(${hue}, 65%, 55%)`;        // couleurs vives et lisibles
 }
 
-// Fermer le dropdown si on clique ailleurs
-document.addEventListener('click', function(event) {
-    const filterSection = document.querySelector('.filter-section');
-    if (!filterSection.contains(event.target)) {
-        document.getElementById('filterDropdown').classList.remove('active');
-        document.getElementById('filter-arrow').style.transform = 'rotate(0deg)';
-    }
+// Variables globales pour les filtres
+let currentFilters = { status: 'all', category: 'all', region: 'all' };
+
+// Toggle dropdown des filtres
+function toggleFilters() {
+  const dropdown = document.getElementById('filterDropdown');
+  const arrow = document.getElementById('filter-arrow');
+  dropdown.classList.toggle('active');
+  arrow.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+// Fermer le dropdown si clic à l'extérieur
+document.addEventListener('click', function (event) {
+  const filterSection = document.querySelector('.filter-section');
+  if (!filterSection.contains(event.target)) {
+    document.getElementById('filterDropdown').classList.remove('active');
+    document.getElementById('filter-arrow').style.transform = 'rotate(0deg)';
+  }
 });
 
 // Gestion des filter pills
-document.addEventListener('DOMContentLoaded', function() {
-    const filterPills = document.querySelectorAll('.filter-pill');
-    
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', function() {
-            // Retirer active de tous les pills
-            filterPills.forEach(p => p.classList.remove('active'));
-            // Ajouter active au pill cliqué
-            this.classList.add('active');
-            // Mettre à jour le filtre actuel
-            currentFilters.status = this.dataset.filter;
-        });
+document.addEventListener('DOMContentLoaded', function () {
+  const filterPills = document.querySelectorAll('.filter-pill');
+  filterPills.forEach(pill => {
+    pill.addEventListener('click', function () {
+      filterPills.forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      currentFilters.status = this.dataset.filter;
     });
+  });
 });
 
-// Fonction pour réinitialiser les filtres
+// Réinitialiser les filtres
 function resetFilters() {
-    // Reset status pills
-    document.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.classList.remove('active');
-        if (pill.dataset.filter === 'all') {
-            pill.classList.add('active');
-        }
-    });
-    
-    // Reset selects
-    document.getElementById('categoryFilter').value = 'all';
-    document.getElementById('regionFilter').value = 'all';
-    
-    // Reset current filters
-    currentFilters = {
-        status: 'all',
-        category: 'all',
-        region: 'all'
-    };
-    
-    // Appliquer les filtres réinitialisés
-    applyFilters();
-    
-    // Notification
-    showNotification('Filtres réinitialisés', 'info');
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.classList.remove('active');
+    if (pill.dataset.filter === 'all') pill.classList.add('active');
+  });
+  document.getElementById('categoryFilter').value = 'all';
+  document.getElementById('regionFilter').value = 'all';
+  currentFilters = { status: 'all', category: 'all', region: 'all' };
+  applyFilters();
+  showNotification('Filtres réinitialisés', 'info');
 }
 
-// Fonction pour appliquer les filtres
+// Appliquer les filtres
 function applyFilters() {
-    // Récupérer les valeurs des filtres
-    currentFilters.category = document.getElementById('categoryFilter').value;
-    currentFilters.region = document.getElementById('regionFilter').value;
-    
-    console.log('Application des filtres:', currentFilters);
-    
-    // Appliquer les filtres aux graphiques
-    applyChartFilters(currentFilters);
-    
-    // Fermer le dropdown
-    document.getElementById('filterDropdown').classList.remove('active');
-    document.getElementById('filter-arrow').style.transform = 'rotate(0deg)';
-    
-    // Notification
-    showNotification('Filtres appliqués avec succès!');
+  currentFilters.category = document.getElementById('categoryFilter').value;
+  currentFilters.region = document.getElementById('regionFilter').value;
+
+  applyChartFilters(currentFilters);
+
+  document.getElementById('filterDropdown').classList.remove('active');
+  document.getElementById('filter-arrow').style.transform = 'rotate(0deg)';
+  showNotification('Filtres appliqués avec succès!');
 }
 
-// Fonction pour appliquer les filtres aux graphiques
+// Appliquer les filtres aux graphiques
 function applyChartFilters(filters) {
-    // Récupérer tous les graphiques Chart.js
-    const charts = Chart.instances;
-    
-    charts.forEach(chart => {
-        // Filtrer par statut (vulnérable/non vulnérable)
-        if (chart.config.type === 'bar' || chart.config.type === 'line') {
-            chart.data.datasets.forEach((dataset, i) => {
-                if (filters.status === 'all') {
-                    dataset.hidden = false;
-                } else if (filters.status === 'vulnerable') {
-                    dataset.hidden = dataset.label.toLowerCase().includes('non');
-                } else if (filters.status === 'non-vulnerable') {
-                    dataset.hidden = !dataset.label.toLowerCase().includes('non');
-                }
-            });
-        }
-        
-        chart.update('active');
-    });
-    
-    // Filtrer le graphique des catégories si nécessaire
-    if (filters.category !== 'all') {
-        updateCategoryChart(filters.category);
+  const charts = Object.values(Chart.instances || {});
+  charts.forEach(chart => {
+    if (chart.config.type === 'bar' || chart.config.type === 'line') {
+      chart.data.datasets.forEach(dataset => {
+        if (filters.status === 'all') dataset.hidden = false;
+        else if (filters.status === 'vulnerable') dataset.hidden = dataset.label.toLowerCase().includes('non');
+        else if (filters.status === 'non-vulnerable') dataset.hidden = !dataset.label.toLowerCase().includes('non');
+      });
+      chart.update('active');
     }
-    
-    // Filtrer la carte par région si nécessaire
-    if (filters.region !== 'all') {
-        filterMapByRegion(filters.region);
-    }
+  });
+
+  // Filtre catégorie (corrigé: on appelle bien updateEntiteChart)
+  if (filters.category !== 'all') updateEntiteChart(filters.category);
+
+  if (filters.region !== 'all') filterMapByRegion(filters.region);
 }
 
-// Fonction pour filtrer la carte par région
-function filterMapByRegion(region) {
-    // Cette fonction devrait être implémentée selon votre logique de carte
-    console.log('Filtrage de la carte par région:', region);
-}
+// Filtrer la carte par région (adapter selon votre logique)
+function filterMapByRegion(region) { console.log('Filtrage de la carte par région:', region); }
 
-// Fonction pour afficher une notification
+// Notification
 function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    const bgColor = type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444';
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: ${bgColor};
-        color: white;
-        padding: 16px 24px;
-        border-radius: 12px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: slideIn 0.3s ease-out;
-        z-index: 9999;
-    `;
-    
-    const icon = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle';
-    notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+  const notification = document.createElement('div');
+  const bgColor = type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444';
+  notification.style.cssText = `
+    position: fixed; top: 80px; right: 20px; background: ${bgColor}; color: white;
+    padding: 16px 24px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1);
+    font-weight: 500; display: flex; align-items: center; gap: 10px; animation: slideIn .3s ease-out; z-index: 9999;
+  `;
+  const icon = type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-exclamation-circle';
+  notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+  document.body.appendChild(notification);
+  setTimeout(() => { notification.style.animation = 'slideOut .3s ease-out'; setTimeout(() => notification.remove(), 300); }, 3000);
 }
 
-// Attendre que tous les scripts soient chargés
-window.addEventListener('load', function() {
-    // Configuration des couleurs
-    const colors = {
-        vulnerable: '#ef4444',
-        nonVulnerable: '#10b981',
-        gradient1: ['#3b82f6', '#1e40af'],
-        gradient2: ['#06b6d4', '#0891b2'],
-        gradient3: ['#f59e0b', '#d97706'],
-        gradient4: ['#8b5cf6', '#7c3aed']
-    };
+// Attendre le chargement complet
+window.addEventListener('load', function () {
+  // Palette
+  const colors = {
+    vulnerable: '#ef4444',
+    nonVulnerable: '#10b981'
+  };
 
-    // Options communes pour les graphiques
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
+  // Options communes Chart.js
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { padding: 15, usePointStyle: true, font: { size: 12 } }
+      }
+    }
+  };
+
+  // ====== Carte Leaflet ======
+  try {
+    const map = L.map('map').setView([7.5, -5.5], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+
+    const regionsData = {{ regions_data|safe }};
+    const statsRegionForMap = {{ stats_region|safe }};
+
+    if (Array.isArray(regionsData)) {
+      regionsData.forEach(region => {
+        const regStat = statsRegionForMap.find(s => s.region_geographique === region.name);
+        const totalVul = regStat ? regStat.total_vulnerables : 0;
+        const totalNonVul = regStat ? regStat.total_non_vulnerables : 0;
+
+        if (totalVul > 0 && region.lat && region.lng) {
+          const radius = Math.min(15 + totalVul / 10, 50);
+          L.circleMarker([region.lat, region.lng], {
+            radius, fillColor: colors.vulnerable, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.7
+          }).bindPopup(`
+            <strong>${region.name}</strong><br>
+            Vulnérables: ${totalVul}<br>
+            Non-vulnérables: ${totalNonVul}
+          `).addTo(map);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Erreur lors de l\'initialisation de la carte:', error);
+  }
+
+  // ====== Données graphiques ======
+  const statsPauvrete = {{ stats_pauvrete|safe }};
+  const statsEntite = {{ stats_entite|safe }};
+  const statsSexe = {{ stats_sexe|safe }};
+  const statsAge = {{ stats_age|safe }};
+  const statsEnfants = {{ stats_enfants|safe }};
+
+  let statsRegion = [];
+  try { statsRegion = {{ stats_region|safe }}; } catch (e) { statsRegion = []; }
+
+  const globalVul = statsPauvrete.find(stat => stat.est_vulnerable === true)?.total || 0;
+  const globalNonVul = statsPauvrete.find(stat => stat.est_vulnerable === false)?.total || 0;
+
+  // ====== Graphique 1 : Niveaux de Pauvreté ======
+  try {
+    const ctx1 = document.getElementById('pauvreteChart').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['Répartition Globale'],
+        datasets: [
+          { label: 'Vulnérables', data: [globalVul], backgroundColor: colors.vulnerable, borderRadius: 10 },
+          { label: 'Non Vulnérables', data: [globalNonVul], backgroundColor: colors.nonVulnerable, borderRadius: 10 }
+        ]
+      },
+      options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
+    });
+  } catch (error) { console.error('Erreur graphique pauvreté:', error); }
+
+  // ====== Graphique 2 : Pauvreté par Région (horizontal) ======
+  try {
+    const ctx2 = document.getElementById('regionChart').getContext('2d');
+
+    if (!statsRegion || statsRegion.length === 0) {
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['Abidjan', 'Yamoussoukro', 'Bouaké', 'San-Pédro', 'Autres'],
+          datasets: [
+            { label: 'Vulnérables', data: [0, 0, 0, 0, 0], backgroundColor: colors.vulnerable, borderRadius: 5 },
+            { label: 'Non Vulnérables', data: [0, 0, 0, 0, 0], backgroundColor: colors.nonVulnerable, borderRadius: 5 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+          plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Aucune donnée disponible pour le moment', color: '#ef4444', font: { size: 14 } } },
+          scales: { x: { beginAtZero: true } }
+        }
+      });
+    } else {
+      const labels = [];
+      const dataVulnerables = [];
+      const dataNonVulnerables = [];
+      (Array.isArray(statsRegion) ? statsRegion : []).forEach(stat => {
+        if (!stat || typeof stat !== 'object') return;
+        const regionName = stat.region_geographique || stat.region || 'Inconnu';
+        labels.push(regionName);
+        dataVulnerables.push(parseInt(stat.total_vulnerables) || 0);
+        dataNonVulnerables.push(parseInt(stat.total_non_vulnerables) || 0);
+      });
+
+      new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['Aucune région'],
+          datasets: [
+            { label: 'Vulnérables', data: dataVulnerables.length ? dataVulnerables : [0], backgroundColor: colors.vulnerable, borderRadius: 5 },
+            { label: 'Non Vulnérables', data: dataNonVulnerables.length ? dataNonVulnerables : [0], backgroundColor: colors.nonVulnerable, borderRadius: 5 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { beginAtZero: true, grid: { display: true, color: 'rgba(0,0,0,.05)' } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Erreur détaillée graphique région:', error);
+  }
+
+  // ====== Graphique 3 : Pauvreté par Catégorie (une couleur par catégorie) ======
+  try {
+    const ctx3 = document.getElementById('entiteChart').getContext('2d');
+    const entiteLabels = statsEntite.map(stat => stat.entite || 'Autre');
+    const entiteData   = statsEntite.map(s => s.total_vulnerables || 0);
+    const entiteColors = entiteLabels.map(label => colorFromString(label));
+
+    new Chart(ctx3, {
+      type: 'doughnut',
+      data: { labels: entiteLabels, datasets: [{ data: entiteData, backgroundColor: entiteColors, borderWidth: 1 }] },
+      options: {
+        ...commonOptions,
         plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 15,
-                    usePointStyle: true,
-                    font: {
-                        size: 12
-                    }
-                }
-            }
+          ...commonOptions.plugins,
+          legend: { ...commonOptions.plugins.legend, labels: { ...commonOptions.plugins.legend.labels, boxWidth: 12 } }
         }
-    };
+      }
+    });
+  } catch (error) { console.error('Erreur graphique entité:', error); }
 
-    // Initialisation de la carte Leaflet
-    try {
-        const map = L.map('map').setView([7.5, -5.5], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+  // ====== Graphique 4 : Pauvreté par Sexe (Bleu = Homme, Rose = Femme) ======
+  try {
+    const ctx4 = document.getElementById('sexeChart').getContext('2d');
 
-        // Parsing des données
-        const regionsData = {{ regions_data|safe }};
-        const statsRegion = {{ stats_region|safe }};
-
-        // Ajout des marqueurs
-        if (Array.isArray(regionsData)) {
-            regionsData.forEach(region => {
-                const regStat = statsRegion.find(s => s.region_geographique === region.name);
-                const totalVul = regStat ? regStat.total_vulnerables : 0;
-                const totalNonVul = regStat ? regStat.total_non_vulnerables : 0;
-                
-                if (totalVul > 0 && region.lat && region.lng) {
-                    const radius = Math.min(15 + totalVul / 10, 50);
-                    L.circleMarker([region.lat, region.lng], {
-                        radius: radius,
-                        fillColor: colors.vulnerable,
-                        color: '#fff',
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).bindPopup(`
-                        <strong>${region.name}</strong><br>
-                        Vulnérables: ${totalVul}<br>
-                        Non-vulnérables: ${totalNonVul}
-                    `).addTo(map);
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Erreur lors de l\'initialisation de la carte:', error);
-    }
-
-    // Données pour les graphiques
-    const statsPauvrete = {{ stats_pauvrete|safe }};
-    const statsEntite = {{ stats_entite|safe }};
-    const statsSexe = {{ stats_sexe|safe }};
-    const statsAge = {{ stats_age|safe }};
-    const statsEnfants = {{ stats_enfants|safe }};
-    
-    // Pour le graphique des régions, on doit vérifier si on a des données
-    let statsRegion = [];
-    try {
-        statsRegion = {{ stats_region|safe }};
-        console.log('Stats région brutes:', statsRegion);
-    } catch (e) {
-        console.error('Erreur parsing stats région:', e);
-        statsRegion = [];
-    }
-
-    // Variables globales
-    const globalVul = statsPauvrete.find(stat => stat.est_vulnerable === true)?.total || 0;
-    const globalNonVul = statsPauvrete.find(stat => stat.est_vulnerable === false)?.total || 0;
-
-    // Graphique 1 : Niveaux de Pauvreté
-    try {
-        const ctx1 = document.getElementById('pauvreteChart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: ['Répartition Globale'],
-                datasets: [
-                    {
-                        label: 'Vulnérables',
-                        data: [globalVul],
-                        backgroundColor: colors.vulnerable,
-                        borderRadius: 10
-                    },
-                    {
-                        label: 'Non Vulnérables',
-                        data: [globalNonVul],
-                        backgroundColor: colors.nonVulnerable,
-                        borderRadius: 10
-                    }
-                ]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Erreur graphique pauvreté:', error);
-    }
-
-    // Graphique 2 : Pauvreté par Région - Version corrigée
-    try {
-        const ctx2 = document.getElementById('regionChart').getContext('2d');
-        
-        // Debug complet
-        console.log('Canvas trouvé:', !!ctx2);
-        console.log('Type de statsRegion:', typeof statsRegion);
-        console.log('Contenu statsRegion:', statsRegion);
-        
-        // Si pas de données, créer des données de test
-        if (!statsRegion || statsRegion.length === 0) {
-            console.warn('Pas de données régions, utilisation de données de test');
-            
-            // Créer un graphique avec des données vides ou de test
-            new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Abidjan', 'Yamoussoukro', 'Bouaké', 'San-Pédro', 'Autres'],
-                    datasets: [
-                        {
-                            label: 'Vulnérables',
-                            data: [0, 0, 0, 0, 0],
-                            backgroundColor: colors.vulnerable,
-                            borderRadius: 5
-                        },
-                        {
-                            label: 'Non Vulnérables',
-                            data: [0, 0, 0, 0, 0],
-                            backgroundColor: colors.nonVulnerable,
-                            borderRadius: 5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y', // Pour un graphique horizontal
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Aucune donnée disponible pour le moment',
-                            color: '#ef4444',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        } else {
-            // Utiliser les vraies données
-            const labels = [];
-            const dataVulnerables = [];
-            const dataNonVulnerables = [];
-            
-            // S'assurer que statsRegion est un tableau
-            const regionArray = Array.isArray(statsRegion) ? statsRegion : [];
-            
-            regionArray.forEach(stat => {
-                if (stat && typeof stat === 'object') {
-                    const regionName = stat.region_geographique || stat.region || 'Inconnu';
-                    labels.push(regionName);
-                    dataVulnerables.push(parseInt(stat.total_vulnerables) || 0);
-                    dataNonVulnerables.push(parseInt(stat.total_non_vulnerables) || 0);
-                }
-            });
-            
-            console.log('Labels finaux:', labels);
-            console.log('Data vulnérables:', dataVulnerables);
-            console.log('Data non vulnérables:', dataNonVulnerables);
-            
-            new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: labels.length > 0 ? labels : ['Aucune région'],
-                    datasets: [
-                        {
-                            label: 'Vulnérables',
-                            data: dataVulnerables.length > 0 ? dataVulnerables : [0],
-                            backgroundColor: colors.vulnerable,
-                            borderRadius: 5
-                        },
-                        {
-                            label: 'Non Vulnérables',
-                            data: dataNonVulnerables.length > 0 ? dataNonVulnerables : [0],
-                            backgroundColor: colors.nonVulnerable,
-                            borderRadius: 5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y', // Graphique horizontal
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {
-                                display: true,
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        console.log('Graphique région créé avec succès');
-        
-    } catch (error) {
-        console.error('Erreur détaillée graphique région:', error);
-        console.error('Stack trace:', error.stack);
-        
-        // Essayer de créer un graphique minimaliste
-        try {
-            const ctx2 = document.getElementById('regionChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Erreur de données'],
-                    datasets: [{
-                        label: 'Erreur',
-                        data: [0],
-                        backgroundColor: '#ef4444'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Erreur: ' + error.message,
-                            color: '#ef4444'
-                        }
-                    }
-                }
-            });
-        } catch (e) {
-            console.error('Impossible de créer le graphique:', e);
-        }
-    }
-
-    // Graphique 3 : Pauvreté par Catégorie
-    try {
-        const ctx3 = document.getElementById('entiteChart').getContext('2d');
-        new Chart(ctx3, {
-            type: 'doughnut',
-            data: {
-                labels: statsEntite.map(stat => stat.entite || "Autre"),
-                datasets: [{
-                    data: statsEntite.map(s => s.total_vulnerables || 0),
-                    backgroundColor: [
-                        colors.gradient1[0],
-                        colors.gradient2[0],
-                        colors.gradient3[0],
-                        colors.gradient4[0]
-                    ]
-                }]
-            },
-            options: commonOptions
-        });
-    } catch (error) {
-        console.error('Erreur graphique entité:', error);
-    }
-
-    // Graphique 4 : Pauvreté par Sexe
-    try {
-        const ctx4 = document.getElementById('sexeChart').getContext('2d');
-        new Chart(ctx4, {
-            type: 'pie',
-            data: {
-                labels: statsSexe.map(s => s.sexe || "Inconnu"),
-                datasets: [{
-                    data: statsSexe.map(s => s.total_vulnerables || 0),
-                    backgroundColor: ['#3b82f6', '#ec4899']
-                }]
-            },
-            options: commonOptions
-        });
-    } catch (error) {
-        console.error('Erreur graphique sexe:', error);
-    }
-
-    // Graphique 5 : Évolution par Âge
-    try {
-        const ctx5 = document.getElementById('ageChart').getContext('2d');
-        new Chart(ctx5, {
-            type: 'line',
-            data: {
-                labels: statsAge.map(s => s.age + ' ans'),
-                datasets: [
-                    {
-                        label: 'Vulnérables',
-                        data: statsAge.map(s => s.total_vulnerables || 0),
-                        borderColor: colors.vulnerable,
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Non Vulnérables',
-                        data: statsAge.map(s => s.total_non_vulnerables || 0),
-                        borderColor: colors.nonVulnerable,
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Erreur graphique âge:', error);
-    }
-
-    // Graphique 6 : Enfants Pris en Charge
-    try {
-        const ctx6 = document.getElementById('enfantsChart').getContext('2d');
-        new Chart(ctx6, {
-            type: 'bar',
-            data: {
-                labels: ['Enfants'],
-                datasets: [
-                    {
-                        label: 'Vulnérables',
-                        data: [statsEnfants.enfants_vulnerables || 0],
-                        backgroundColor: colors.vulnerable
-                    },
-                    {
-                        label: 'Non Vulnérables',
-                        data: [statsEnfants.enfants_non_vulnerables || 0],
-                        backgroundColor: colors.nonVulnerable
-                    }
-                ]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Erreur graphique enfants:', error);
-    }
-
-    // Graphique 7 : Répartition Globale
-    try {
-        const ctx7 = document.getElementById('globalDistributionChart').getContext('2d');
-        new Chart(ctx7, {
-            type: 'pie',
-            data: {
-                labels: ['Vulnérables', 'Non Vulnérables'],
-                datasets: [{
-                    data: [globalVul, globalNonVul],
-                    backgroundColor: [colors.vulnerable, colors.nonVulnerable]
-                }]
-            },
-            options: commonOptions
-        });
-    } catch (error) {
-        console.error('Erreur graphique distribution:', error);
-    }
-
-    // Affichage des dernières personnes vulnérables
-    try {
-        const lastThreeList = {{ last_three_list|safe }};
-        const container = document.getElementById('lastThreeContainer');
-        
-        if (container && Array.isArray(lastThreeList)) {
-            lastThreeList.forEach((person, index) => {
-                const card = document.createElement('div');
-                card.className = 'vulnerable-card';
-                card.innerHTML = `
-                    <div class="vulnerable-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <h4 class="vulnerable-name">${person.nom || ''} ${person.prenom || ''}</h4>
-                    <div class="vulnerable-percentage">${person.pourcentage_vulnerabilite || 0}%</div>
-                    <small style="color: #6b7280;">Taux de vulnérabilité</small>
-                `;
-                container.appendChild(card);
-            });
-        }
-    } catch (error) {
-        console.error('Erreur affichage personnes vulnérables:', error);
-    }
-
-    // Gestion des filtres
-    const filterRadios = document.querySelectorAll('input[name="filter"]');
-    const entityFilter = document.getElementById('entityFilter');
-
-    filterRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            applyFilter(this.value);
-        });
+    // Normalisation & agrégation
+    const sexes = { homme: 0, femme: 0 };
+    (statsSexe || []).forEach(s => {
+      const k = (s.sexe || '').toString().trim().toLowerCase();
+      if (k.includes('hom')) sexes.homme += (s.total_vulnerables || 0);
+      if (k.includes('fem')) sexes.femme += (s.total_vulnerables || 0);
     });
 
-    function applyFilter(filterType) {
-        // Récupérer tous les graphiques Chart.js
-        const charts = Chart.instances;
-        
-        charts.forEach(chart => {
-            if (chart.config.type === 'bar' || chart.config.type === 'line') {
-                chart.data.datasets.forEach((dataset, i) => {
-                    if (filterType === 'all') {
-                        dataset.hidden = false;
-                    } else if (filterType === 'vulnerable') {
-                        dataset.hidden = dataset.label.includes('Non');
-                    } else if (filterType === 'non-vulnerable') {
-                        dataset.hidden = !dataset.label.includes('Non');
-                    }
-                });
-                chart.update();
-            }
-        });
-    }
+    new Chart(ctx4, {
+      type: 'pie',
+      data: {
+        labels: ['Homme', 'Femme'],
+        datasets: [{ data: [sexes.homme, sexes.femme], backgroundColor: ['#3b82f6', '#ec4899'] }]
+      },
+      options: commonOptions
+    });
+  } catch (error) { console.error('Erreur graphique sexe:', error); }
 
-    // Filtre par entité
-    if (entityFilter) {
-        entityFilter.addEventListener('change', function() {
-            updateEntiteChart(this.value);
-        });
-    }
+  // ====== Graphique 5 : Évolution par Âge ======
+  try {
+    const ctx5 = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctx5, {
+      type: 'line',
+      data: {
+        labels: statsAge.map(s => s.age + ' ans'),
+        datasets: [
+          { label: 'Vulnérables', data: statsAge.map(s => s.total_vulnerables || 0), borderColor: colors.vulnerable, backgroundColor: 'rgba(239,68,68,.1)', fill: true, tension: 0.4 },
+          { label: 'Non Vulnérables', data: statsAge.map(s => s.total_non_vulnerables || 0), borderColor: colors.nonVulnerable, backgroundColor: 'rgba(16,185,129,.1)', fill: true, tension: 0.4 }
+        ]
+      },
+      options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
+    });
+  } catch (error) { console.error('Erreur graphique âge:', error); }
 
-    function updateEntiteChart(filterEntity) {
-        const entiteChart = Chart.getChart('entiteChart');
-        if (!entiteChart) return;
+  // ====== Graphique 6 : Enfants Pris en Charge ======
+  try {
+    const ctx6 = document.getElementById('enfantsChart').getContext('2d');
+    new Chart(ctx6, {
+      type: 'bar',
+      data: {
+        labels: ['Enfants'],
+        datasets: [
+          { label: 'Vulnérables', data: [statsEnfants.enfants_vulnerables || 0], backgroundColor: colors.vulnerable },
+          { label: 'Non Vulnérables', data: [statsEnfants.enfants_non_vulnerables || 0], backgroundColor: colors.nonVulnerable }
+        ]
+      },
+      options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
+    });
+  } catch (error) { console.error('Erreur graphique enfants:', error); }
 
-        let filteredData;
-        if (filterEntity === 'all') {
-            filteredData = statsEntite;
-        } else {
-            filteredData = statsEntite.filter(stat => 
-                stat.entite && stat.entite.toLowerCase().includes(filterEntity.toLowerCase())
-            );
-        }
+  // ====== Graphique 7 : Répartition Globale ======
+  try {
+    const ctx7 = document.getElementById('globalDistributionChart').getContext('2d');
+    new Chart(ctx7, {
+      type: 'pie',
+      data: { labels: ['Vulnérables', 'Non Vulnérables'], datasets: [{ data: [globalVul, globalNonVul], backgroundColor: [colors.vulnerable, colors.nonVulnerable] }] },
+      options: commonOptions
+    });
+  } catch (error) { console.error('Erreur graphique distribution:', error); }
 
-        if (filteredData.length > 0) {
-            entiteChart.data.labels = filteredData.map(stat => stat.entite || "Autre");
-            entiteChart.data.datasets[0].data = filteredData.map(s => s.total_vulnerables || 0);
-            entiteChart.update();
-        }
-    }
-
-    // Fonction pour afficher une notification
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? '#10b981' : '#ef4444'};
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            font-weight: 500;
-            animation: slideIn 0.3s ease-out;
-            z-index: 9999;
+  // ====== Dernières Personnes Vulnérables ======
+  try {
+    const lastThreeList = {{ last_three_list|safe }};
+    const container = document.getElementById('lastThreeContainer');
+    if (container && Array.isArray(lastThreeList)) {
+      lastThreeList.forEach(person => {
+        const card = document.createElement('div');
+        card.className = 'vulnerable-card';
+        card.innerHTML = `
+          <div class="vulnerable-avatar"><i class="fas fa-user"></i></div>
+          <h4 class="vulnerable-name">${person.nom || ''} ${person.prenom || ''}</h4>
+          <div class="vulnerable-percentage">${person.pourcentage_vulnerabilite || 0}%</div>
+          <small style="color:#6b7280;">Taux de vulnérabilité</small>
         `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease-out';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        container.appendChild(card);
+      });
     }
+  } catch (error) { console.error('Erreur affichage personnes vulnérables:', error); }
 
-    // Ajout des animations CSS
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
+  // ====== Gestion des filtres secondaires ======
+  const filterRadios = document.querySelectorAll('input[name="filter"]');
+  const entityFilter = document.getElementById('entityFilter');
 
-    console.log('Dashboard initialisé avec succès');
+  filterRadios.forEach(radio => {
+    radio.addEventListener('change', function () { applyFilter(this.value); });
+  });
+
+  function applyFilter(filterType) {
+    const charts = Object.values(Chart.instances || {});
+    charts.forEach(chart => {
+      if (chart.config.type === 'bar' || chart.config.type === 'line') {
+        chart.data.datasets.forEach(dataset => {
+          if (filterType === 'all') dataset.hidden = false;
+          else if (filterType === 'vulnerable') dataset.hidden = dataset.label.includes('Non');
+          else if (filterType === 'non-vulnerable') dataset.hidden = !dataset.label.includes('Non');
+        });
+        chart.update();
+      }
+    });
+  }
+
+  if (entityFilter) {
+    entityFilter.addEventListener('change', function () { updateEntiteChart(this.value); });
+  }
+
+  function updateEntiteChart(filterEntity) {
+    const entiteChart = Chart.getChart('entiteChart');
+    if (!entiteChart) return;
+
+    let filteredData = filterEntity === 'all'
+      ? statsEntite
+      : statsEntite.filter(stat => stat.entite && stat.entite.toLowerCase().includes(filterEntity.toLowerCase()));
+
+    const newLabels = filteredData.map(stat => stat.entite || 'Autre');
+    const newValues = filteredData.map(s => s.total_vulnerables || 0);
+    const newColors = newLabels.map(label => colorFromString(label));
+
+    entiteChart.data.labels = newLabels;
+    entiteChart.data.datasets[0].data = newValues;
+    entiteChart.data.datasets[0].backgroundColor = newColors;
+    entiteChart.update();
+  }
+
+  // Animations CSS pour notifications
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+  `;
+  document.head.appendChild(style);
+
+  console.log('Dashboard initialisé avec succès');
 });
 
-// Gestion des erreurs globales
-window.addEventListener('error', function(e) {
-    console.error('Erreur globale:', e.error);
+// Erreurs globales
+window.addEventListener('error', function (e) {
+  console.error('Erreur globale:', e.error);
 });
 </script>
+
 
 {% endblock %}
