@@ -1,6 +1,7 @@
 <!-- formation/templates/formation/formation_detail.html -->
 {% extends 'formation/base_formation.html' %}
 
+
 {% block title %}{{ formation.nom }} - Formation - LanfiaSave{% endblock %}
 
 {% block breadcrumb %}
@@ -125,23 +126,26 @@
                 </section>
 
                 <section class="content-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-trophy"></i>
-                        Compétences acquises
-                    </h2>
-                    <div class="section-content">
-                        <div class="competences-list">
-                            {% for competence in formation.competences_acquises|linebreaks %}
-                                {% if competence.strip %}
-                                <div class="competence-item">
-                                    <i class="fas fa-check-circle"></i>
-                                    {{ competence|safe }}
-                                </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </section>
+  <h2 class="section-title">
+    <i class="fas fa-trophy"></i>
+    Compétences acquises
+  </h2>
+  <div class="section-content">
+    {% if competences %}
+      <div class="competences-list">
+        {% for competence in competences %}
+          <div class="competence-item">
+            <i class="fas fa-check-circle"></i>
+            {{ competence }}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Aucune compétence renseignée.</p>
+    {% endif %}
+  </div>
+</section>
+
 
                 {% if formation.prerequis_materiels %}
                 <section class="content-section">

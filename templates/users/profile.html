@@ -30,6 +30,18 @@
                 {% endif %}
             </span>
         </div>
+    <div class="profile-actions">
+  {% if user.is_donator %}
+    <a href="{% url 'dashboard_donateur' %}" class="btn-primary btn-dashboard">
+      <i class="fas fa-chart-line"></i> Tableau de bord Donateur
+    </a>
+  {% else %}
+    <a href="{% url 'dashboard_formation_complete' %}" class="btn-primary btn-dashboard">
+      <i class="fas fa-chart-line"></i> Tableau de bord
+    </a>
+  {% endif %}
+</div>
+
     </div>
     <div class="hero-pattern"></div>
 </div>
@@ -1340,6 +1352,19 @@
         border-radius: 50px;
         transition: width 0.8s ease-in-out;
     }
+    
+    .profile-actions{
+  margin-top:16px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+}
+.btn-dashboard{
+  padding:12px 20px;
+  border-radius:12px;
+  font-weight:600;
+}
+
     
 </style>
 

@@ -1,3 +1,4 @@
+# users/urls.py
 from django.urls import path
 from . import views
 from .views import admin_dashboard, update_validation_status, voir_personne, modifier_personne, \

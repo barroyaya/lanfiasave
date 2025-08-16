@@ -97,12 +97,41 @@ def formations_list(request):
 
     return render(request, 'formation/formations_list.html', context)
 
+import json, re
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Formation, DemandeFormation
+
+def _parse_competences(raw: str):
+    """
+    Convertit le champ texte en liste propre :
+    - supporte JSON ["A","B"] si jamais c'est stocké ainsi
+    - sinon découpe par retours ligne / ; / , et enlève les puces - • *
+    """
+    if not raw:
+        return []
+    raw = raw.strip()
+
+    # JSON ? => ["comp1","comp2"]
+    try:
+        data = json.loads(raw)
+        if isinstance(data, list):
+            return [str(x).strip() for x in data if str(x).strip()]
+    except Exception:
+        pass
+
+    # Normalisation puis split
+    txt = raw.replace("\r\n", "\n")
+    # supprimer les puces en début de ligne
+    txt = re.sub(r"^[\s]*[•\-\*]\s*", "", txt, flags=re.MULTILINE)
+    # découper par lignes, ; ou ,
+    parts = re.split(r"\n|;|,", txt)
+    return [p.strip() for p in parts if p.strip()]
+
 @login_required
 def formation_detail(request, formation_id):
-    """Détail d'une formation"""
     formation = get_object_or_404(Formation, id=formation_id, est_active=True)
 
-    # Vérifier si l'utilisateur a déjà fait une demande
     demande_existante = None
     if hasattr(request.user, 'personnevulnerable'):
         demande_existante = DemandeFormation.objects.filter(
@@ -114,10 +143,9 @@ def formation_detail(request, formation_id):
         'formation': formation,
         'demande_existante': demande_existante,
         'places_restantes': formation.places_restantes(),
+        'competences': _parse_competences(formation.competences_acquises),
     }
-
     return render(request, 'formation/formation_detail.html', context)
-
 
 @login_required
 @user_passes_test(is_vulnerable_or_admin)
