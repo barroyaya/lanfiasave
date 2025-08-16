@@ -251,7 +251,7 @@ os.environ.setdefault('CUDA_VISIBLE_DEVICES', '-1')
 os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '2')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # 🔧 DÉTECTION AMÉLIORÉE de l'environnement Render
 IS_RENDER = (
